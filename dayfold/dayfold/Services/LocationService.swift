@@ -1,8 +1,8 @@
 // Services/LocationService.swift
 import Foundation
 import CoreLocation
-import Combine
 
+@MainActor
 class LocationService: NSObject, ObservableObject {
     private let locationManager = CLLocationManager()
     private let geocoder = CLGeocoder()
@@ -56,29 +56,38 @@ class LocationService: NSObject, ObservableObject {
             let city = placemark.locality ?? ""
             let area = placemark.subLocality ?? ""
 
+            let name: String
             if !city.isEmpty && !area.isEmpty {
-                self.placeName = "\(city)·\(area)"
+                name = "\(city)·\(area)"
             } else if !city.isEmpty {
-                self.placeName = city
+                name = city
             } else {
-                self.placeName = area
+                name = area
+            }
+
+            DispatchQueue.main.async {
+                self.placeName = name
             }
         }
     }
 }
 
 extension LocationService: CLLocationManagerDelegate {
-    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        checkAuthorization()
+    nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        Task { @MainActor in
+            checkAuthorization()
+        }
     }
 
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
-        currentLocation = location
-        reverseGeocode()
+        Task { @MainActor in
+            currentLocation = location
+            reverseGeocode()
+        }
     }
 
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+    nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("Location error: \(error.localizedDescription)")
     }
 }
