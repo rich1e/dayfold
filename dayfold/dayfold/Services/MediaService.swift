@@ -7,8 +7,9 @@ class MediaService {
     static let shared = MediaService()
 
     private let fileManager = FileManager.default
+    private let fileQueue = DispatchQueue(label: "com.dayfold.mediaservice", qos: .userInitiated)
 
-    var mediaDirectory: URL {
+    private(set) lazy var mediaDirectory: URL = {
         let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let mediaURL = documentsURL.appendingPathComponent("Media", isDirectory: true)
 
@@ -16,37 +17,93 @@ class MediaService {
         try? fileManager.createDirectory(at: mediaURL, withIntermediateDirectories: true)
 
         return mediaURL
+    }()
+
+    private init() {}
+
+    func saveImage(_ image: UIImage) async -> (filename: String, thumbnail: Data?)? {
+        return await withCheckedContinuation { continuation in
+            fileQueue.async { [weak self] in
+                guard let self = self else {
+                    continuation.resume(returning: nil)
+                    return
+                }
+
+                let filename = "\(UUID().uuidString).jpg"
+                let fileURL = self.mediaDirectory.appendingPathComponent(filename)
+
+                guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+                    continuation.resume(returning: nil)
+                    return
+                }
+
+                do {
+                    try imageData.write(to: fileURL)
+                    let thumbnail = self.generateThumbnail(from: image)
+                    continuation.resume(returning: (filename, thumbnail))
+                } catch {
+                    print("Failed to save image: \(error.localizedDescription)")
+                    continuation.resume(returning: nil)
+                }
+            }
+        }
     }
 
-    func saveImage(_ image: UIImage) -> (filename: String, thumbnail: Data?)? {
-        let filename = "\(UUID().uuidString).jpg"
-        let fileURL = mediaDirectory.appendingPathComponent(filename)
-
-        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+    func loadImage(filename: String) async -> UIImage? {
+        // Validate filename to prevent path traversal
+        guard isValidFilename(filename) else {
+            print("Invalid filename: \(filename)")
             return nil
         }
 
-        do {
-            try imageData.write(to: fileURL)
-            let thumbnail = generateThumbnail(from: image)
-            return (filename, thumbnail)
-        } catch {
-            print("Failed to save image: \(error.localizedDescription)")
-            return nil
+        return await withCheckedContinuation { continuation in
+            fileQueue.async { [weak self] in
+                guard let self = self else {
+                    continuation.resume(returning: nil)
+                    return
+                }
+
+                let fileURL = self.mediaDirectory.appendingPathComponent(filename)
+                guard let imageData = try? Data(contentsOf: fileURL) else {
+                    continuation.resume(returning: nil)
+                    return
+                }
+                continuation.resume(returning: UIImage(data: imageData))
+            }
         }
     }
 
-    func loadImage(filename: String) -> UIImage? {
-        let fileURL = mediaDirectory.appendingPathComponent(filename)
-        guard let imageData = try? Data(contentsOf: fileURL) else {
-            return nil
+    @discardableResult
+    func deleteImage(filename: String) async -> Bool {
+        // Validate filename to prevent path traversal
+        guard isValidFilename(filename) else {
+            print("Invalid filename: \(filename)")
+            return false
         }
-        return UIImage(data: imageData)
+
+        return await withCheckedContinuation { continuation in
+            fileQueue.async { [weak self] in
+                guard let self = self else {
+                    continuation.resume(returning: false)
+                    return
+                }
+
+                let fileURL = self.mediaDirectory.appendingPathComponent(filename)
+                do {
+                    try self.fileManager.removeItem(at: fileURL)
+                    continuation.resume(returning: true)
+                } catch {
+                    print("Failed to delete image: \(error.localizedDescription)")
+                    continuation.resume(returning: false)
+                }
+            }
+        }
     }
 
-    func deleteImage(filename: String) {
-        let fileURL = mediaDirectory.appendingPathComponent(filename)
-        try? fileManager.removeItem(at: fileURL)
+    private func isValidFilename(_ filename: String) -> Bool {
+        // Prevent path traversal attacks
+        let invalidCharacters = CharacterSet(charactersIn: "../\\:")
+        return !filename.isEmpty && filename.rangeOfCharacter(from: invalidCharacters) == nil
     }
 
     func generateThumbnail(from image: UIImage, size: CGSize = CGSize(width: 100, height: 100)) -> Data? {
