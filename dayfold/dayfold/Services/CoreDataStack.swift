@@ -54,14 +54,19 @@ class CoreDataStack: ObservableObject {
         persistentContainer.viewContext
     }
 
-    func save() {
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    func save() throws {
         let context = viewContext
-        if context.hasChanges {
-            do {
-                try context.save()
-            } catch {
-                print("Failed to save context: \(error.localizedDescription)")
-            }
+        guard context.hasChanges else { return }
+
+        do {
+            try context.save()
+        } catch {
+            context.rollback()
+            throw error
         }
     }
 
@@ -98,8 +103,12 @@ class CoreDataStack: ObservableObject {
                 tag.order = Int32(index)
             }
 
-            save()
-            print("Preset tags created successfully")
+            do {
+                try save()
+                print("Preset tags created successfully")
+            } catch {
+                print("Failed to save preset tags: \(error.localizedDescription)")
+            }
         } catch {
             print("Failed to create preset tags: \(error.localizedDescription)")
         }
