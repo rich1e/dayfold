@@ -102,8 +102,11 @@ class MediaService {
 
     private func isValidFilename(_ filename: String) -> Bool {
         // Prevent path traversal attacks
-        let invalidCharacters = CharacterSet(charactersIn: "../\\:")
-        return !filename.isEmpty && filename.rangeOfCharacter(from: invalidCharacters) == nil
+        return !filename.isEmpty
+            && !filename.contains("..")
+            && !filename.contains("/")
+            && !filename.contains("\\")
+            && !filename.contains(":")
     }
 
     func generateThumbnail(from image: UIImage, size: CGSize = CGSize(width: 100, height: 100)) -> Data? {
