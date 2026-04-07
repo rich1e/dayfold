@@ -8,5 +8,7 @@
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Dayfold 需要访问您的位置来记录日记的地点信息</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Dayfold 需要访问您的相册来添加照片到日记</string>
 </dict>
 </plist>
