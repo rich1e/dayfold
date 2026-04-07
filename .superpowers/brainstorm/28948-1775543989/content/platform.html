@@ -1,0 +1,123 @@
+<h2>目标平台选择</h2>
+<p class="subtitle">选择你希望优先开发的平台</p>
+
+<div class="options">
+  <div class="option" data-choice="web" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Web 应用</h3>
+      <p>跨平台访问,开发快速,易于迭代</p>
+      <div class="pros-cons" style="margin-top: 12px;">
+        <div class="pros">
+          <h4>优势</h4>
+          <ul>
+            <li>无需安装,浏览器直接访问</li>
+            <li>跨平台兼容性好</li>
+            <li>更新部署方便</li>
+            <li>开发成本相对较低</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>劣势</h4>
+          <ul>
+            <li>需要网络连接</li>
+            <li>离线功能受限</li>
+            <li>系统集成能力较弱</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="mobile" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>移动端原生应用 (iOS/Android)</h3>
+      <p>原生体验,系统集成深度,离线优先</p>
+      <div class="pros-cons" style="margin-top: 12px;">
+        <div class="pros">
+          <h4>优势</h4>
+          <ul>
+            <li>完整的离线功能</li>
+            <li>深度系统集成(通知、widget等)</li>
+            <li>更好的性能和体验</li>
+            <li>可利用设备传感器(位置、相机等)</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>劣势</h4>
+          <ul>
+            <li>开发成本高(需分别开发)</li>
+            <li>应用商店审核流程</li>
+            <li>更新迭代较慢</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="desktop" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>桌面端应用 (macOS/Windows)</h3>
+      <p>专业写作体验,本地数据,强大的编辑功能</p>
+      <div class="pros-cons" style="margin-top: 12px;">
+        <div class="pros">
+          <h4>优势</h4>
+          <ul>
+            <li>适合长文写作</li>
+            <li>本地数据存储安全</li>
+            <li>强大的文件管理能力</li>
+            <li>快捷键和系统集成</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>劣势</h4>
+          <ul>
+            <li>移动性较差</li>
+            <li>开发和维护成本较高</li>
+            <li>分发和更新相对复杂</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="hybrid" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>跨平台混合方案 (React Native / Electron)</h3>
+      <p>一套代码,多端运行,平衡开发成本和体验</p>
+      <div class="pros-cons" style="margin-top: 12px;">
+        <div class="pros">
+          <h4>优势</h4>
+          <ul>
+            <li>代码复用率高</li>
+            <li>开发效率高</li>
+            <li>覆盖多个平台</li>
+            <li>社区和工具链成熟</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>劣势</h4>
+          <ul>
+            <li>性能略逊于原生</li>
+            <li>包体积较大</li>
+            <li>平台特性支持受限</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 32px;">
+  <p class="label">技术建议</p>
+  <p>对于 MVP 阶段,我推荐 <strong>选项 D (跨平台混合方案)</strong>:</p>
+  <ul>
+    <li>使用 React + React Native 可以同时覆盖 Web、iOS 和 Android</li>
+    <li>核心逻辑和 UI 组件可以最大程度复用</li>
+    <li>后续如需要,可以针对特定平台做原生优化</li>
+    <li>开发团队技能栈统一,维护成本更低</li>
+  </ul>
+</div>

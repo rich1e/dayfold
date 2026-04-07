@@ -1,0 +1,160 @@
+<h2>MVP 核心场景</h2>
+<p class="subtitle">选择第一个版本必须包含的使用场景(可多选)</p>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="quick-entry" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>快速记录</h3>
+      <p>打开应用即可快速写下想法</p>
+      <ul style="margin-top: 8px; font-size: 0.9em; color: #666;">
+        <li>从主界面直接创建新条目</li>
+        <li>自动保存草稿</li>
+        <li>快捷添加照片</li>
+        <li>语音转文字(可选)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="option" data-choice="rich-editing" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>深度写作</h3>
+      <p>沉浸式的长文写作体验</p>
+      <ul style="margin-top: 8px; font-size: 0.9em; color: #666;">
+        <li>全屏编辑模式</li>
+        <li>Markdown 支持</li>
+        <li>格式化工具栏</li>
+        <li>字数统计和写作目标</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="option" data-choice="media-rich" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>多媒体日记</h3>
+      <p>图文并茂记录生活瞬间</p>
+      <ul style="margin-top: 8px; font-size: 0.9em; color: #666;">
+        <li>相册网格展示</li>
+        <li>照片批量导入</li>
+        <li>图片标注和编辑</li>
+        <li>视频录制和插入</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="option" data-choice="timeline-browse" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>时间轴浏览</h3>
+      <p>按时间顺序回顾过往记录</p>
+      <ul style="margin-top: 8px; font-size: 0.9em; color: #666;">
+        <li>日历视图</li>
+        <li>时间线滚动</li>
+        <li>日期快速跳转</li>
+        <li>卡片式预览</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="option" data-choice="search-filter" onclick="toggleSelect(this)">
+    <div class="letter">E</div>
+    <div class="content">
+      <h3>搜索和筛选</h3>
+      <p>快速找到想要的内容</p>
+      <ul style="margin-top: 8px; font-size: 0.9em; color: #666;">
+        <li>全文搜索</li>
+        <li>按标签筛选</li>
+        <li>按位置筛选</li>
+        <li>按日期范围筛选</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="option" data-choice="organization" onclick="toggleSelect(this)">
+    <div class="letter">F</div>
+    <div class="content">
+      <h3>标签和分类</h3>
+      <p>灵活组织管理日记内容</p>
+      <ul style="margin-top: 8px; font-size: 0.9em; color: #666;">
+        <li>创建和管理标签</li>
+        <li>日记本/文件夹</li>
+        <li>收藏/置顶功能</li>
+        <li>批量操作</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="option" data-choice="context-auto" onclick="toggleSelect(this)">
+    <div class="letter">G</div>
+    <div class="content">
+      <h3>自动上下文</h3>
+      <p>自动记录位置、天气等信息</p>
+      <ul style="margin-top: 8px; font-size: 0.9em; color: #666;">
+        <li>GPS 位置自动获取</li>
+        <li>天气信息拉取</li>
+        <li>地图展示</li>
+        <li>活动数据集成(HealthKit)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="option" data-choice="security" onclick="toggleSelect(this)">
+    <div class="letter">H</div>
+    <div class="content">
+      <h3>安全和隐私</h3>
+      <p>保护敏感的个人信息</p>
+      <ul style="margin-top: 8px; font-size: 0.9em; color: #666;">
+        <li>Face ID/Touch ID 解锁</li>
+        <li>应用锁定</li>
+        <li>端到端加密存储</li>
+        <li>隐私模式(隐藏通知预览)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="option" data-choice="on-this-day" onclick="toggleSelect(this)">
+    <div class="letter">I</div>
+    <div class="content">
+      <h3>"On This Day" 回顾</h3>
+      <p>展示历史上今天的记录</p>
+      <ul style="margin-top: 8px; font-size: 0.9em; color: #666;">
+        <li>每日历史回顾推送</li>
+        <li>随机记忆展示</li>
+        <li>年度对比视图</li>
+        <li>情感追踪图表</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="option" data-choice="export-backup" onclick="toggleSelect(this)">
+    <div class="letter">J</div>
+    <div class="content">
+      <h3>导出和备份</h3>
+      <p>保证数据所有权和可迁移性</p>
+      <ul style="margin-top: 8px; font-size: 0.9em; color: #666;">
+        <li>导出为 PDF</li>
+        <li>导出为 Markdown</li>
+        <li>iCloud 自动备份</li>
+        <li>手动本地备份</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 32px;">
+  <p class="label">MVP 建议</p>
+  <p>对于一个可用的 MVP,我建议至少包含以下核心流程:</p>
+  <ul>
+    <li><strong>创建流程</strong>: A (快速记录) + C (多媒体日记) + G (自动上下文)</li>
+    <li><strong>浏览流程</strong>: D (时间轴浏览) + E (搜索和筛选)</li>
+    <li><strong>安全保障</strong>: H (安全和隐私)</li>
+  </ul>
+  <p style="margin-top: 12px;">这样可以形成完整的 <strong>"记录 → 浏览 → 查找"</strong> 闭环,同时满足你之前选择的核心功能。</p>
+  <p style="margin-top: 8px;">其他功能可以在后续版本迭代中加入:</p>
+  <ul>
+    <li>B (深度写作) 和 F (标签分类) - v1.1 增强组织能力</li>
+    <li>I (On This Day) 和 J (导出备份) - v1.2 增加价值感</li>
+  </ul>
+</div>
