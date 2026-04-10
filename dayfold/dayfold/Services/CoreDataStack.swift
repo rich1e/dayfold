@@ -23,7 +23,7 @@ class CoreDataStack: ObservableObject {
 
         // 配置 CloudKit 容器
         description.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
-            containerIdentifier: "iCloud.com.yourcompany.dayfold"
+            containerIdentifier: "iCloud.com.Yuqi.dayfold"
         )
 
         container.loadPersistentStores { storeDescription, error in
@@ -71,7 +71,7 @@ class CoreDataStack: ObservableObject {
     }
 
     private func checkCloudKitAvailability() {
-        CKContainer(identifier: "iCloud.com.yourcompany.dayfold")
+        CKContainer(identifier: "iCloud.com.Yuqi.dayfold")
             .accountStatus { status, error in
                 DispatchQueue.main.async {
                     self.isCloudKitAvailable = (status == .available)

@@ -9,12 +9,24 @@ import SwiftUI
 
 @main
 struct dayfoldApp: App {
-    let persistenceController = PersistenceController.shared
+    @StateObject private var coreDataStack = CoreDataStack.shared
+    @StateObject private var securityManager = SecurityManager()
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            Group {
+                if securityManager.isLocked {
+                    LockScreenView()
+                        .environmentObject(securityManager)
+                } else {
+                    MainTabView()
+                        .environment(\.managedObjectContext, coreDataStack.viewContext)
+                        .environmentObject(securityManager)
+                }
+            }
+            .onAppear {
+                coreDataStack.createPresetTags()
+            }
         }
     }
 }
