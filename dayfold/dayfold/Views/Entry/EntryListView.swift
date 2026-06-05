@@ -97,7 +97,7 @@ struct EntryListView: View {
 }
 
 struct EntryCard: View {
-    let entry: Entry
+    @ObservedObject var entry: Entry
     let viewModel: EntryListViewModel
     @State private var thumbnails: [UIImage] = []
 

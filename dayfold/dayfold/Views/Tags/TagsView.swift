@@ -109,7 +109,7 @@ struct TagsView: View {
 }
 
 struct TagRow: View {
-    let tag: Tag
+    @ObservedObject var tag: Tag
 
     var body: some View {
         HStack(spacing: 16) {
