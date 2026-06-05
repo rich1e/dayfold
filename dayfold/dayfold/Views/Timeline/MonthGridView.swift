@@ -25,7 +25,7 @@ struct MonthGridView: View {
 
             // 日期网格
             LazyVGrid(columns: columns, spacing: 0) {
-                ForEach(calendarDays, id: \.self) { date in
+                ForEach(Array(calendarDays.enumerated()), id: \.offset) { _, date in
                     if let date = date {
                         DayCell(
                             date: date,
