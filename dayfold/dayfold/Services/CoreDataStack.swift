@@ -28,7 +28,21 @@ class CoreDataStack: ObservableObject {
 
         container.loadPersistentStores { storeDescription, error in
             if let error = error as NSError? {
-                print("Core Data failed to load: \(error.localizedDescription)")
+                // 无 iCloud 账号 (CKAccountStatusNoAccount) 时回退为纯本地存储，
+                // 避免 CloudKit 镜像反复 recovery 刷错误日志。
+                if error.domain == NSCocoaErrorDomain, error.code == 134400 {
+                    print("CloudKit unavailable (no iCloud account), falling back to local store")
+                    description.cloudKitContainerOptions = nil
+                    container.loadPersistentStores { _, retryError in
+                        if let retryError = retryError as NSError? {
+                            print("Core Data failed to load: \(retryError.localizedDescription)")
+                        } else {
+                            print("Core Data loaded successfully (local only)")
+                        }
+                    }
+                } else {
+                    print("Core Data failed to load: \(error.localizedDescription)")
+                }
             } else {
                 print("Core Data loaded successfully")
                 self.checkCloudKitAvailability()
