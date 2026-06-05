@@ -25,6 +25,11 @@ extension Entry {
         return set.sorted { $0.order < $1.order }
     }
 
+    var wrappedIsFavorite: Bool {
+        get { isFavorite }
+        set { isFavorite = newValue }
+    }
+
     static func create(in context: NSManagedObjectContext) -> Entry {
         let entry = Entry(context: context)
         entry.id = UUID()
