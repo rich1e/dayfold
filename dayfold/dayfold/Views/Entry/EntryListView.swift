@@ -155,9 +155,14 @@ struct EntryCard: View {
                 )
             }
         }
-        .task {
+        .task(id: thumbnailSourceID) {
             await loadThumbnails()
         }
+    }
+
+    // 媒体文件标识，变化时重新加载缩略图（编辑增删图片后即时刷新）
+    private var thumbnailSourceID: String {
+        entry.mediaAssetsArray.map { $0.wrappedFilename }.joined(separator: ",")
     }
 
     private func loadThumbnails() async {
