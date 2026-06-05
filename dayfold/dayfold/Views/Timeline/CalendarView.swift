@@ -7,8 +7,16 @@ struct CalendarView: View {
     @State private var newEntryDate: Date = Date()
     @State private var dragOffset: CGFloat = 0
 
+    // 监听条目增删，驱动 dotMap 在新增/删除日记后重算
+    @FetchRequest(
+        sortDescriptors: [SortDescriptor(\.createdAt, order: .reverse)],
+        animation: .default
+    )
+    private var allEntries: FetchedResults<Entry>
+
     private var dotMap: [Date: [EntryDotType]] {
-        viewModel.datesWithEntries(in: viewModel.currentMonth)
+        _ = allEntries.count
+        return viewModel.datesWithEntries(in: viewModel.currentMonth)
     }
 
     private var selectedEntries: [Entry] {
