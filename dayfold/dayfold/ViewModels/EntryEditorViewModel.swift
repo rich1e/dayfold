@@ -10,7 +10,11 @@ class EntryEditorViewModel: ObservableObject {
     @Published var title = ""
     @Published var content = ""
     @Published var selectedTags: [Tag] = []
-    @Published var images: [UIImage] = []
+    @Published var images: [UIImage] = [] {
+        didSet {
+            if !isLoadingImages { imagesChanged = true }
+        }
+    }
     @Published var location: CLLocation?
     @Published var placeName: String?
     @Published var weather: WeatherData?
@@ -24,6 +28,8 @@ class EntryEditorViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private let isNewEntryOnInit: Bool
     private let prefillDate: Date?
+    private var isLoadingImages = false
+    private var imagesChanged = false
 
     var isNewEntry: Bool {
         isNewEntryOnInit
@@ -58,11 +64,32 @@ class EntryEditorViewModel: ObservableObject {
                     symbolName: location.weatherIcon ?? "sun.max.fill"
                 )
             }
+
+            loadExistingImages(from: entry)
         } else {
             fetchLocationAndWeather()
         }
 
         startAutoSave()
+    }
+
+    // 编辑已有日记时，将已保存的图片按顺序加载到 images 供编辑器展示
+    private func loadExistingImages(from entry: Entry) {
+        let filenames = entry.mediaAssetsArray.map { $0.wrappedFilename }
+        Task { [weak self] in
+            var loaded: [UIImage] = []
+            for filename in filenames {
+                if let image = await MediaService.shared.loadImage(filename: filename) {
+                    loaded.append(image)
+                }
+            }
+            await MainActor.run {
+                guard let self = self else { return }
+                self.isLoadingImages = true
+                self.images = loaded
+                self.isLoadingImages = false
+            }
+        }
     }
 
     deinit {
@@ -109,10 +136,16 @@ class EntryEditorViewModel: ObservableObject {
             entryToSave.location = locationEntity
         }
 
-        // 保存图片 (一对多关系)
-        for (index, image) in images.enumerated() {
-            let existingAsset = entryToSave.mediaAssetsArray.first { $0.order == Int32(index) }
-            if existingAsset == nil {
+        // 保存图片 (一对多关系)：仅当图片有增删时全量重建，避免编辑未动图片时误删
+        if imagesChanged {
+            // 删除旧的 MediaAsset 记录与磁盘文件
+            for asset in entryToSave.mediaAssetsArray {
+                let filename = asset.wrappedFilename
+                viewContext.delete(asset)
+                Task { await MediaService.shared.deleteImage(filename: filename) }
+            }
+            // 按当前 images 顺序重新保存
+            for (index, image) in images.enumerated() {
                 if let result = await MediaService.shared.saveImage(image) {
                     let asset = MediaAsset.create(type: .photo, filename: result.filename, in: viewContext)
                     asset.thumbnailData = result.thumbnail
@@ -122,6 +155,7 @@ class EntryEditorViewModel: ObservableObject {
                     asset.entry = entryToSave
                 }
             }
+            imagesChanged = false
         }
 
         try? CoreDataStack.shared.save()
