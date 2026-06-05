@@ -4,6 +4,7 @@ import CoreData
 
 struct TimelineView: View {
     @StateObject private var viewModel: TimelineViewModel
+    @State private var photoWallScrollTarget: UUID?
 
     init(context: NSManagedObjectContext) {
         _viewModel = StateObject(wrappedValue: TimelineViewModel(context: context))
@@ -28,11 +29,9 @@ struct TimelineView: View {
                     case .list:
                         TimelineListView()
                     case .calendar:
-                        Text("日历模式 - 待实现")
-                            .foregroundColor(.warmBrown)
+                        CalendarView(viewModel: viewModel)
                     case .photoWall:
-                        Text("照片墙模式 - 待实现")
-                            .foregroundColor(.warmBrown)
+                        PhotoWallView(viewModel: viewModel, scrollTarget: photoWallScrollTarget)
                     }
                 }
             }
