@@ -1,10 +1,14 @@
 // Views/Timeline/CalendarView.swift
 import SwiftUI
 
+private struct NewEntryDate: Identifiable {
+    let id = UUID()
+    let date: Date
+}
+
 struct CalendarView: View {
     @ObservedObject var viewModel: TimelineViewModel
-    @State private var showingNewEntry = false
-    @State private var newEntryDate: Date = Date()
+    @State private var newEntryDate: NewEntryDate?
     @State private var dragOffset: CGFloat = 0
 
     // 监听条目增删，驱动 dotMap 在新增/删除日记后重算
@@ -58,16 +62,15 @@ struct CalendarView: View {
                 viewMode: $viewModel.viewMode,
                 photoWallScrollTarget: .constant(nil),
                 onCreateEntry: { date in
-                    newEntryDate = date
-                    showingNewEntry = true
+                    newEntryDate = NewEntryDate(date: date)
                 }
             )
         }
-        .sheet(isPresented: $showingNewEntry) {
+        .sheet(item: $newEntryDate) { item in
             EntryEditorView(
                 entry: nil,
                 context: CoreDataStack.shared.viewContext,
-                prefillDate: newEntryDate
+                prefillDate: item.date
             )
         }
     }
