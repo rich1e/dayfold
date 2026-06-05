@@ -36,6 +36,22 @@ AX Safe category class 'SLHighlightDisambiguationPillViewAccessibility' was not 
 - **性质**：系统 Accessibility 框架内部日志。
 - **处理**：忽略，与应用代码无关。
 
+### 4. 键盘输入辅助栏约束冲突
+
+```
+Unable to simultaneously satisfy constraints.
+...
+"<NSLayoutConstraint ... 'assistantHeight' SystemInputAssistantView.height == 72 ...>",
+"<NSLayoutConstraint ... 'assistantView.bottom' SystemInputAssistantView.bottom == _UIKBCompatInputView ...>",
+...
+Will attempt to recover by breaking constraint
+<NSLayoutConstraint ... 'assistantHeight' SystemInputAssistantView.height == 72 ...>
+```
+
+- **性质**：弹出键盘时，UIKit 输入辅助栏（`SystemInputAssistantView` / `_UIRemoteKeyboardPlaceholderView` / `_UIKBCompatInputView`）的内部约束冲突。涉及的全是系统私有视图，无任何 App 自定义视图。
+- **触发**：任意 `TextField` / `TextEditor` 获得焦点弹出键盘时几乎必现，SwiftUI 无法干预系统输入辅助栏约束。
+- **处理**：忽略。系统自动打破 `assistantHeight == 72` 恢复，不影响布局与功能。
+
 ---
 
 ## 已做代码降级的日志
