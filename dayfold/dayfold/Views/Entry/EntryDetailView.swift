@@ -40,11 +40,19 @@ struct EntryDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    showingEditSheet = true
-                } label: {
-                    Text("编辑")
-                        .foregroundColor(.warmAccent)
+                HStack(spacing: 16) {
+                    Button {
+                        toggleFavorite()
+                    } label: {
+                        Image(systemName: entry.isFavorite ? "star.fill" : "star")
+                            .foregroundColor(.warmAccent)
+                    }
+                    Button {
+                        showingEditSheet = true
+                    } label: {
+                        Text("编辑")
+                            .foregroundColor(.warmAccent)
+                    }
                 }
             }
         }
@@ -57,6 +65,12 @@ struct EntryDetailView: View {
         .task {
             await loadImages()
         }
+    }
+
+    private func toggleFavorite() {
+        let context = entry.managedObjectContext ?? CoreDataStack.shared.viewContext
+        entry.isFavorite.toggle()
+        try? context.save()
     }
 
     private func loadImages() async {
