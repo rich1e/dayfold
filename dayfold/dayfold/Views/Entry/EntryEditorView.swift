@@ -8,8 +8,8 @@ struct EntryEditorView: View {
     @StateObject private var viewModel: EntryEditorViewModel
     @State private var showingSaveError = false
 
-    init(entry: Entry? = nil, context: NSManagedObjectContext) {
-        _viewModel = StateObject(wrappedValue: EntryEditorViewModel(context: context, entry: entry))
+    init(entry: Entry? = nil, context: NSManagedObjectContext, prefillDate: Date? = nil) {
+        _viewModel = StateObject(wrappedValue: EntryEditorViewModel(context: context, entry: entry, prefillDate: prefillDate))
     }
 
     var body: some View {
@@ -77,6 +77,15 @@ struct EntryEditorView: View {
                         dismiss()
                     }
                     .foregroundColor(.warmBrown)
+                }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        viewModel.isFavorite.toggle()
+                    } label: {
+                        Image(systemName: viewModel.isFavorite ? "star.fill" : "star")
+                            .foregroundColor(.warmAccent)
+                    }
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {

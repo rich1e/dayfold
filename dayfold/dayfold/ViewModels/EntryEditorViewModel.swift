@@ -15,6 +15,7 @@ class EntryEditorViewModel: ObservableObject {
     @Published var placeName: String?
     @Published var weather: WeatherData?
     @Published var isSaving = false
+    @Published var isFavorite = false
 
     private let viewContext: NSManagedObjectContext
     private var entry: Entry?
@@ -22,6 +23,7 @@ class EntryEditorViewModel: ObservableObject {
     private let locationService = LocationService()
     private var cancellables = Set<AnyCancellable>()
     private let isNewEntryOnInit: Bool
+    private let prefillDate: Date?
 
     var isNewEntry: Bool {
         isNewEntryOnInit
@@ -35,15 +37,17 @@ class EntryEditorViewModel: ObservableObject {
         max(1, wordCount / 200)
     }
 
-    init(context: NSManagedObjectContext, entry: Entry? = nil) {
+    init(context: NSManagedObjectContext, entry: Entry? = nil, prefillDate: Date? = nil) {
         self.viewContext = context
         self.entry = entry
         self.isNewEntryOnInit = (entry == nil)
+        self.prefillDate = prefillDate
 
         if let entry = entry {
             self.title = entry.wrappedTitle
             self.content = entry.wrappedContent
             self.selectedTags = entry.tagsArray
+            self.isFavorite = entry.isFavorite
             self.location = entry.location?.coordinate.toLocation()
             self.placeName = entry.location?.wrappedPlaceName
 
@@ -76,11 +80,15 @@ class EntryEditorViewModel: ObservableObject {
             entryToSave = existing
         } else {
             entryToSave = Entry.create(in: viewContext)
+            if let prefillDate = prefillDate {
+                entryToSave.createdAt = prefillDate
+            }
             entry = entryToSave
         }
 
         entryToSave.title = title.isEmpty ? nil : title
         entryToSave.content = content
+        entryToSave.isFavorite = isFavorite
         entryToSave.modifiedAt = Date()
         entryToSave.needsSync = true
 
