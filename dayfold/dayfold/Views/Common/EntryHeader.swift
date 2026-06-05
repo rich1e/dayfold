@@ -2,7 +2,7 @@
 import SwiftUI
 
 struct EntryHeader: View {
-    let entry: Entry
+    @ObservedObject var entry: Entry
 
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
