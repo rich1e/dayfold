@@ -39,6 +39,7 @@ struct EntryListView: View {
                             ForEach(filteredEntries, id: \.id) { entry in
                                 NavigationLink(destination: EntryDetailView(entry: entry)) {
                                     EntryCard(entry: entry, viewModel: viewModel)
+                                        .frame(maxWidth: .infinity)
                                 }
                                 .buttonStyle(PlainButtonStyle())
                             }
