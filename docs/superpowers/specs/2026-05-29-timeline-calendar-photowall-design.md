@@ -70,7 +70,9 @@ TimelineView
 
 ### 底部抽屉（EntryBottomSheet）
 
-使用 `.sheet` + `.presentationDetents` 实现三档高度：
+实现方式：`CalendarView` 底部用 `.overlay` + `VStack` 自绘抽屉，而非 `.sheet`，避免与外层 `NavigationView` 的 sheet 嵌套冲突。通过 `@GestureState` + `DragGesture` 控制抽屉高度，三档吸附：
+
+
 
 | 档位 | 高度 | 内容 |
 |---|---|---|
@@ -94,9 +96,10 @@ TimelineView
 
 **布局规则**：
 - 基础单位：3列等宽网格
-- **收藏（★）条目**的第一张图占 **2×2 大格**（跨2列2行）
+- **收藏（★）条目**的第一张图占 **2×2 大格**（跨2列2行），大格始终放在当前行的左侧（列0-1），右侧空余1列填入小格
+- 连续两个收藏条目时，第二个降级为小格（避免布局混乱），下一行再恢复大格
 - 其余条目占 **1×1 小格**
-- 按 `createdAt` 倒序混排
+- 按 `createdAt` 倒序混排，使用 `LazyVGrid` + 自定义 `GridItem` 实现
 
 **单格显示**：
 - 小格：正方形缩略图，图片数 ≥ 2 时右上角显示角标（`🖼 3`）
