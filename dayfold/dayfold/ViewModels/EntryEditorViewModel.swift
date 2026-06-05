@@ -85,6 +85,8 @@ class EntryEditorViewModel: ObservableObject {
             }
             await MainActor.run {
                 guard let self = self else { return }
+                // 若用户在加载完成前已改动图片，不覆盖其操作结果
+                guard !self.imagesChanged else { return }
                 self.isLoadingImages = true
                 self.images = loaded
                 self.isLoadingImages = false

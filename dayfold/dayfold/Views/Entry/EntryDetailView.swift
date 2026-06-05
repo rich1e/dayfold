@@ -3,7 +3,7 @@ import SwiftUI
 
 struct EntryDetailView: View {
     @Environment(\.dismiss) private var dismiss
-    let entry: Entry
+    @ObservedObject var entry: Entry
     @State private var showingEditSheet = false
     @State private var loadedImages: [UIImage] = []
 
@@ -56,7 +56,9 @@ struct EntryDetailView: View {
                 }
             }
         }
-        .sheet(isPresented: $showingEditSheet) {
+        .sheet(isPresented: $showingEditSheet, onDismiss: {
+            Task { await loadImages() }
+        }) {
             EntryEditorView(
                 entry: entry,
                 context: entry.managedObjectContext ?? CoreDataStack.shared.viewContext
