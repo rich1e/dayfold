@@ -1,16 +1,16 @@
 # Dayfold iOS App - 实现进度报告
 
-更新时间: 2026-04-10
+更新时间: 2026-06-05
 实现方式: 子代理驱动开发 (Subagent-Driven Development)
 
 ---
 
 ## 总体进度
 
-**总任务数**: 20 个任务
-**已完成**: 20 个任务 (100%)
-**构建状态**: 零警告零错误
-**运行验证**: iOS 18.1 模拟器 (iPhone 16) 通过
+**MVP 任务数**: 20 个任务 (100%)
+**Timeline 增强任务数**: 10 个任务 (100%)
+**构建状态**: BUILD SUCCEEDED
+**运行验证**: MVP 已在 iOS 18.1 模拟器验证；Timeline 日历/照片墙仅编译通过，交互待模拟器验证
 
 ---
 
@@ -109,6 +109,58 @@
 #### Task 20: 最终测试和完善
 - **内容**: 模拟器验证, Bug 修复, Info.plist 权限配置, CloudKit 标识符更新
 
+### 第八阶段: Timeline 日历模式 & 照片墙模式 (2026-06-05)
+
+设计文档: `docs/superpowers/specs/2026-05-29-timeline-calendar-photowall-design.md`
+实现计划: `docs/superpowers/plans/2026-05-29-timeline-calendar-photowall.md`
+
+实现了 TimelineView 中此前为占位符的日历模式和照片墙模式, 三模式通过共享 `selectedDate`/`currentMonth` 状态联动。`Entry.isFavorite` 已存在于 Core Data schema, 无需迁移。
+
+#### 增强 Task 1: Entry 收藏计算属性
+- **文件**: `Models/Entry.swift`
+- **内容**: 新增 `wrappedIsFavorite` 计算属性
+
+#### 增强 Task 2: TimelineViewModel 状态与查询扩展
+- **文件**: `ViewModels/TimelineViewModel.swift`
+- **内容**: 新增 `selectedDate`/`currentMonth`; `datesWithEntries(in:)` 返回 `[Date: [EntryDotType]]`（区分含图/纯文字）; `entriesWithPhotos` 照片查询; `goToPreviousMonth`/`goToNextMonth`; 新增 `EntryDotType` 枚举
+
+#### 增强 Task 3: 月历网格
+- **文件**: `Views/Timeline/MonthGridView.swift`
+- **内容**: `MonthGridView` 7列动态行网格 + `DayCell`; 圆点指示器（暖橙=含图片, 暖棕=纯文字, 多于3条显示 `N+`）; 今天填色高亮, 选中深色描边
+
+#### 增强 Task 4: 可拖拽底部抽屉
+- **文件**: `Views/Timeline/EntryBottomSheet.swift`
+- **内容**: 用 `.overlay` + `@GestureState` 自绘抽屉, 三档吸附（collapsed 80 / medium 320 / expanded 85% 屏高）; 空日期提示与 `+` 快捷创建; 点击条目图片联动跳照片墙
+
+#### 增强 Task 5: 日历模式顶层视图
+- **文件**: `Views/Timeline/CalendarView.swift`
+- **内容**: 月份导航（箭头 + 横向滑动手势切换）; 嵌入 MonthGridView 与 EntryBottomSheet; `.sheet` 新建条目预填日期
+
+#### 增强 Task 6: EntryEditor 预填日期
+- **文件**: `ViewModels/EntryEditorViewModel.swift`, `Views/Entry/EntryEditorView.swift`
+- **内容**: `init` 新增 `prefillDate` 参数, 新建条目时设置 `createdAt`
+
+#### 增强 Task 7: 照片墙
+- **文件**: `Views/Timeline/PhotoWallView.swift`
+- **内容**: `PhotoWallGrid` 自定义交错布局（收藏条目首图占 2×2 大格, 连续收藏时第二个降级为小格避免错乱）; `PhotoWallCell` 角标（★ 收藏 / 多图数量）; 长按 contextMenu 编辑/收藏切换; 空状态; ScrollViewReader 支持联动定位
+
+#### 增强 Task 8: TimelineView 接入
+- **文件**: `Views/Timeline/TimelineView.swift`
+- **内容**: 替换日历/照片墙占位符, 新增 `photoWallScrollTarget` 状态
+
+#### 增强 Task 9: 详情页收藏按钮
+- **文件**: `Views/Entry/EntryDetailView.swift`
+- **内容**: 导航栏右上角收藏（★）切换按钮 + `toggleFavorite()`
+
+#### 增强 Task 10: 编辑器收藏按钮
+- **文件**: `ViewModels/EntryEditorViewModel.swift`, `Views/Entry/EntryEditorView.swift`
+- **内容**: 新增 `@Published isFavorite`, 工具栏收藏切换按钮, 保存时写回
+
+#### 实现中对计划的适配
+- ViewModel 保存方法实际为 `save()`（计划写的 `saveEntry()` 不存在）
+- `datesWithEntries` 旧 `Set<Date>` 签名替换为 `[Date: [EntryDotType]]`（无旧引用, 安全）
+- Task 6 与 Task 10 改动交织于同两文件, 合并为一次编辑器提交
+
 ---
 
 ## 开发过程中修复的 Bug
@@ -191,7 +243,11 @@ dayfold/
 │   │       └── TagPicker.swift
 │   ├── Timeline/
 │   │   ├── TimelineView.swift
-│   │   └── TimelineListView.swift
+│   │   ├── TimelineListView.swift
+│   │   ├── CalendarView.swift
+│   │   ├── MonthGridView.swift
+│   │   ├── EntryBottomSheet.swift
+│   │   └── PhotoWallView.swift
 │   ├── Tags/
 │   │   ├── TagsView.swift
 │   │   └── TagEditorView.swift
