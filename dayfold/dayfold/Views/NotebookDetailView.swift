@@ -52,24 +52,19 @@ struct NotebookDetailView: View {
                     Spacer()
 
                     Button {
-                        // TODO: 多选模式
+                        // TODO: 相册
                     } label: {
-                        Text("SELECT")
-                            .font(.system(size: 13, weight: .semibold))
+                        Image(systemName: "photo.on.rectangle")
+                            .font(.system(size: 18, weight: .regular))
                             .foregroundColor(Color(hex: "9090A0"))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color(hex: "4A4A58"), lineWidth: 1)
-                            )
+                            .frame(width: 44, height: 44)
                     }
                     .buttonStyle(PlainButtonStyle())
 
                     Button {
-                        // TODO: 拍照新增
+                        // TODO: 日历视图
                     } label: {
-                        Image(systemName: "camera")
+                        Image(systemName: "calendar")
                             .font(.system(size: 18, weight: .regular))
                             .foregroundColor(Color(hex: "9090A0"))
                             .frame(width: 44, height: 44)
