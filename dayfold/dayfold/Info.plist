@@ -10,6 +10,8 @@
 	<string>Dayfold 需要访问您的位置来记录日记的地点信息</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Dayfold 需要访问您的相册来添加照片到日记</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Dayfold 需要保存生成的日记卡片到相册</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Dayfold 使用 Face ID 保护您的日记隐私</string>
 </dict>

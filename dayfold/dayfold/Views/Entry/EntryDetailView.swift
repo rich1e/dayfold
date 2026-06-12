@@ -5,6 +5,7 @@ struct EntryDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var entry: Entry
     @State private var showingEditSheet = false
+    @State private var showingCardSheet = false
     @State private var loadedImages: [UIImage] = []
 
     var body: some View {
@@ -48,6 +49,12 @@ struct EntryDetailView: View {
                             .foregroundColor(.warmAccent)
                     }
                     Button {
+                        showingCardSheet = true
+                    } label: {
+                        Image(systemName: "square.and.arrow.up.on.square")
+                            .foregroundColor(.warmAccent)
+                    }
+                    Button {
                         showingEditSheet = true
                     } label: {
                         Text("编辑")
@@ -63,6 +70,9 @@ struct EntryDetailView: View {
                 entry: entry,
                 context: entry.managedObjectContext ?? CoreDataStack.shared.viewContext
             )
+        }
+        .sheet(isPresented: $showingCardSheet) {
+            EntryCardPreviewSheet(entry: entry, images: loadedImages)
         }
         .task {
             await loadImages()
