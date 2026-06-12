@@ -46,8 +46,31 @@ struct MainTabView: View {
                     }
                 }
                 .animation(.easeOut(duration: 0.38), value: selectedTab)
-                // 顶部左右按钮 overlay（随内容区一起移动）
-                .overlay(alignment: .topLeading) {
+                // 右侧点击区：关闭抽屉
+                .overlay {
+                    if drawerOpen {
+                        Color.black.opacity(0.01)
+                            .ignoresSafeArea()
+                            .onTapGesture {
+                                withAnimation(.spring(response: 0.38, dampingFraction: 0.82)) {
+                                    drawerOpen = false
+                                }
+                            }
+                    }
+                }
+                // 内容区整体向右偏移（与抽屉宽度完全一致，无缝隙）
+                .offset(x: offset)
+                .animation(.spring(response: 0.38, dampingFraction: 0.82), value: drawerOpen)
+                .shadow(
+                    color: drawerOpen ? Color.black.opacity(0.4) : Color.clear,
+                    radius: drawerOpen ? 20 : 0,
+                    x: drawerOpen ? -6 : 0,
+                    y: 0
+                )
+                .ignoresSafeArea(edges: .bottom)
+
+                // 顶部按钮层：独立于 ignoresSafeArea 内容区之上，在安全区内布局
+                HStack {
                     Button {
                         withAnimation(.spring(response: 0.38, dampingFraction: 0.82)) {
                             drawerOpen.toggle()
@@ -59,10 +82,10 @@ struct MainTabView: View {
                             .frame(width: 44, height: 44)
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .padding(.top, geo.safeAreaInsets.top + 8)
                     .padding(.leading, 12)
-                }
-                .overlay(alignment: .topTrailing) {
+
+                    Spacer()
+
                     if selectedTab == .list {
                         Button {
                             withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
@@ -76,36 +99,19 @@ struct MainTabView: View {
                                 .contentTransition(.symbolEffect(.replace))
                         }
                         .buttonStyle(PlainButtonStyle())
-                        .padding(.top, geo.safeAreaInsets.top + 8)
                         .padding(.trailing, 12)
                     }
                 }
-                // 右侧点击区：关闭抽屉
-                .overlay {
-                    if drawerOpen {
-                        Color.black.opacity(0.01)
-                            .onTapGesture {
-                                withAnimation(.spring(response: 0.38, dampingFraction: 0.82)) {
-                                    drawerOpen = false
-                                }
-                            }
-                    }
-                }
-                .frame(width: geo.size.width, height: geo.size.height)
-                .ignoresSafeArea()
-                // 内容区整体向右偏移（与抽屉宽度完全一致，无缝隙）
+                .frame(width: geo.size.width)
                 .offset(x: offset)
                 .animation(.spring(response: 0.38, dampingFraction: 0.82), value: drawerOpen)
-                .shadow(
-                    color: drawerOpen ? Color.black.opacity(0.4) : Color.clear,
-                    radius: drawerOpen ? 20 : 0,
-                    x: drawerOpen ? -6 : 0,
-                    y: 0
-                )
+                // 垂直对齐到顶部 safe area 内（ZStack 默认居中，需要明确放到顶部）
+                .frame(maxHeight: .infinity, alignment: .top)
+                .padding(.top, geo.safeAreaInsets.top + 8)
             }
-            .ignoresSafeArea()
+            .ignoresSafeArea(edges: .bottom)
         }
-        .ignoresSafeArea()
+        .ignoresSafeArea(edges: .bottom)
         .sheet(isPresented: $showingNewEntry) {
             EntryEditorView(context: viewContext)
         }
