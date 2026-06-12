@@ -95,7 +95,7 @@ struct MainTabView: View {
                 .scaleEffect(
                     x: drawerOpen ? 0.96 : 1.0,
                     y: drawerOpen ? 0.97 : 1.0,
-                    anchor: .trailing
+                    anchor: .topTrailing
                 )
                 .shadow(
                     color: drawerOpen ? Color.black.opacity(0.35) : Color.clear,
