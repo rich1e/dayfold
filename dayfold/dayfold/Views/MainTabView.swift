@@ -8,11 +8,6 @@ struct MainTabView: View {
     @State private var drawerOpen = false
     @State private var homeListMode = false
 
-    // 内容区向右偏移量：打开时为屏幕宽的 65%
-    private var drawerOffset: CGFloat {
-        drawerOpen ? UIScreen.main.bounds.width * 0.65 : 0
-    }
-
     private var topInset: CGFloat {
         (UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }
@@ -21,7 +16,7 @@ struct MainTabView: View {
 
     var body: some View {
         GeometryReader { geo in
-            let drawerWidth = geo.size.width * 0.65
+            let drawerWidth = geo.size.width * 0.85
             let offset: CGFloat = drawerOpen ? drawerWidth : 0
 
             ZStack(alignment: .leading) {
