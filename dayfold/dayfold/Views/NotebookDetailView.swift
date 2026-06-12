@@ -2,21 +2,27 @@
 import SwiftUI
 import CoreData
 
+private enum SheetMode: Identifiable {
+    case photos, calendar
+    var id: Int { hashValue }
+}
+
 struct NotebookDetailView: View {
     let notebook: Notebook
     let context: NSManagedObjectContext
     var onNewEntry: () -> Void
     @Binding var isPresented: Bool
 
-    @Namespace private var ns
-
+    @StateObject private var timelineVM: TimelineViewModel
     @FetchRequest private var entries: FetchedResults<Entry>
+    @State private var sheetMode: SheetMode?
 
     init(notebook: Notebook, context: NSManagedObjectContext, onNewEntry: @escaping () -> Void, isPresented: Binding<Bool>) {
         self.notebook = notebook
         self.context = context
         self.onNewEntry = onNewEntry
         self._isPresented = isPresented
+        self._timelineVM = StateObject(wrappedValue: TimelineViewModel(context: context))
         self._entries = FetchRequest(
             sortDescriptors: [NSSortDescriptor(keyPath: \Entry.createdAt, ascending: false)],
             animation: .default
@@ -51,22 +57,18 @@ struct NotebookDetailView: View {
 
                     Spacer()
 
-                    Button {
-                        // TODO: 相册
-                    } label: {
+                    Button { sheetMode = .photos } label: {
                         Image(systemName: "photo.on.rectangle")
                             .font(.system(size: 18, weight: .regular))
-                            .foregroundColor(Color(hex: "9090A0"))
+                            .foregroundColor(sheetMode == .photos ? Color(hex: "5BC8D8") : Color(hex: "9090A0"))
                             .frame(width: 44, height: 44)
                     }
                     .buttonStyle(PlainButtonStyle())
 
-                    Button {
-                        // TODO: 日历视图
-                    } label: {
+                    Button { sheetMode = .calendar } label: {
                         Image(systemName: "calendar")
                             .font(.system(size: 18, weight: .regular))
-                            .foregroundColor(Color(hex: "9090A0"))
+                            .foregroundColor(sheetMode == .calendar ? Color(hex: "5BC8D8") : Color(hex: "9090A0"))
                             .frame(width: 44, height: 44)
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -122,9 +124,7 @@ struct NotebookDetailView: View {
             // 底部 + 按钮
             VStack {
                 Spacer()
-                Button {
-                    onNewEntry()
-                } label: {
+                Button { onNewEntry() } label: {
                     ZStack {
                         Circle()
                             .fill(Color(hex: "3C3C44"))
@@ -138,6 +138,19 @@ struct NotebookDetailView: View {
                 .buttonStyle(PlainButtonStyle())
                 .padding(.bottom, 48)
             }
+        }
+        .sheet(item: $sheetMode) { mode in
+            ZStack {
+                Color(hex: "2A2A30").ignoresSafeArea()
+                switch mode {
+                case .photos:
+                    PhotoWallView(viewModel: timelineVM)
+                case .calendar:
+                    CalendarView(viewModel: timelineVM)
+                }
+            }
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
         }
     }
 }
