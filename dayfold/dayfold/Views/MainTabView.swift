@@ -112,7 +112,7 @@ struct MainTabView: View {
                 .offset(x: offset)
                 .animation(.spring(response: 0.38, dampingFraction: 0.82), value: drawerOpen)
                 .frame(maxHeight: .infinity, alignment: .top)
-                .padding(.top, topInset + 4)
+                .padding(.top, -15)
             }
             .ignoresSafeArea(edges: .bottom)
         }
