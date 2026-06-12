@@ -77,12 +77,12 @@ struct MainTabView: View {
                         }
                     } label: {
                         Image(systemName: "gearshape")
-                            .font(.system(size: 18, weight: .medium))
+                            .font(.system(size: 22, weight: .medium))
                             .foregroundColor(Color(hex: "5BC8D8"))
-                            .frame(width: 44, height: 44)
+                            .frame(width: 48, height: 48)
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .padding(.leading, 12)
+                    .padding(.leading, 8)
 
                     Spacer()
 
@@ -93,21 +93,20 @@ struct MainTabView: View {
                             }
                         } label: {
                             Image(systemName: homeListMode ? "square.grid.2x2" : "list.bullet")
-                                .font(.system(size: 18, weight: .medium))
+                                .font(.system(size: 22, weight: .medium))
                                 .foregroundColor(Color(hex: "5BC8D8"))
-                                .frame(width: 44, height: 44)
+                                .frame(width: 48, height: 48)
                                 .contentTransition(.symbolEffect(.replace))
                         }
                         .buttonStyle(PlainButtonStyle())
-                        .padding(.trailing, 12)
+                        .padding(.trailing, 8)
                     }
                 }
                 .frame(width: geo.size.width)
                 .offset(x: offset)
                 .animation(.spring(response: 0.38, dampingFraction: 0.82), value: drawerOpen)
-                // 垂直对齐到顶部 safe area 内（ZStack 默认居中，需要明确放到顶部）
                 .frame(maxHeight: .infinity, alignment: .top)
-                .padding(.top, geo.safeAreaInsets.top + 8)
+                .padding(.top, geo.safeAreaInsets.top + 2)
             }
             .ignoresSafeArea(edges: .bottom)
         }
