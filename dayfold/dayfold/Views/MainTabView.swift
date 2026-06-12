@@ -3,25 +3,39 @@ import SwiftUI
 
 struct MainTabView: View {
     @Environment(\.managedObjectContext) private var viewContext
+    @State private var selectedTab: SidebarTab = .timeline
+    @State private var showingNewEntry = false
 
     var body: some View {
-        TabView {
-            TimelineView(context: viewContext)
-                .tabItem {
-                    Label("时间轴", systemImage: "clock")
-                }
+        HStack(spacing: 0) {
+            // 侧边导航栏
+            SidebarView(selectedTab: $selectedTab) {
+                showingNewEntry = true
+            }
 
-            EntryListView(context: viewContext)
-                .tabItem {
-                    Label("全部", systemImage: "book.closed")
-                }
+            // 内容区域
+            ZStack {
+                Color.warmPaper.ignoresSafeArea()
 
-            TagsView(context: viewContext)
-                .tabItem {
-                    Label("标签", systemImage: "tag")
+                if selectedTab == .timeline {
+                    TimelineView(context: viewContext)
+                        .transition(.paperDrop)
                 }
+                if selectedTab == .list {
+                    EntryListView(context: viewContext)
+                        .transition(.paperDrop)
+                }
+                if selectedTab == .tags {
+                    TagsView(context: viewContext)
+                        .transition(.paperDrop)
+                }
+            }
+            .animation(.easeOut(duration: 0.38), value: selectedTab)
         }
-        .accentColor(.warmAccent)
+        .ignoresSafeArea(edges: .bottom)
+        .sheet(isPresented: $showingNewEntry) {
+            EntryEditorView(context: viewContext)
+        }
     }
 }
 
