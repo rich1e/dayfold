@@ -36,7 +36,19 @@ AX Safe category class 'SLHighlightDisambiguationPillViewAccessibility' was not 
 - **性质**：系统 Accessibility 框架内部日志。
 - **处理**：忽略，与应用代码无关。
 
-### 4. 键盘输入辅助栏约束冲突
+### 4. Face ID 未注册（模拟器）
+
+```
+LocalAuthentication: canEvaluatePolicy:1 on LAContext returned
+Error Domain=com.apple.LocalAuthentication Code=-7
+"No identities are enrolled." / "Biometry is not enrolled."
+```
+
+- **性质**：模拟器默认未注册 Face ID/Touch ID，`SecurityManager` 调用 `canEvaluatePolicy` 时返回 -7，是预期行为。
+- **影响**：应用跳过锁屏，功能不受影响。
+- **处理**：忽略。在真机或已注册生物认证的模拟器（设置 → Face ID → 注册）上运行时不会出现。
+
+### 5. 键盘输入辅助栏约束冲突
 
 ```
 Unable to simultaneously satisfy constraints.
