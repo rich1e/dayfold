@@ -2,14 +2,14 @@
 import SwiftUI
 
 extension Color {
-    // 深色主题色系
-    static let warmPaper = Color(hex: "2E2E33")   // 主背景
-    static let warmCream = Color(hex: "3A3A40")   // 分割线/边框
-    static let warmBrown = Color(hex: "C8C0B8")   // 次要文字
-    static let warmAccent = Color(hex: "E8603A")  // 主强调色（橙红）
-    static let warmGray  = Color(hex: "48484F")   // 卡片阴影/禁用
-    static let warmDark  = Color(hex: "F0EDE8")   // 主文字（近白）
-    static let warmLight = Color(hex: "38383E")   // 卡片/面板背景
+    // 深色主题色系（参考 Hardcover 配色）
+    static let warmPaper = Color(hex: "3C3C44")   // 主背景（蓝灰深色）
+    static let warmCream = Color(hex: "4A4A58")   // 分割线/边框
+    static let warmBrown = Color(hex: "9090A0")   // 次要文字/禁用
+    static let warmAccent = Color(hex: "E05A3A")  // 主强调色（橙红）
+    static let warmGray  = Color(hex: "52525F")   // 卡片阴影层/禁用背景
+    static let warmDark  = Color(hex: "E8E8EC")   // 主文字（近白偏蓝灰）
+    static let warmLight = Color(hex: "434350")   // 卡片/面板/行背景
 
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
