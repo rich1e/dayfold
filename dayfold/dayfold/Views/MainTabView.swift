@@ -6,6 +6,7 @@ struct MainTabView: View {
     @State private var selectedTab: SidebarTab = .list
     @State private var showingNewEntry = false
     @State private var drawerOpen = false
+    @State private var homeListMode = false  // false=封面视图, true=列表视图
 
     var body: some View {
         ZStack(alignment: .leading) {
@@ -13,11 +14,12 @@ struct MainTabView: View {
             ZStack {
                 Color.warmPaper.ignoresSafeArea()
 
-                // 主封面页（默认）
                 if selectedTab == .list {
-                    HomeView(context: viewContext) {
-                        showingNewEntry = true
-                    }
+                    HomeView(
+                        context: viewContext,
+                        isListMode: $homeListMode,
+                        onNewEntry: { showingNewEntry = true }
+                    )
                     .transition(.paperDrop)
                 }
                 if selectedTab == .tags {
@@ -30,30 +32,44 @@ struct MainTabView: View {
                 }
             }
             .animation(.easeOut(duration: 0.38), value: selectedTab)
-            // 导航栏按钮 + FAB overlay
-            .overlay(alignment: .topTrailing) {
+            // 顶部左右两个按钮
+            .overlay(alignment: .topLeading) {
+                // 左上：齿轮 → 打开抽屉
                 Button {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                         drawerOpen = true
                     }
                 } label: {
-                    Image(systemName: "line.3.horizontal")
+                    Image(systemName: "gearshape")
                         .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(.warmBrown)
+                        .foregroundColor(Color(hex: "5BC8D8"))
                         .frame(width: 44, height: 44)
-                        .background(Color.warmLight.opacity(0.9))
-                        .clipShape(Circle())
                 }
                 .buttonStyle(PlainButtonStyle())
                 .padding(.top, 8)
-                .padding(.trailing, 16)
+                .padding(.leading, 12)
             }
-            .overlay(alignment: .bottomTrailing) {
-                FABButton {
-                    showingNewEntry = true
+            .overlay(alignment: .topTrailing) {
+                // 右上：切换封面↔列表视图（仅在 HomeView 时显示）
+                if selectedTab == .list {
+                    Button {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+                            homeListMode.toggle()
+                        }
+                    } label: {
+                        Image(systemName: homeListMode ? "square.grid.2x2" : "list.bullet")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(Color(hex: "5BC8D8"))
+                            .frame(width: 44, height: 44)
+                            .contentTransition(.symbolEffect(.replace))
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .padding(.top, 8)
+                    .padding(.trailing, 12)
+                } else {
+                    // 其他 Tab 显示菜单图标（备用）
+                    EmptyView()
                 }
-                .padding(.bottom, 32)
-                .padding(.trailing, 24)
             }
 
             // 遮罩层
@@ -74,49 +90,13 @@ struct MainTabView: View {
                     .frame(width: UIScreen.main.bounds.width * 0.75)
                     .ignoresSafeArea()
                     .transition(.move(edge: .leading))
-                    .shadow(color: .black.opacity(0.18), radius: 16, x: 4, y: 0)
+                    .shadow(color: .black.opacity(0.25), radius: 20, x: 6, y: 0)
             }
         }
         .ignoresSafeArea(edges: .bottom)
         .sheet(isPresented: $showingNewEntry) {
             EntryEditorView(context: viewContext)
         }
-    }
-}
-
-private struct FABButton: View {
-    var action: () -> Void
-    @State private var isPressed = false
-
-    var body: some View {
-        Button {
-            action()
-        } label: {
-            Image(systemName: "plus")
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(.white)
-                .frame(width: 56, height: 56)
-                .background(Color.warmAccent)
-                .clipShape(Circle())
-                .shadow(color: Color.warmAccent.opacity(0.4), radius: 10, x: 0, y: 4)
-                .scaleEffect(isPressed ? 0.9 : 1.0)
-        }
-        .buttonStyle(PlainButtonStyle())
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in
-                    if !isPressed {
-                        withAnimation(.spring(response: 0.15, dampingFraction: 0.7)) {
-                            isPressed = true
-                        }
-                    }
-                }
-                .onEnded { _ in
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                        isPressed = false
-                    }
-                }
-        )
     }
 }
 

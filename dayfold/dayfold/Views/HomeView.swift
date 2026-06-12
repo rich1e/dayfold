@@ -35,6 +35,7 @@ struct Notebook: Identifiable {
 
 struct HomeView: View {
     let context: NSManagedObjectContext
+    @Binding var isListMode: Bool
     var onNewEntry: () -> Void
 
     @State private var notebooks: [Notebook] = [Notebook.make(style: .chevronTeal)]
@@ -63,86 +64,136 @@ struct HomeView: View {
         ZStack {
             Color(hex: "2A2A30").ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                // 标题区
-                VStack(spacing: 6) {
-                    Text(currentNotebook?.name ?? "DAYFOLD")
-                        .font(.system(size: 26, weight: .black))
-                        .foregroundColor(Color(hex: "D4A574"))
-                        .tracking(3)
-                        .animation(.easeOut(duration: 0.2), value: currentIndex)
-
-                    Text("\(latestDate) / \(entryCount) entries")
-                        .font(.system(size: 13, weight: .regular))
-                        .foregroundColor(Color(hex: "7A7A88"))
-                }
-                .padding(.top, 28)
-                .frame(height: 72)
-
-                Spacer()
-
-                // 笔记本翻页区
-                if notebooks.isEmpty {
-                    emptyState
-                } else {
-                    TabView(selection: $currentIndex) {
-                        ForEach(Array(notebooks.enumerated()), id: \.element.id) { idx, nb in
-                            NotebookCoverView(notebook: nb)
-                                .frame(width: 240, height: 340)
-                                .shadow(color: .black.opacity(0.55), radius: 24, x: 0, y: 16)
-                                .tag(idx)
-                                .padding(.horizontal, 40)
-                        }
-                    }
-                    .tabViewStyle(.page(indexDisplayMode: .never))
-                    .frame(height: 380)
-                }
-
-                Spacer()
-
-                // 页码指示器
-                if notebooks.count > 1 {
-                    PageIndicator(count: notebooks.count, current: currentIndex)
-                        .padding(.bottom, 16)
-                }
-
-                // 底部按钮
-                if confirmDelete {
-                    HStack(spacing: 20) {
-                        CircleActionButton(icon: "xmark", bgColor: Color(hex: "E8D5B8"), iconColor: Color(hex: "4A3828")) {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                confirmDelete = false
-                            }
-                        }
-                        CircleActionButton(icon: "checkmark", bgColor: Color(hex: "E05A3A"), iconColor: .white) {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                deleteCurrentNotebook()
-                                confirmDelete = false
-                            }
-                        }
-                    }
-                    .padding(.bottom, 48)
-                    .transition(.scale(scale: 0.8).combined(with: .opacity))
-                } else {
-                    HStack(spacing: 20) {
-                        CircleActionButton(icon: "plus", bgColor: Color(hex: "E8D5B8"), iconColor: Color(hex: "4A3828")) {
-                            withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
-                                addNotebook()
-                            }
-                        }
-                        CircleActionButton(icon: "trash", bgColor: Color(hex: "D0C8BA"), iconColor: Color(hex: "4A3828")) {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                confirmDelete = true
-                            }
-                        }
-                    }
-                    .padding(.bottom, 48)
-                    .transition(.scale(scale: 0.8).combined(with: .opacity))
-                }
+            if isListMode {
+                listModeView
+                    .transition(.opacity.combined(with: .move(edge: .trailing)))
+            } else {
+                coverModeView
+                    .transition(.opacity.combined(with: .move(edge: .leading)))
             }
         }
+        .animation(.spring(response: 0.38, dampingFraction: 0.82), value: isListMode)
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: confirmDelete)
     }
+
+    // MARK: - 封面翻页模式
+
+    private var coverModeView: some View {
+        VStack(spacing: 0) {
+            // 标题区
+            VStack(spacing: 6) {
+                Text(currentNotebook?.name ?? "DAYFOLD")
+                    .font(.system(size: 26, weight: .black))
+                    .foregroundColor(Color(hex: "D4A574"))
+                    .tracking(3)
+                    .animation(.easeOut(duration: 0.2), value: currentIndex)
+
+                Text("\(latestDate) / \(entryCount) entries")
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundColor(Color(hex: "7A7A88"))
+            }
+            .padding(.top, 56)
+            .frame(height: 90)
+
+            Spacer()
+
+            // 笔记本翻页区
+            if notebooks.isEmpty {
+                emptyState
+            } else {
+                TabView(selection: $currentIndex) {
+                    ForEach(Array(notebooks.enumerated()), id: \.element.id) { idx, nb in
+                        NotebookCoverView(notebook: nb)
+                            .frame(width: 240, height: 340)
+                            .shadow(color: .black.opacity(0.55), radius: 24, x: 0, y: 16)
+                            .tag(idx)
+                            .padding(.horizontal, 40)
+                    }
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                .frame(height: 380)
+            }
+
+            Spacer()
+
+            // 页码指示器
+            if notebooks.count > 1 {
+                PageIndicator(count: notebooks.count, current: currentIndex)
+                    .padding(.bottom, 16)
+            }
+
+            // 底部按钮
+            if confirmDelete {
+                HStack(spacing: 20) {
+                    CircleActionButton(icon: "xmark", bgColor: Color(hex: "E8D5B8"), iconColor: Color(hex: "4A3828")) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { confirmDelete = false }
+                    }
+                    CircleActionButton(icon: "checkmark", bgColor: Color(hex: "E05A3A"), iconColor: .white) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                            deleteCurrentNotebook()
+                            confirmDelete = false
+                        }
+                    }
+                }
+                .padding(.bottom, 48)
+                .transition(.scale(scale: 0.8).combined(with: .opacity))
+            } else {
+                HStack(spacing: 20) {
+                    CircleActionButton(icon: "plus", bgColor: Color(hex: "E8D5B8"), iconColor: Color(hex: "4A3828")) {
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) { addNotebook() }
+                    }
+                    CircleActionButton(icon: "trash", bgColor: Color(hex: "D0C8BA"), iconColor: Color(hex: "4A3828")) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { confirmDelete = true }
+                    }
+                }
+                .padding(.bottom, 48)
+                .transition(.scale(scale: 0.8).combined(with: .opacity))
+            }
+        }
+    }
+
+    // MARK: - 列表模式
+
+    private var listModeView: some View {
+        VStack(spacing: 0) {
+            // 顶部占位（与封面模式对齐）
+            Spacer().frame(height: 56)
+
+            if notebooks.isEmpty {
+                Spacer()
+                emptyState
+                Spacer()
+            } else {
+                ScrollView {
+                    VStack(spacing: 0) {
+                        ForEach(Array(notebooks.enumerated()), id: \.element.id) { idx, nb in
+                            NotebookListRow(notebook: nb, isSelected: idx == currentIndex) {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                                    currentIndex = idx
+                                }
+                            }
+                            if idx < notebooks.count - 1 {
+                                Divider()
+                                    .background(Color(hex: "4A4A58"))
+                                    .padding(.leading, 80)
+                            }
+                        }
+                    }
+                    .padding(.top, 8)
+                }
+            }
+
+            Spacer()
+
+            // 列表模式底部：只有 + 按钮，居中
+            CircleActionButton(icon: "plus", bgColor: Color(hex: "E8D5B8"), iconColor: Color(hex: "4A3828")) {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) { addNotebook() }
+            }
+            .padding(.bottom, 48)
+        }
+    }
+
+    // MARK: - 列表行
 
     // MARK: - 空状态
 
@@ -460,6 +511,64 @@ private struct RoundedCornerShape: Shape {
     }
 }
 
+// MARK: - 笔记本列表行
+
+struct NotebookListRow: View {
+    let notebook: Notebook
+    let isSelected: Bool
+    let action: () -> Void
+    @State private var isPressed = false
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 16) {
+                // 圆形封面缩略图
+                ZStack {
+                    Circle()
+                        .fill(Color(hex: "2A2A30"))
+                        .frame(width: 52, height: 52)
+                    Circle()
+                        .clipShape(Circle())
+                        .frame(width: 52, height: 52)
+                        .overlay(
+                            CoverPatternView(style: notebook.coverStyle)
+                                .clipShape(Circle())
+                        )
+                }
+                .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+
+                // 文字
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(notebook.name)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(isSelected ? Color(hex: "E05A3A") : Color(hex: "E8E8EC"))
+                    Text("0 PHOTOS")
+                        .font(.system(size: 11, weight: .regular))
+                        .foregroundColor(Color(hex: "7A7A88"))
+                        .tracking(1)
+                }
+
+                Spacer()
+
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color(hex: "E05A3A"))
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            .background(isPressed ? Color(hex: "38383E") : Color.clear)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in if !isPressed { isPressed = true } }
+                .onEnded { _ in isPressed = false }
+        )
+    }
+}
+
 #Preview {
-    HomeView(context: CoreDataStack.shared.viewContext, onNewEntry: {})
+    HomeView(context: CoreDataStack.shared.viewContext, isListMode: .constant(false), onNewEntry: {})
 }
