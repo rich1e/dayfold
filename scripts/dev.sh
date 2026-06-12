@@ -39,26 +39,30 @@ IGNORE_PATTERN+="|AXRuntimeNotifications|AX Safe category|getpwuid_r|Skipping mi
 RED='\033[0;31m'; YELLOW='\033[0;33m'; GREEN='\033[0;32m'
 CYAN='\033[0;36m'; BOLD='\033[1m'; RESET='\033[0m'
 
-log()  { echo -e "${CYAN}>> $*${RESET}"; }
-ok()   { echo -e "${GREEN}[OK] $*${RESET}"; }
-warn() { echo -e "${YELLOW}[WARN] $*${RESET}"; }
-err()  { echo -e "${RED}[ERR] $*${RESET}"; }
-sep()  { echo -e "${BOLD}----------------------------------------------------------------------${RESET}"; }
+log()  { echo -e "${CYAN}>> $*${RESET}" >&2; }
+ok()   { echo -e "${GREEN}[OK] $*${RESET}" >&2; }
+warn() { echo -e "${YELLOW}[WARN] $*${RESET}" >&2; }
+err()  { echo -e "${RED}[ERR] $*${RESET}" >&2; }
+sep()  { echo -e "${BOLD}----------------------------------------------------------------------${RESET}" >&2; }
 
 # ---------------------------------------------------------------------------
 # Get booted simulator UDID (boot if needed)
 # ---------------------------------------------------------------------------
 get_simulator_udid() {
-    # 优先取已 Booted 且名称匹配的第一个 UDID
+    # 精确匹配设备名称（避免 "iPhone 16 Pro" 匹配到 "iPhone 16 Pro Max"）
+    local name_pattern
+    name_pattern="    ${SIMULATOR_NAME} ("
+
+    # 优先取已 Booted 且名称精确匹配的第一个 UDID
     local udid
     udid=$(xcrun simctl list devices booted 2>/dev/null \
-        | grep "$SIMULATOR_NAME" | head -1 \
+        | grep -F "$name_pattern" | head -1 \
         | grep -oE '[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}')
 
     if [[ -z "$udid" ]]; then
         # 没有已启动的，找可用设备中最新 iOS 版本对应的那一台
         udid=$(xcrun simctl list devices available 2>/dev/null \
-            | grep "$SIMULATOR_NAME" | tail -1 \
+            | grep -F "$name_pattern" | tail -1 \
             | grep -oE '[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}')
         if [[ -z "$udid" ]]; then
             err "Simulator not found: $SIMULATOR_NAME"
@@ -69,7 +73,7 @@ get_simulator_udid() {
         xcrun simctl boot "$udid" 2>/dev/null || true
         # 等待 Booted 状态
         local wait=0
-        while ! xcrun simctl list devices booted 2>/dev/null | grep -q "$udid"; do
+        while ! xcrun simctl list devices booted 2>/dev/null | grep -qF "$udid"; do
             sleep 2; wait=$((wait+2))
             [[ $wait -ge 30 ]] && { err "Simulator boot timed out"; exit 1; }
         done
