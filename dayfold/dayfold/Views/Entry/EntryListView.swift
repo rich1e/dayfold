@@ -5,8 +5,6 @@ import CoreData
 struct EntryListView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @StateObject private var viewModel: EntryListViewModel
-    @State private var showingNewEntry = false
-
     @FetchRequest(
         sortDescriptors: [SortDescriptor(\.createdAt, order: .reverse)],
         animation: .default
@@ -36,12 +34,17 @@ struct EntryListView: View {
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 16) {
-                            ForEach(filteredEntries, id: \.id) { entry in
+                            ForEach(Array(filteredEntries.enumerated()), id: \.element.id) { index, entry in
                                 NavigationLink(destination: EntryDetailView(entry: entry)) {
                                     EntryCard(entry: entry, viewModel: viewModel)
                                         .frame(maxWidth: .infinity)
                                 }
                                 .buttonStyle(PlainButtonStyle())
+                                .transition(.paperDrop)
+                                .animation(
+                                    .easeOut(duration: 0.38).delay(Double(min(index, 7)) * 0.07),
+                                    value: filteredEntries.count
+                                )
                             }
                         }
                         .padding()
@@ -49,21 +52,7 @@ struct EntryListView: View {
                 }
             }
             .navigationTitle("全部日记")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showingNewEntry = true
-                    } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .foregroundColor(.warmAccent)
-                            .font(.title2)
-                    }
-                }
-            }
             .searchable(text: $viewModel.searchText, prompt: "搜索日记")
-        }
-        .sheet(isPresented: $showingNewEntry) {
-            EntryEditorView(context: viewContext)
         }
     }
 
@@ -77,21 +66,9 @@ struct EntryListView: View {
                 .font(.warmHeadline)
                 .foregroundColor(.warmBrown)
 
-            Text("点击右上角的 + 开始记录")
+            Text("点击右下角的 + 开始记录")
                 .font(.warmBody)
                 .foregroundColor(.warmBrown.opacity(0.7))
-
-            Button {
-                showingNewEntry = true
-            } label: {
-                Text("创建第一篇日记")
-                    .font(.warmBody)
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 32)
-                    .padding(.vertical, 12)
-                    .background(Color.warmAccent)
-                    .cornerRadius(24)
-            }
         }
     }
 }
