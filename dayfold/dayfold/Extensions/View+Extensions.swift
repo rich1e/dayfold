@@ -17,6 +17,6 @@ struct WarmCardModifier: ViewModifier {
             .padding(16)
             .background(Color.warmLight)
             .cornerRadius(16)
-            .shadow(color: Color.warmGray.opacity(0.3), radius: 8, x: 0, y: 4)
+            .shadow(color: Color.black.opacity(0.35), radius: 8, x: 0, y: 4)
     }
 }
