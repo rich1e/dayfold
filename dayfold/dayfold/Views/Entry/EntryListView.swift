@@ -77,6 +77,7 @@ struct EntryCard: View {
     @ObservedObject var entry: Entry
     let viewModel: EntryListViewModel
     @State private var thumbnails: [UIImage] = []
+    @State private var isPressed = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -116,6 +117,8 @@ struct EntryCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
         .warmCard()
+        .scaleEffect(isPressed ? 0.97 : 1.0)
+        .animation(.spring(response: 0.25, dampingFraction: 0.6), value: isPressed)
         .contextMenu {
             Button(role: .destructive) {
                 viewModel.deleteEntry(entry)
@@ -132,6 +135,15 @@ struct EntryCard: View {
                 )
             }
         }
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    if !isPressed { isPressed = true }
+                }
+                .onEnded { _ in
+                    isPressed = false
+                }
+        )
         .task(id: thumbnailSourceID) {
             await loadThumbnails()
         }
