@@ -20,13 +20,18 @@ struct TimelineListView: View {
             LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
                 ForEach(groupedEntries, id: \.0) { date, dayEntries in
                     Section {
-                        ForEach(dayEntries, id: \.id) { entry in
+                        ForEach(Array(dayEntries.enumerated()), id: \.element.id) { localIdx, entry in
                             NavigationLink(destination: EntryDetailView(entry: entry)) {
                                 TimelineEntryCard(entry: entry)
                             }
                             .buttonStyle(PlainButtonStyle())
                             .padding(.horizontal)
                             .padding(.vertical, 8)
+                            .transition(.paperDrop)
+                            .animation(
+                                .easeOut(duration: 0.38).delay(Double(min(localIdx, 7)) * 0.07),
+                                value: entries.count
+                            )
                         }
                     } header: {
                         Text(date)
@@ -60,6 +65,7 @@ struct TimelineListView: View {
 struct TimelineEntryCard: View {
     let entry: Entry
     @State private var thumbnail: UIImage?
+    @State private var isPressed = false
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -123,6 +129,17 @@ struct TimelineEntryCard: View {
         }
         .padding()
         .warmCard()
+        .scaleEffect(isPressed ? 0.97 : 1.0)
+        .animation(.spring(response: 0.25, dampingFraction: 0.6), value: isPressed)
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    if !isPressed { isPressed = true }
+                }
+                .onEnded { _ in
+                    isPressed = false
+                }
+        )
         .task {
             if let firstAsset = entry.mediaAssetsArray.first {
                 thumbnail = await MediaService.shared.loadImage(filename: firstAsset.wrappedFilename)
