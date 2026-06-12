@@ -21,76 +21,66 @@ enum SidebarTab: String, CaseIterable, Hashable {
     }
 }
 
-struct SidebarView: View {
+struct DrawerView: View {
     @Binding var selectedTab: SidebarTab
-    var onNewEntry: () -> Void
+    @Binding var isOpen: Bool
 
-    @Namespace private var sidebarNamespace
-    @State private var fabPressed = false
+    @Namespace private var drawerNamespace
 
     var body: some View {
-        VStack(spacing: 0) {
-            // 导航项
-            VStack(spacing: 4) {
+        VStack(alignment: .leading, spacing: 0) {
+            // 顶部标题区
+            HStack {
+                Text("Dayfold")
+                    .font(.warmTitle)
+                    .foregroundColor(.warmBrown)
+                Spacer()
+                Button {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                        isOpen = false
+                    }
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.warmBrown.opacity(0.6))
+                        .frame(width: 36, height: 36)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 56)
+            .padding(.bottom, 24)
+
+            Divider()
+                .background(Color.warmCream)
+                .padding(.horizontal, 20)
+
+            // 导航项列表
+            VStack(spacing: 2) {
                 ForEach(SidebarTab.allCases, id: \.self) { tab in
-                    SidebarItem(
+                    DrawerItem(
                         tab: tab,
                         isActive: selectedTab == tab,
-                        namespace: sidebarNamespace
+                        namespace: drawerNamespace
                     ) {
                         selectedTab = tab
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                            isOpen = false
+                        }
                     }
                 }
             }
-            .padding(.top, 16)
+            .padding(.top, 12)
+            .padding(.horizontal, 12)
 
             Spacer()
-
-            // FAB 新建按钮
-            Button {
-                onNewEntry()
-            } label: {
-                Image(systemName: "plus")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(width: 44, height: 44)
-                    .background(Color.warmAccent)
-                    .clipShape(Circle())
-                    .shadow(
-                        color: Color.warmAccent.opacity(0.35),
-                        radius: 8, x: 0, y: 3
-                    )
-                    .scaleEffect(fabPressed ? 0.9 : 1.0)
-            }
-            .buttonStyle(PlainButtonStyle())
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { _ in
-                        if !fabPressed {
-                            withAnimation(.spring(response: 0.15, dampingFraction: 0.7)) {
-                                fabPressed = true
-                            }
-                        }
-                    }
-                    .onEnded { _ in
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                            fabPressed = false
-                        }
-                    }
-            )
-            .padding(.bottom, 24)
         }
-        .frame(width: 48)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.warmLight)
-        .overlay(alignment: .trailing) {
-            Rectangle()
-                .fill(Color.warmCream)
-                .frame(width: 1)
-        }
     }
 }
 
-private struct SidebarItem: View {
+private struct DrawerItem: View {
     let tab: SidebarTab
     let isActive: Bool
     let namespace: Namespace.ID
@@ -98,24 +88,25 @@ private struct SidebarItem: View {
 
     var body: some View {
         Button(action: action) {
-            ZStack {
+            ZStack(alignment: .leading) {
                 if isActive {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.warmAccent.opacity(0.13))
-                        .frame(width: 36, height: 36)
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.warmAccent.opacity(0.12))
                         .matchedGeometryEffect(id: "activeTab", in: namespace)
                 }
 
-                VStack(spacing: 3) {
+                HStack(spacing: 14) {
                     Image(systemName: tab.icon)
-                        .font(.system(size: 15, weight: isActive ? .semibold : .regular))
-                        .foregroundColor(isActive ? .warmAccent : .warmBrown.opacity(0.6))
+                        .font(.system(size: 18, weight: isActive ? .semibold : .regular))
+                        .foregroundColor(isActive ? .warmAccent : .warmBrown.opacity(0.55))
+                        .frame(width: 24)
 
                     Text(tab.label)
-                        .font(.system(size: 9, design: .rounded))
-                        .foregroundColor(isActive ? .warmAccent : .warmBrown.opacity(0.6))
+                        .font(.system(size: 16, weight: isActive ? .semibold : .regular, design: .rounded))
+                        .foregroundColor(isActive ? .warmAccent : .warmBrown)
                 }
-                .frame(width: 36, height: 36)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 14)
             }
         }
         .buttonStyle(PlainButtonStyle())
@@ -123,9 +114,6 @@ private struct SidebarItem: View {
 }
 
 #Preview {
-    HStack {
-        SidebarView(selectedTab: .constant(.timeline), onNewEntry: {})
-        Spacer()
-    }
-    .background(Color.warmPaper)
+    DrawerView(selectedTab: .constant(.timeline), isOpen: .constant(true))
+        .frame(width: 300)
 }
