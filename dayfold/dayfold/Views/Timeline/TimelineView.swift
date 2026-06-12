@@ -24,16 +24,21 @@ struct TimelineView: View {
                 .background(Color.warmLight)
 
                 // 内容区域
-                Group {
-                    switch viewModel.viewMode {
-                    case .list:
+                ZStack {
+                    if viewModel.viewMode == .list {
                         TimelineListView()
-                    case .calendar:
+                            .transition(.paperDrop)
+                    }
+                    if viewModel.viewMode == .calendar {
                         CalendarView(viewModel: viewModel)
-                    case .photoWall:
+                            .transition(.paperDrop)
+                    }
+                    if viewModel.viewMode == .photoWall {
                         PhotoWallView(viewModel: viewModel, scrollTarget: photoWallScrollTarget)
+                            .transition(.paperDrop)
                     }
                 }
+                .animation(.easeOut(duration: 0.38), value: viewModel.viewMode)
             }
             .navigationTitle("时间轴")
             .background(Color.warmPaper)
