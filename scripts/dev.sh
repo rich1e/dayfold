@@ -28,8 +28,8 @@ LOG_DURATION="${LOG_DURATION:-20}"
 IGNORE_PATTERN='CA Event|account info cache|SLHighlightDisambiguation'
 IGNORE_PATTERN+="|assistantHeight|NSLayoutConstraint|UIKBCompatInputView"
 IGNORE_PATTERN+="|SystemInputAssistantView|_UIRemoteKeyboardPlaceholderView"
-IGNORE_PATTERN+="|134400|CKAccountStatusNoAccount"
-IGNORE_PATTERN+="|mirroring.*setup|mirroring.*recover|mirroring.*failed"
+IGNORE_PATTERN+="|134400|CKAccountStatusNoAccount|_performSetupRequest|CloudKit integration"
+IGNORE_PATTERN+="|mirroring.*setup|mirroring.*recover|mirroring.*failed|CloudKitMirroringDelegate"
 IGNORE_PATTERN+="|LocalAuthentication.*-7|Biometry is not enrolled|No identities are enrolled"
 IGNORE_PATTERN+="|AXRuntimeNotifications|AX Safe category|getpwuid_r|Skipping migration"
 
@@ -49,15 +49,17 @@ sep()  { echo -e "${BOLD}-------------------------------------------------------
 # Get booted simulator UDID (boot if needed)
 # ---------------------------------------------------------------------------
 get_simulator_udid() {
+    # 优先取已 Booted 且名称匹配的第一个 UDID
     local udid
     udid=$(xcrun simctl list devices booted 2>/dev/null \
         | grep "$SIMULATOR_NAME" | head -1 \
-        | grep -oE '[A-F0-9-]{36}')
+        | grep -oE '[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}')
 
     if [[ -z "$udid" ]]; then
+        # 没有已启动的，找可用设备中最新 iOS 版本对应的那一台
         udid=$(xcrun simctl list devices available 2>/dev/null \
-            | grep "$SIMULATOR_NAME" | head -1 \
-            | grep -oE '[A-F0-9-]{36}')
+            | grep "$SIMULATOR_NAME" | tail -1 \
+            | grep -oE '[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}')
         if [[ -z "$udid" ]]; then
             err "Simulator not found: $SIMULATOR_NAME"
             exit 1
@@ -65,8 +67,18 @@ get_simulator_udid() {
         log "Booting simulator $SIMULATOR_NAME ($udid) ..."
         open -a Simulator
         xcrun simctl boot "$udid" 2>/dev/null || true
-        sleep 3
+        # 等待 Booted 状态
+        local wait=0
+        while ! xcrun simctl list devices booted 2>/dev/null | grep -q "$udid"; do
+            sleep 2; wait=$((wait+2))
+            [[ $wait -ge 30 ]] && { err "Simulator boot timed out"; exit 1; }
+        done
+        sleep 1
+    else
+        # 已 Booted，确保 Simulator.app 窗口可见
+        open -a Simulator 2>/dev/null || true
     fi
+
     echo "$udid"
 }
 
@@ -141,8 +153,9 @@ cmd_launch() {
 
     local app_path
     app_path=$(find ~/Library/Developer/Xcode/DerivedData -name "dayfold.app" \
-        -path "*/Debug-iphonesimulator/*" 2>/dev/null \
-        | sort | tail -1)
+        -path "*/Debug-iphonesimulator/*" \
+        ! -path "*/Index.noindex/*" 2>/dev/null \
+        | xargs ls -dt 2>/dev/null | head -1)
 
     if [[ -z "$app_path" ]]; then
         err "No .app build artifact found. Run build first."
@@ -210,9 +223,9 @@ cmd_log() {
     # App's own print() output (filter out system frameworks)
     local app_prints
     app_prints=$(grep 'dayfold:' "$RUNTIME_LOG" \
-        | grep -vE '\((CoreData|LocalAuthentication|UIAccessibility|BaseBoard|FrontBoardServices|CoreServices|CoreLocation)\)' \
+        | grep -vE '\((CoreData|LocalAuthentication|UIAccessibility|BaseBoard|FrontBoardServices|CoreServices|CoreLocation|RunningBoardServices|libxpc|UIKitCore|BoardServices|libMobileGestalt|XCTTargetBootstrap|CoreFoundation|libAccessibility)\)' \
         | grep -vE "$IGNORE_PATTERN" \
-        | grep -vE '\s+(Debug|Info)\s+' \
+        | grep -vE '\s+(Debug|Info|Default|Activity)\s+' \
         | head -30 || true)
 
     if [[ -n "$app_prints" ]]; then
