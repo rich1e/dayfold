@@ -92,8 +92,8 @@ struct HomeView: View {
                     .font(.system(size: 13, weight: .regular))
                     .foregroundColor(Color(hex: "7A7A88"))
             }
-            .padding(.top, 56)
-            .frame(height: 90)
+            .padding(.top, 100)
+            .frame(height: 134)
 
             Spacer()
 
@@ -157,7 +157,7 @@ struct HomeView: View {
     private var listModeView: some View {
         VStack(spacing: 0) {
             // 顶部占位（与封面模式对齐）
-            Spacer().frame(height: 56)
+            Spacer().frame(height: 100)
 
             if notebooks.isEmpty {
                 Spacer()
