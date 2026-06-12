@@ -59,7 +59,7 @@ struct MainTabView: View {
                             .frame(width: 44, height: 44)
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .padding(.top, 8)
+                    .padding(.top, geo.safeAreaInsets.top + 8)
                     .padding(.leading, 12)
                 }
                 .overlay(alignment: .topTrailing) {
@@ -76,7 +76,7 @@ struct MainTabView: View {
                                 .contentTransition(.symbolEffect(.replace))
                         }
                         .buttonStyle(PlainButtonStyle())
-                        .padding(.top, 8)
+                        .padding(.top, geo.safeAreaInsets.top + 8)
                         .padding(.trailing, 12)
                     }
                 }
