@@ -3,7 +3,7 @@ import SwiftUI
 
 struct MainTabView: View {
     @Environment(\.managedObjectContext) private var viewContext
-    @State private var selectedTab: SidebarTab = .timeline
+    @State private var selectedTab: SidebarTab = .list
     @State private var showingNewEntry = false
     @State private var drawerOpen = false
 
@@ -13,16 +13,19 @@ struct MainTabView: View {
             ZStack {
                 Color.warmPaper.ignoresSafeArea()
 
-                if selectedTab == .timeline {
-                    TimelineView(context: viewContext)
-                        .transition(.paperDrop)
-                }
+                // 主封面页（默认）
                 if selectedTab == .list {
-                    EntryListView(context: viewContext)
-                        .transition(.paperDrop)
+                    HomeView(context: viewContext) {
+                        showingNewEntry = true
+                    }
+                    .transition(.paperDrop)
                 }
                 if selectedTab == .tags {
                     TagsView(context: viewContext)
+                        .transition(.paperDrop)
+                }
+                if selectedTab == .timeline {
+                    EntryListView(context: viewContext)
                         .transition(.paperDrop)
                 }
             }

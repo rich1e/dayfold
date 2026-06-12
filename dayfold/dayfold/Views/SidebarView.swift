@@ -15,10 +15,13 @@ enum SidebarTab: String, CaseIterable, Hashable {
     var label: String {
         switch self {
         case .timeline: return "时间轴"
-        case .list:     return "全部"
+        case .list:     return "全部日记"
         case .tags:     return "标签"
         }
     }
+
+    // 在抽屉中显示的项（隐藏时间轴，主页封面替代）
+    static var drawerCases: [SidebarTab] { [.list, .tags] }
 }
 
 private let drawerBg = Color(red: 0.18, green: 0.18, blue: 0.20)
@@ -47,7 +50,7 @@ struct DrawerView: View {
 
             // 导航列表
             VStack(spacing: 0) {
-                ForEach(SidebarTab.allCases, id: \.self) { tab in
+                ForEach(SidebarTab.drawerCases, id: \.self) { tab in
                     DrawerRow(
                         tab: tab,
                         isActive: selectedTab == tab
@@ -58,7 +61,7 @@ struct DrawerView: View {
                         }
                     }
 
-                    if tab != SidebarTab.allCases.last {
+                    if tab != SidebarTab.drawerCases.last {
                         Divider()
                             .background(drawerDivider)
                     }
