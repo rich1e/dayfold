@@ -1,8 +1,7 @@
 // Views/SidebarView.swift
 import SwiftUI
-import CoreData
 
-enum SidebarTab: CaseIterable {
+enum SidebarTab: String, CaseIterable, Hashable {
     case timeline, list, tags
 
     var icon: String {
@@ -70,7 +69,9 @@ struct SidebarView: View {
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in
                         if !fabPressed {
-                            fabPressed = true
+                            withAnimation(.spring(response: 0.15, dampingFraction: 0.7)) {
+                                fabPressed = true
+                            }
                         }
                     }
                     .onEnded { _ in
