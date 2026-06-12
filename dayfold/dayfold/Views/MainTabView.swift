@@ -15,10 +15,13 @@ struct MainTabView: View {
 
     var body: some View {
         GeometryReader { geo in
+            let drawerWidth = geo.size.width * 0.65
+            let offset: CGFloat = drawerOpen ? drawerWidth : 0
+
             ZStack(alignment: .leading) {
                 // 底层：抽屉面板（固定左侧，不做动画）
                 DrawerView(selectedTab: $selectedTab, isOpen: $drawerOpen)
-                    .frame(width: geo.size.width * 0.65)
+                    .frame(width: drawerWidth)
                     .ignoresSafeArea()
 
                 // 上层：内容区（整体向右滑动）
@@ -80,7 +83,7 @@ struct MainTabView: View {
                 // 右侧点击区：关闭抽屉
                 .overlay {
                     if drawerOpen {
-                        Color.black.opacity(0.01) // 透明可点击层
+                        Color.black.opacity(0.01)
                             .onTapGesture {
                                 withAnimation(.spring(response: 0.38, dampingFraction: 0.82)) {
                                     drawerOpen = false
@@ -88,25 +91,21 @@ struct MainTabView: View {
                             }
                     }
                 }
-                // 内容区整体向右偏移
-                .offset(x: drawerOffset)
+                .frame(width: geo.size.width, height: geo.size.height)
+                .ignoresSafeArea()
+                // 内容区整体向右偏移（与抽屉宽度完全一致，无缝隙）
+                .offset(x: offset)
                 .animation(.spring(response: 0.38, dampingFraction: 0.82), value: drawerOpen)
-                // 打开时右侧轻微缩放+阴影
-                .scaleEffect(
-                    x: drawerOpen ? 0.96 : 1.0,
-                    y: drawerOpen ? 0.97 : 1.0,
-                    anchor: .topTrailing
-                )
                 .shadow(
-                    color: drawerOpen ? Color.black.opacity(0.35) : Color.clear,
+                    color: drawerOpen ? Color.black.opacity(0.4) : Color.clear,
                     radius: drawerOpen ? 20 : 0,
-                    x: drawerOpen ? -8 : 0,
+                    x: drawerOpen ? -6 : 0,
                     y: 0
                 )
-                .ignoresSafeArea(edges: .bottom)
             }
+            .ignoresSafeArea()
         }
-        .ignoresSafeArea(edges: .bottom)
+        .ignoresSafeArea()
         .sheet(isPresented: $showingNewEntry) {
             EntryEditorView(context: viewContext)
         }
