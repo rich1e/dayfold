@@ -41,6 +41,8 @@ struct HomeView: View {
     @State private var notebooks: [Notebook] = [Notebook.make(style: .chevronTeal)]
     @State private var currentIndex: Int = 0
     @State private var confirmDelete = false
+    @State private var showDetail = false
+    @Namespace private var coverNamespace
 
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \Entry.createdAt, ascending: false)],
@@ -74,6 +76,20 @@ struct HomeView: View {
         }
         .animation(.spring(response: 0.38, dampingFraction: 0.82), value: isListMode)
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: confirmDelete)
+        .fullScreenCover(isPresented: $showDetail) {
+            if let nb = currentNotebook {
+                NotebookDetailView(
+                    notebook: nb,
+                    context: context,
+                    onNewEntry: onNewEntry,
+                    isPresented: $showDetail
+                )
+                .transition(.asymmetric(
+                    insertion: .scale(scale: 0.85).combined(with: .opacity),
+                    removal: .scale(scale: 0.85).combined(with: .opacity)
+                ))
+            }
+        }
     }
 
     // MARK: - 封面翻页模式
@@ -108,6 +124,12 @@ struct HomeView: View {
                             .shadow(color: .black.opacity(0.55), radius: 24, x: 0, y: 16)
                             .tag(idx)
                             .padding(.horizontal, 40)
+                            .onTapGesture {
+                                currentIndex = idx
+                                withAnimation(.spring(response: 0.42, dampingFraction: 0.85)) {
+                                    showDetail = true
+                                }
+                            }
                     }
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
