@@ -13,6 +13,12 @@ struct MainTabView: View {
         drawerOpen ? UIScreen.main.bounds.width * 0.65 : 0
     }
 
+    private var topInset: CGFloat {
+        (UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first?.windows.first?.safeAreaInsets.top) ?? 0
+    }
+
     var body: some View {
         GeometryReader { geo in
             let drawerWidth = geo.size.width * 0.65
@@ -106,7 +112,7 @@ struct MainTabView: View {
                 .offset(x: offset)
                 .animation(.spring(response: 0.38, dampingFraction: 0.82), value: drawerOpen)
                 .frame(maxHeight: .infinity, alignment: .top)
-                .padding(.top, geo.safeAreaInsets.top + 2)
+                .padding(.top, topInset + 4)
             }
             .ignoresSafeArea(edges: .bottom)
         }
