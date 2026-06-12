@@ -1,7 +1,7 @@
 // Extensions/Transitions+Warm.swift
 import SwiftUI
 
-struct PaperDropModifier: ViewModifier {
+private struct PaperDropModifier: ViewModifier {
     let progress: Double // 0 = 起始（倾斜+偏移），1 = 落定
 
     func body(content: Content) -> some View {
