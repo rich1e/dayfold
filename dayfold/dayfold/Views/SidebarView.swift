@@ -21,95 +21,94 @@ enum SidebarTab: String, CaseIterable, Hashable {
     }
 }
 
+private let drawerBg = Color(red: 0.18, green: 0.18, blue: 0.20)
+private let drawerRowBg = Color(red: 0.22, green: 0.22, blue: 0.24)
+private let drawerDivider = Color(red: 0.28, green: 0.28, blue: 0.30)
+private let drawerAccent = Color(red: 0.95, green: 0.45, blue: 0.35)
+private let drawerText = Color(red: 0.92, green: 0.92, blue: 0.92)
+
 struct DrawerView: View {
     @Binding var selectedTab: SidebarTab
     @Binding var isOpen: Bool
 
-    @Namespace private var drawerNamespace
-
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // 顶部标题区
+            // 顶部标题
             HStack {
-                Text("Dayfold")
-                    .font(.warmTitle)
-                    .foregroundColor(.warmBrown)
+                Text("DAYFOLD")
+                    .font(.system(size: 22, weight: .bold, design: .default))
+                    .foregroundColor(drawerAccent)
+                    .tracking(2)
                 Spacer()
-                Button {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                        isOpen = false
-                    }
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.warmBrown.opacity(0.6))
-                        .frame(width: 36, height: 36)
-                }
-                .buttonStyle(PlainButtonStyle())
             }
             .padding(.horizontal, 20)
-            .padding(.top, 56)
-            .padding(.bottom, 24)
+            .padding(.top, 60)
+            .padding(.bottom, 20)
 
-            Divider()
-                .background(Color.warmCream)
-                .padding(.horizontal, 20)
-
-            // 导航项列表
-            VStack(spacing: 2) {
+            // 导航列表
+            VStack(spacing: 0) {
                 ForEach(SidebarTab.allCases, id: \.self) { tab in
-                    DrawerItem(
+                    DrawerRow(
                         tab: tab,
-                        isActive: selectedTab == tab,
-                        namespace: drawerNamespace
+                        isActive: selectedTab == tab
                     ) {
                         selectedTab = tab
                         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                             isOpen = false
                         }
                     }
+
+                    if tab != SidebarTab.allCases.last {
+                        Divider()
+                            .background(drawerDivider)
+                    }
                 }
             }
-            .padding(.top, 12)
-            .padding(.horizontal, 12)
 
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.warmLight)
+        .background(drawerBg.ignoresSafeArea())
     }
 }
 
-private struct DrawerItem: View {
+private struct DrawerRow: View {
     let tab: SidebarTab
     let isActive: Bool
-    let namespace: Namespace.ID
     let action: () -> Void
+
+    @State private var isPressed = false
 
     var body: some View {
         Button(action: action) {
-            ZStack(alignment: .leading) {
+            HStack(spacing: 16) {
+                Image(systemName: tab.icon)
+                    .font(.system(size: 17, weight: .regular))
+                    .foregroundColor(isActive ? drawerAccent : drawerText)
+                    .frame(width: 22)
+
+                Text(tab.label)
+                    .font(.system(size: 16, weight: .regular))
+                    .foregroundColor(isActive ? drawerAccent : drawerText)
+
+                Spacer()
+
                 if isActive {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.warmAccent.opacity(0.12))
-                        .matchedGeometryEffect(id: "activeTab", in: namespace)
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(drawerAccent)
                 }
-
-                HStack(spacing: 14) {
-                    Image(systemName: tab.icon)
-                        .font(.system(size: 18, weight: isActive ? .semibold : .regular))
-                        .foregroundColor(isActive ? .warmAccent : .warmBrown.opacity(0.55))
-                        .frame(width: 24)
-
-                    Text(tab.label)
-                        .font(.system(size: 16, weight: isActive ? .semibold : .regular, design: .rounded))
-                        .foregroundColor(isActive ? .warmAccent : .warmBrown)
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 14)
             }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .background(isPressed ? drawerRowBg : Color.clear)
         }
         .buttonStyle(PlainButtonStyle())
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in if !isPressed { isPressed = true } }
+                .onEnded { _ in isPressed = false }
+        )
     }
 }
 
