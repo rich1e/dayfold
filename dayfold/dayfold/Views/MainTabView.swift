@@ -31,8 +31,8 @@ struct MainTabView: View {
                 }
             }
             .animation(.easeOut(duration: 0.38), value: selectedTab)
+            .ignoresSafeArea(edges: .bottom)
         }
-        .ignoresSafeArea(edges: .bottom)
         .sheet(isPresented: $showingNewEntry) {
             EntryEditorView(context: viewContext)
         }
