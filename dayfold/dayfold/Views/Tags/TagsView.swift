@@ -5,7 +5,6 @@ import CoreData
 struct TagsView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @StateObject private var viewModel: TagManagerViewModel
-    @State private var showingNewTag = false
     @State private var editingTag: Tag?
 
     @FetchRequest(
@@ -27,11 +26,16 @@ struct TagsView: View {
                     emptyState
                 } else {
                     List {
-                        ForEach(tags, id: \.id) { tag in
+                        ForEach(Array(tags.enumerated()), id: \.element.id) { index, tag in
                             TagRow(tag: tag)
                                 .onTapGesture {
                                     editingTag = tag
                                 }
+                                .transition(.paperDrop)
+                                .animation(
+                                    .easeOut(duration: 0.38).delay(Double(min(index, 7)) * 0.07),
+                                    value: tags.count
+                                )
                         }
                         .onDelete { indexSet in
                             deleteTag(at: indexSet)
@@ -49,24 +53,9 @@ struct TagsView: View {
             .navigationTitle("标签管理")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showingNewTag = true
-                    } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .foregroundColor(.warmAccent)
-                            .font(.title2)
-                    }
-                }
-
-                ToolbarItem(placement: .navigationBarTrailing) {
                     EditButton()
                         .foregroundColor(.warmAccent)
                 }
-            }
-        }
-        .sheet(isPresented: $showingNewTag) {
-            TagEditorView { name, color, icon in
-                viewModel.createTag(name: name, color: color, icon: icon)
             }
         }
         .sheet(item: $editingTag) { tag in
@@ -85,18 +74,6 @@ struct TagsView: View {
             Text("还没有标签")
                 .font(.warmHeadline)
                 .foregroundColor(.warmBrown)
-
-            Button {
-                showingNewTag = true
-            } label: {
-                Text("创建第一个标签")
-                    .font(.warmBody)
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 32)
-                    .padding(.vertical, 12)
-                    .background(Color.warmAccent)
-                    .cornerRadius(24)
-            }
         }
     }
 
