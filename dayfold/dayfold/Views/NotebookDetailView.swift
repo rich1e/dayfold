@@ -3,7 +3,7 @@ import SwiftUI
 import CoreData
 
 private enum SheetMode: Identifiable {
-    case photos, calendar
+    case photos, calendar, newEntry
     var id: Int { hashValue }
 }
 
@@ -124,7 +124,7 @@ struct NotebookDetailView: View {
             // 底部 + 按钮
             VStack {
                 Spacer()
-                Button { onNewEntry() } label: {
+                Button { sheetMode = .newEntry } label: {
                     ZStack {
                         Circle()
                             .fill(Color(hex: "3C3C44"))
@@ -140,17 +140,24 @@ struct NotebookDetailView: View {
             }
         }
         .sheet(item: $sheetMode) { mode in
-            ZStack {
-                Color(hex: "2A2A30").ignoresSafeArea()
-                switch mode {
-                case .photos:
+            switch mode {
+            case .photos:
+                ZStack {
+                    Color(hex: "2A2A30").ignoresSafeArea()
                     PhotoWallView(viewModel: timelineVM)
-                case .calendar:
+                }
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+            case .calendar:
+                ZStack {
+                    Color(hex: "2A2A30").ignoresSafeArea()
                     CalendarView(viewModel: timelineVM)
                 }
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+            case .newEntry:
+                EntryEditorView(context: context)
             }
-            .presentationDetents([.large])
-            .presentationDragIndicator(.visible)
         }
     }
 }
