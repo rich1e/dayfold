@@ -3,8 +3,15 @@ import SwiftUI
 import CoreData
 
 private enum SheetMode: Identifiable {
-    case photos, calendar, newEntry
-    var id: Int { hashValue }
+    case photos, calendar, newEntry, entryDetail(Entry)
+    var id: String {
+        switch self {
+        case .photos: return "photos"
+        case .calendar: return "calendar"
+        case .newEntry: return "newEntry"
+        case .entryDetail(let e): return "detail-\(e.objectID)"
+        }
+    }
 }
 
 struct NotebookDetailView: View {
@@ -60,7 +67,7 @@ struct NotebookDetailView: View {
                     Button { sheetMode = .photos } label: {
                         Image(systemName: "photo.on.rectangle")
                             .font(.system(size: 18, weight: .regular))
-                            .foregroundColor(sheetMode == .photos ? Color(hex: "5BC8D8") : Color(hex: "9090A0"))
+                            .foregroundColor({ if case .photos = sheetMode { return Color(hex: "5BC8D8") }; return Color(hex: "9090A0") }())
                             .frame(width: 44, height: 44)
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -68,7 +75,7 @@ struct NotebookDetailView: View {
                     Button { sheetMode = .calendar } label: {
                         Image(systemName: "calendar")
                             .font(.system(size: 18, weight: .regular))
-                            .foregroundColor(sheetMode == .calendar ? Color(hex: "5BC8D8") : Color(hex: "9090A0"))
+                            .foregroundColor({ if case .calendar = sheetMode { return Color(hex: "5BC8D8") }; return Color(hex: "9090A0") }())
                             .frame(width: 44, height: 44)
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -108,11 +115,11 @@ struct NotebookDetailView: View {
                     ScrollView {
                         LazyVStack(spacing: 12) {
                             ForEach(entries) { entry in
-                                NavigationLink(destination: EntryDetailView(entry: entry)) {
                                     EntryCard(entry: entry, viewModel: EntryListViewModel(context: context))
                                         .frame(maxWidth: .infinity)
-                                }
-                                .buttonStyle(PlainButtonStyle())
+                                        .onTapGesture {
+                                            sheetMode = .entryDetail(entry)
+                                        }
                             }
                         }
                         .padding(.horizontal, 16)
@@ -144,7 +151,9 @@ struct NotebookDetailView: View {
             case .photos:
                 ZStack {
                     Color(hex: "2A2A30").ignoresSafeArea()
-                    PhotoWallView(viewModel: timelineVM)
+                    PhotoWallView(viewModel: timelineVM, onSelectEntry: { entry in
+                        sheetMode = .entryDetail(entry)
+                    })
                 }
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
@@ -157,6 +166,8 @@ struct NotebookDetailView: View {
                 .presentationDragIndicator(.visible)
             case .newEntry:
                 EntryEditorView(context: context)
+            case .entryDetail(let entry):
+                EntryDetailView(entry: entry)
             }
         }
     }

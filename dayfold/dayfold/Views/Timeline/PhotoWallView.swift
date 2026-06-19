@@ -4,6 +4,7 @@ import SwiftUI
 struct PhotoWallView: View {
     @ObservedObject var viewModel: TimelineViewModel
     var scrollTarget: UUID?
+    var onSelectEntry: ((Entry) -> Void)?
 
     private var entries: [Entry] { viewModel.entriesWithPhotos }
 
@@ -16,7 +17,7 @@ struct PhotoWallView: View {
                     PhotoWallGrid(
                         entries: entries,
                         onNavigate: { entry in
-                            // 跳转详情由 NavigationLink 处理
+                            onSelectEntry?(entry)
                         }
                     )
                     .padding(2)
@@ -109,7 +110,8 @@ struct PhotoWallGrid: View {
                         PhotoWallCell(
                             entry: item.entry,
                             size: size,
-                            isLarge: item.isLarge
+                            isLarge: item.isLarge,
+                            onTap: onNavigate
                         )
                         .id(item.entry.id)
                     }
@@ -124,12 +126,14 @@ struct PhotoWallCell: View {
     let entry: Entry
     let size: CGSize
     let isLarge: Bool
+    var onTap: (Entry) -> Void = { _ in }
 
     @State private var thumbnail: UIImage?
-    @State private var highlighted = false
 
     var body: some View {
-        NavigationLink(destination: EntryDetailView(entry: entry)) {
+        Button {
+            onTap(entry)
+        } label: {
             ZStack(alignment: .topTrailing) {
                 Group {
                     if let img = thumbnail {
@@ -173,7 +177,6 @@ struct PhotoWallCell: View {
             }
         }
         .buttonStyle(PlainButtonStyle())
-        .scaleEffect(highlighted ? 1.04 : 1.0)
         .contextMenu {
             Button {
                 // 跳转编辑由调用方处理

@@ -8,6 +8,7 @@ private struct NewEntryDate: Identifiable {
 
 struct CalendarView: View {
     @ObservedObject var viewModel: TimelineViewModel
+    @Environment(\.managedObjectContext) private var viewContext
     @State private var newEntryDate: NewEntryDate?
     @State private var dragOffset: CGFloat = 0
 
@@ -69,7 +70,7 @@ struct CalendarView: View {
         .sheet(item: $newEntryDate) { item in
             EntryEditorView(
                 entry: nil,
-                context: CoreDataStack.shared.viewContext,
+                context: viewContext,
                 prefillDate: item.date
             )
         }
