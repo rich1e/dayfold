@@ -361,12 +361,19 @@ private struct SwipeToDeleteRow<Content: View>: View {
         self.content = content()
     }
 
+    // 滑动展开时右侧两角加圆角，与原有首尾圆角合并
+    private var activeCorners: UIRectCorner {
+        var c = corners
+        if offset < 0 { c.formUnion([.topRight, .bottomRight]) }
+        return c
+    }
+
     var body: some View {
         content
             .background(
-                corners == []
+                activeCorners == []
                     ? AnyView(Color(hex: "32323A"))
-                    : AnyView(Color(hex: "32323A").cornerRadius(12, corners: corners))
+                    : AnyView(Color(hex: "32323A").cornerRadius(12, corners: activeCorners))
             )
             // 红色删除按钮：固定在 content 右边缘之外，随 content offset 一起移动
             .overlay(alignment: .trailing) {
