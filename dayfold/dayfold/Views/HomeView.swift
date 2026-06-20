@@ -80,7 +80,6 @@ struct HomeView: View {
             if let nb = currentNotebook {
                 NotebookDetailView(
                     notebook: nb,
-                    context: context,
                     onNewEntry: onNewEntry,
                     isPresented: $showDetail
                 )

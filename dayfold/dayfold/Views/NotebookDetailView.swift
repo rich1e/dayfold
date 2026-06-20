@@ -16,25 +16,23 @@ private enum SheetMode: Identifiable {
 
 struct NotebookDetailView: View {
     let notebook: Notebook
-    let context: NSManagedObjectContext
     var onNewEntry: () -> Void
     @Binding var isPresented: Bool
 
+    @Environment(\.managedObjectContext) private var context
     @StateObject private var timelineVM: TimelineViewModel
-    @FetchRequest private var entries: FetchedResults<Entry>
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \Entry.createdAt, ascending: false)],
+        predicate: NSPredicate(format: "deletedAt == nil"),
+        animation: .default
+    ) private var entries: FetchedResults<Entry>
     @State private var sheetMode: SheetMode?
 
-    init(notebook: Notebook, context: NSManagedObjectContext, onNewEntry: @escaping () -> Void, isPresented: Binding<Bool>) {
+    init(notebook: Notebook, onNewEntry: @escaping () -> Void, isPresented: Binding<Bool>) {
         self.notebook = notebook
-        self.context = context
         self.onNewEntry = onNewEntry
         self._isPresented = isPresented
-        self._timelineVM = StateObject(wrappedValue: TimelineViewModel(context: context))
-        self._entries = FetchRequest(
-            sortDescriptors: [NSSortDescriptor(keyPath: \Entry.createdAt, ascending: false)],
-            predicate: NSPredicate(format: "deletedAt == nil"),
-            animation: .default
-        )
+        self._timelineVM = StateObject(wrappedValue: TimelineViewModel(context: CoreDataStack.shared.viewContext))
     }
 
     var latestDate: String {
@@ -456,7 +454,6 @@ private struct SwipeToDeleteRow<Content: View>: View {
     let nb = Notebook.make(style: .chevronTeal)
     return NotebookDetailView(
         notebook: nb,
-        context: context,
         onNewEntry: {},
         isPresented: .constant(true)
     )
