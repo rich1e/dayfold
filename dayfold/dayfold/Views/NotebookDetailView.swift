@@ -188,6 +188,7 @@ struct NotebookDetailView: View {
                         sheetMode = .entryDetail(entry)
                     })
                 }
+                .environment(\.managedObjectContext, context)
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
             case .calendar:
@@ -195,12 +196,15 @@ struct NotebookDetailView: View {
                     Color(hex: "2A2A30").ignoresSafeArea()
                     CalendarView(viewModel: timelineVM)
                 }
+                .environment(\.managedObjectContext, context)
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
             case .newEntry:
                 EntryEditorView(context: context)
+                    .environment(\.managedObjectContext, context)
             case .entryDetail(let entry):
                 EntryDetailView(entry: entry)
+                    .environment(\.managedObjectContext, context)
             }
         }
     }

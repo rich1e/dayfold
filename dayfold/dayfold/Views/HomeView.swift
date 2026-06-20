@@ -84,6 +84,7 @@ struct HomeView: View {
                     onNewEntry: onNewEntry,
                     isPresented: $showDetail
                 )
+                .environment(\.managedObjectContext, context)
                 .transition(.asymmetric(
                     insertion: .scale(scale: 0.85).combined(with: .opacity),
                     removal: .scale(scale: 0.85).combined(with: .opacity)
