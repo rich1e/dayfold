@@ -99,8 +99,8 @@ class EntryEditorViewModel: ObservableObject {
     }
 
     func save() async -> Bool {
-        // 没有内容时不保存
-        guard !content.isEmpty else { return false }
+        // 标题与正文都为空时不保存
+        guard !title.isEmpty || !content.isEmpty else { return false }
 
         isSaving = true
 

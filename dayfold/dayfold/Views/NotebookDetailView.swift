@@ -116,18 +116,18 @@ struct NotebookDetailView: View {
                             ForEach(groupedEntries, id: \.month) { group in
                                 // 月份标题
                                 Text(group.month)
-                                    .font(.system(size: 13, weight: .semibold))
+                                    .font(.system(size: 15, weight: .semibold))
                                     .foregroundColor(Color(hex: "E07050"))
-                                    .tracking(1)
                                     .padding(.horizontal, 16)
                                     .padding(.top, 20)
                                     .padding(.bottom, 8)
 
-                                // 该月条目卡片
+                                // 该月条目卡片（按日合并）
                                 VStack(spacing: 0) {
-                                    ForEach(Array(group.entries.enumerated()), id: \.element.id) { idx, entry in
+                                    let flat = group.flatRows
+                                    ForEach(Array(flat.enumerated()), id: \.element.entry.id) { idx, row in
                                         let isFirst = idx == 0
-                                        let isLast  = idx == group.entries.count - 1
+                                        let isLast  = idx == flat.count - 1
                                         let rowCorners: UIRectCorner = {
                                             var c: UIRectCorner = []
                                             if isFirst { c.formUnion([.topLeft, .topRight]) }
@@ -136,18 +136,18 @@ struct NotebookDetailView: View {
                                         }()
 
                                         SwipeToDeleteRow(corners: rowCorners) {
-                                            entry.moveToTrash()
+                                            row.entry.moveToTrash()
                                             try? context.save()
                                         } content: {
-                                            TimelineEntryRow(entry: entry)
-                                                .onTapGesture { sheetMode = .entryDetail(entry) }
+                                            TimelineEntryRow(entry: row.entry, showDate: row.showDate)
+                                                .onTapGesture { sheetMode = .entryDetail(row.entry) }
                                         }
                                         .frame(minHeight: 60)
 
                                         if !isLast {
                                             Divider()
                                                 .background(Color(hex: "3A3A42"))
-                                                .padding(.leading, 56)
+                                                .padding(.leading, 60)
                                         }
                                     }
                                 }
@@ -210,16 +210,34 @@ struct NotebookDetailView: View {
 
 // MARK: - 按月分组
 
+fileprivate struct EntryRow {
+    let entry: Entry
+    let showDate: Bool
+}
+
 fileprivate struct EntryGroup {
     let month: String
     let entries: [Entry]
+
+    var flatRows: [EntryRow] {
+        let cal = Calendar.current
+        var rows: [EntryRow] = []
+        var lastDay: DateComponents?
+        for entry in entries {
+            let comps = cal.dateComponents([.year, .month, .day], from: entry.createdAt ?? Date())
+            let showDate = (comps != lastDay)
+            rows.append(EntryRow(entry: entry, showDate: showDate))
+            lastDay = comps
+        }
+        return rows
+    }
 }
 
 extension NotebookDetailView {
     fileprivate var groupedEntries: [EntryGroup] {
         let fmt = DateFormatter()
-        fmt.dateFormat = "MMMM yyyy"
-        fmt.locale = Locale(identifier: "en_US")
+        fmt.locale = Locale(identifier: "zh_CN")
+        fmt.dateFormat = "yyyy年M月"
         var result: [EntryGroup] = []
         var current: (key: String, list: [Entry])?
         for entry in entries {
@@ -227,11 +245,11 @@ extension NotebookDetailView {
             if current?.key == key {
                 current!.list.append(entry)
             } else {
-                if let c = current { result.append(EntryGroup(month: c.key.uppercased(), entries: c.list)) }
+                if let c = current { result.append(EntryGroup(month: c.key, entries: c.list)) }
                 current = (key, [entry])
             }
         }
-        if let c = current { result.append(EntryGroup(month: c.key.uppercased(), entries: c.list)) }
+        if let c = current { result.append(EntryGroup(month: c.key, entries: c.list)) }
         return result
     }
 }
@@ -240,7 +258,17 @@ extension NotebookDetailView {
 
 private struct TimelineEntryRow: View {
     @ObservedObject var entry: Entry
+    let showDate: Bool
     @State private var thumbnails: [UIImage] = []
+
+    private var weekdayString: String {
+        let fmt = DateFormatter()
+        fmt.locale = Locale(identifier: "zh_CN")
+        fmt.dateFormat = "EEE"
+        let s = fmt.string(from: entry.createdAt ?? Date())
+        // "周六" 直接返回；某些 locale 给出 "星期六" 截取后两字
+        return s.hasPrefix("周") ? s : "周" + String(s.suffix(1))
+    }
 
     private var dayString: String {
         let fmt = DateFormatter()
@@ -254,42 +282,52 @@ private struct TimelineEntryRow: View {
         return fmt.string(from: entry.createdAt ?? Date())
     }
 
-    private var subtitle: String {
-        var parts: [String] = [timeString]
-        if let loc = entry.location, !loc.wrappedPlaceName.isEmpty {
-            parts.append(loc.wrappedPlaceName)
-        }
-        if let loc = entry.location, loc.weatherCondition != nil {
-            parts.append("\(Int(loc.weatherTemperature))°C")
-        }
-        return parts.joined(separator: " · ")
+    private var coordinateString: String? {
+        guard let loc = entry.location else { return nil }
+        let lat = loc.latitude
+        let lon = loc.longitude
+        guard lat != 0 || lon != 0 else { return nil }
+        let latDir = lat >= 0 ? "北" : "南"
+        let lonDir = lon >= 0 ? "东" : "西"
+        return String(format: "%.2f°%@, %.2f°%@", abs(lat), latDir, abs(lon), lonDir)
+    }
+
+    private var weatherString: String? {
+        guard let loc = entry.location, loc.weatherCondition != nil else { return nil }
+        let cond = loc.weatherCondition ?? ""
+        return "\(Int(loc.weatherTemperature))°C \(cond)".trimmingCharacters(in: .whitespaces)
     }
 
     var body: some View {
-        HStack(spacing: 12) {
-            // 日期数字
-            Text(dayString)
-                .font(.system(size: 32, weight: .bold))
-                .foregroundColor(Color(hex: "E07050"))
-                .frame(width: 44, alignment: .center)
+        HStack(alignment: .top, spacing: 12) {
+            // 左侧日期列
+            VStack(spacing: 2) {
+                if showDate {
+                    Text(weekdayString)
+                        .font(.system(size: 11, weight: .regular))
+                        .foregroundColor(Color(hex: "9090A0"))
+                    Text(dayString)
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundColor(Color(hex: "E8E8EE"))
+                }
+            }
+            .frame(width: 36, alignment: .center)
+            .padding(.top, showDate ? 0 : 0)
 
             // 文字信息
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 4) {
                 if !entry.wrappedTitle.isEmpty {
                     Text(entry.wrappedTitle)
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.system(size: 16, weight: .regular))
                         .foregroundColor(Color(hex: "E8E8EE"))
-                        .lineLimit(1)
+                        .lineLimit(2)
                 } else {
                     Text(entry.wrappedContent)
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.system(size: 16, weight: .regular))
                         .foregroundColor(Color(hex: "E8E8EE"))
-                        .lineLimit(1)
+                        .lineLimit(2)
                 }
-                Text(subtitle)
-                    .font(.system(size: 12))
-                    .foregroundColor(Color(hex: "7A7A88"))
-                    .lineLimit(1)
+                subtitleView
             }
 
             Spacer(minLength: 4)
@@ -304,6 +342,20 @@ private struct TimelineEntryRow: View {
         .task(id: entry.mediaAssetsArray.map(\.wrappedFilename).joined()) {
             await loadThumbnails()
         }
+    }
+
+    private var subtitleView: some View {
+        let sep = Text(" · ").foregroundColor(Color(hex: "5A5A68"))
+        var line = Text(timeString).foregroundColor(Color(hex: "8A8A98"))
+        if let coord = coordinateString {
+            line = line + sep + Text(coord).foregroundColor(Color(hex: "8A8A98"))
+        }
+        if let w = weatherString {
+            line = line + sep + Text(w).foregroundColor(Color(hex: "8A8A98"))
+        }
+        return line
+            .font(.system(size: 12))
+            .lineLimit(1)
     }
 
     private var thumbnailGrid: some View {
