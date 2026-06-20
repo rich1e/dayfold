@@ -130,20 +130,21 @@ struct NotebookDetailView: View {
                                     ForEach(Array(group.entries.enumerated()), id: \.element.id) { idx, entry in
                                         let isFirst = idx == 0
                                         let isLast  = idx == group.entries.count - 1
+                                        let rowCorners: UIRectCorner = {
+                                            var c: UIRectCorner = []
+                                            if isFirst { c.formUnion([.topLeft, .topRight]) }
+                                            if isLast  { c.formUnion([.bottomLeft, .bottomRight]) }
+                                            return c
+                                        }()
 
-                                        SwipeToDeleteRow {
+                                        SwipeToDeleteRow(corners: rowCorners) {
                                             entry.moveToTrash()
                                             try? context.save()
                                         } content: {
                                             TimelineEntryRow(entry: entry)
                                                 .onTapGesture { sheetMode = .entryDetail(entry) }
                                         }
-                                        .cornerRadius(12, corners: {
-                                            var c: UIRectCorner = []
-                                            if isFirst { c.formUnion([.topLeft, .topRight]) }
-                                            if isLast  { c.formUnion([.bottomLeft, .bottomRight]) }
-                                            return c
-                                        }())
+                                        .frame(minHeight: 60)
 
                                         if !isLast {
                                             Divider()
@@ -347,27 +348,26 @@ private struct TimelineEntryRow: View {
 private struct SwipeToDeleteRow<Content: View>: View {
     let content: Content
     let onDelete: () -> Void
+    let corners: UIRectCorner
 
     @State private var offset: CGFloat = 0
-    @State private var confirmed = false
 
     private let deleteWidth: CGFloat = 80
-    private let threshold: CGFloat = 60
+    private let threshold: CGFloat = 50
 
-    init(onDelete: @escaping () -> Void, @ViewBuilder content: () -> Content) {
+    init(corners: UIRectCorner = [], onDelete: @escaping () -> Void, @ViewBuilder content: () -> Content) {
+        self.corners = corners
         self.onDelete = onDelete
         self.content = content()
     }
 
     var body: some View {
-        ZStack(alignment: .trailing) {
-            // 红色删除背景
-            Color(hex: "C03828")
-                .cornerRadius(0)
-                .overlay(
-                    Button {
-                        triggerDelete()
-                    } label: {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                // 红色删除区域：固定在右边缘外，内容左移时露出
+                HStack(spacing: 0) {
+                    Spacer(minLength: 0)
+                    Button { triggerDelete() } label: {
                         VStack(spacing: 4) {
                             Image(systemName: "trash.fill")
                                 .font(.system(size: 16, weight: .medium))
@@ -376,61 +376,66 @@ private struct SwipeToDeleteRow<Content: View>: View {
                         }
                         .foregroundColor(.white)
                         .frame(width: deleteWidth)
+                        .frame(maxHeight: .infinity)
+                        .background(Color(hex: "C03828"))
                     }
-                    .buttonStyle(PlainButtonStyle()),
-                    alignment: .trailing
-                )
-                .frame(width: max(0, -offset))
+                    .buttonStyle(PlainButtonStyle())
+                }
+                .frame(width: geo.size.width + deleteWidth)
+                .offset(x: -deleteWidth)
 
-            // 内容行
-            content
-                .offset(x: offset)
-                .background(Color(hex: "32323A"))
-                .gesture(
-                    DragGesture(minimumDistance: 10, coordinateSpace: .local)
-                        .onChanged { value in
-                            // 只允许向左滑
-                            guard value.translation.width < 0 else {
-                                if offset < 0 {
-                                    withAnimation(.interactiveSpring()) { offset = 0 }
-                                }
-                                return
+                // 内容行
+                content
+                    .frame(width: geo.size.width)
+                    .background(
+                        corners == []
+                            ? AnyView(Color(hex: "32323A"))
+                            : AnyView(Color(hex: "32323A").cornerRadius(12, corners: corners))
+                    )
+                    .offset(x: offset)
+            }
+            .frame(width: geo.size.width, height: geo.size.height)
+            .clipped()
+        }
+        .contentShape(Rectangle())
+        .simultaneousGesture(
+                DragGesture(minimumDistance: 10, coordinateSpace: .local)
+                    .onChanged { value in
+                        guard value.translation.width < 0 else {
+                            if offset < 0 {
+                                withAnimation(.interactiveSpring()) { offset = 0 }
                             }
-                            let raw = value.translation.width
-                            // 超过阈值后有阻力
-                            if -raw > deleteWidth {
-                                offset = -(deleteWidth + (-raw - deleteWidth) * 0.2)
-                            } else {
-                                offset = raw
-                            }
+                            return
                         }
-                        .onEnded { value in
-                            let velocity = value.predictedEndTranslation.width - value.translation.width
-                            if -offset > threshold || velocity < -200 {
-                                // 滑过阈值或快速滑动 → 展开删除按钮
-                                if -offset > deleteWidth * 1.6 || velocity < -400 {
-                                    // 滑到底 → 直接删除
-                                    triggerDelete()
-                                } else {
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                        offset = -deleteWidth
-                                    }
-                                }
+                        let raw = value.translation.width
+                        if -raw > deleteWidth {
+                            offset = -(deleteWidth + (-raw - deleteWidth) * 0.2)
+                        } else {
+                            offset = raw
+                        }
+                    }
+                    .onEnded { value in
+                        let velocity = value.predictedEndTranslation.width - value.translation.width
+                        if -offset > threshold || velocity < -200 {
+                            if -offset > deleteWidth * 1.6 || velocity < -400 {
+                                triggerDelete()
                             } else {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                    offset = 0
+                                    offset = -deleteWidth
                                 }
                             }
+                        } else {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                offset = 0
+                            }
                         }
-                )
-        }
-        .clipped()
-        .contentShape(Rectangle())
-        .onTapGesture {
-            if offset < 0 {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { offset = 0 }
+                    }
+            )
+            .onTapGesture {
+                if offset < 0 {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { offset = 0 }
+                }
             }
-        }
     }
 
     private func triggerDelete() {
