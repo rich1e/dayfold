@@ -127,8 +127,13 @@ struct NotebookDetailView: View {
                                 // 该月条目卡片
                                 VStack(spacing: 0) {
                                     ForEach(Array(group.entries.enumerated()), id: \.element.id) { idx, entry in
-                                        TimelineEntryRow(entry: entry)
-                                            .onTapGesture { sheetMode = .entryDetail(entry) }
+                                        SwipeToDeleteRow {
+                                            entry.moveToTrash()
+                                            try? context.save()
+                                        } content: {
+                                            TimelineEntryRow(entry: entry)
+                                                .onTapGesture { sheetMode = .entryDetail(entry) }
+                                        }
 
                                         if idx < group.entries.count - 1 {
                                             Divider()
@@ -326,6 +331,107 @@ private struct TimelineEntryRow: View {
             }
         }
         thumbnails = imgs
+    }
+}
+
+// MARK: - 左滑删除容器
+
+private struct SwipeToDeleteRow<Content: View>: View {
+    let content: Content
+    let onDelete: () -> Void
+
+    @State private var offset: CGFloat = 0
+    @State private var confirmed = false
+
+    private let deleteWidth: CGFloat = 80
+    private let threshold: CGFloat = 60
+
+    init(onDelete: @escaping () -> Void, @ViewBuilder content: () -> Content) {
+        self.onDelete = onDelete
+        self.content = content()
+    }
+
+    var body: some View {
+        ZStack(alignment: .trailing) {
+            // 红色删除背景
+            Color(hex: "C03828")
+                .cornerRadius(0)
+                .overlay(
+                    Button {
+                        triggerDelete()
+                    } label: {
+                        VStack(spacing: 4) {
+                            Image(systemName: "trash.fill")
+                                .font(.system(size: 16, weight: .medium))
+                            Text("删除")
+                                .font(.system(size: 12, weight: .medium))
+                        }
+                        .foregroundColor(.white)
+                        .frame(width: deleteWidth)
+                    }
+                    .buttonStyle(PlainButtonStyle()),
+                    alignment: .trailing
+                )
+                .frame(width: max(0, -offset))
+
+            // 内容行
+            content
+                .offset(x: offset)
+                .background(Color(hex: "32323A"))
+                .gesture(
+                    DragGesture(minimumDistance: 10, coordinateSpace: .local)
+                        .onChanged { value in
+                            // 只允许向左滑
+                            guard value.translation.width < 0 else {
+                                if offset < 0 {
+                                    withAnimation(.interactiveSpring()) { offset = 0 }
+                                }
+                                return
+                            }
+                            let raw = value.translation.width
+                            // 超过阈值后有阻力
+                            if -raw > deleteWidth {
+                                offset = -(deleteWidth + (-raw - deleteWidth) * 0.2)
+                            } else {
+                                offset = raw
+                            }
+                        }
+                        .onEnded { value in
+                            let velocity = value.predictedEndTranslation.width - value.translation.width
+                            if -offset > threshold || velocity < -200 {
+                                // 滑过阈值或快速滑动 → 展开删除按钮
+                                if -offset > deleteWidth * 1.6 || velocity < -400 {
+                                    // 滑到底 → 直接删除
+                                    triggerDelete()
+                                } else {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                        offset = -deleteWidth
+                                    }
+                                }
+                            } else {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                    offset = 0
+                                }
+                            }
+                        }
+                )
+        }
+        .clipped()
+        .contentShape(Rectangle())
+        .onTapGesture {
+            if offset < 0 {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { offset = 0 }
+            }
+        }
+    }
+
+    private func triggerDelete() {
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.85)) {
+            offset = -UIScreen.main.bounds.width
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            onDelete()
+        }
     }
 }
 
