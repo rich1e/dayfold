@@ -30,6 +30,20 @@ extension Entry {
         set { isFavorite = newValue }
     }
 
+    var isInTrash: Bool { deletedAt != nil }
+
+    func moveToTrash() {
+        deletedAt = Date()
+        modifiedAt = Date()
+        needsSync = true
+    }
+
+    func restore() {
+        deletedAt = nil
+        modifiedAt = Date()
+        needsSync = true
+    }
+
     static func create(in context: NSManagedObjectContext) -> Entry {
         let entry = Entry(context: context)
         entry.id = UUID()

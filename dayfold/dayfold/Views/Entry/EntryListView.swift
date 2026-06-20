@@ -7,6 +7,7 @@ struct EntryListView: View {
     @StateObject private var viewModel: EntryListViewModel
     @FetchRequest(
         sortDescriptors: [SortDescriptor(\.createdAt, order: .reverse)],
+        predicate: NSPredicate(format: "deletedAt == nil"),
         animation: .default
     )
     private var entries: FetchedResults<Entry>

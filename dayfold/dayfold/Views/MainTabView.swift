@@ -46,7 +46,7 @@ struct MainTabView: View {
                             .transition(.paperDrop)
                     }
                     if selectedTab == .trash {
-                        PlaceholderView(icon: "trash", title: "回收箱", subtitle: "即将推出")
+                        TrashView()
                             .transition(.paperDrop)
                     }
                     if selectedTab == .stats {

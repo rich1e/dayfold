@@ -15,26 +15,20 @@ class EntryListViewModel: ObservableObject {
     }
 
     func deleteEntry(_ entry: Entry) {
-        // 删除关联的媒体文件
+        entry.moveToTrash()
+        try? CoreDataStack.shared.save()
+    }
+
+    func permanentlyDelete(_ entry: Entry, context: NSManagedObjectContext) {
         let assetsToDelete = entry.mediaAssetsArray
         for asset in assetsToDelete {
             if let filename = asset.filename {
-                Task {
-                    await MediaService.shared.deleteImage(filename: filename)
-                }
+                Task { await MediaService.shared.deleteImage(filename: filename) }
             }
-            viewContext.delete(asset)
+            context.delete(asset)
         }
-
-        // 删除位置信息
-        if let location = entry.location {
-            viewContext.delete(location)
-        }
-
-        // 删除条目
-        viewContext.delete(entry)
-
-        // 保存
+        if let location = entry.location { context.delete(location) }
+        context.delete(entry)
         try? CoreDataStack.shared.save()
     }
 
@@ -46,7 +40,7 @@ class EntryListViewModel: ObservableObject {
     }
 
     func filterPredicate() -> NSPredicate? {
-        var predicates: [NSPredicate] = []
+        var predicates: [NSPredicate] = [NSPredicate(format: "deletedAt == nil")]
 
         // 搜索过滤
         if !searchText.isEmpty {
