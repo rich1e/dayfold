@@ -362,42 +362,33 @@ private struct SwipeToDeleteRow<Content: View>: View {
     }
 
     var body: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .leading) {
-                // 红色删除区域：固定在右边缘外，内容左移时露出
-                HStack(spacing: 0) {
-                    Spacer(minLength: 0)
-                    Button { triggerDelete() } label: {
-                        VStack(spacing: 4) {
-                            Image(systemName: "trash.fill")
-                                .font(.system(size: 16, weight: .medium))
-                            Text("删除")
-                                .font(.system(size: 12, weight: .medium))
-                        }
-                        .foregroundColor(.white)
-                        .frame(width: deleteWidth)
-                        .frame(maxHeight: .infinity)
-                        .background(Color(hex: "C03828"))
+        content
+            .background(
+                corners == []
+                    ? AnyView(Color(hex: "32323A"))
+                    : AnyView(Color(hex: "32323A").cornerRadius(12, corners: corners))
+            )
+            // 红色删除按钮：固定在 content 右边缘之外，随 content offset 一起移动
+            .overlay(alignment: .trailing) {
+                Button { triggerDelete() } label: {
+                    VStack(spacing: 4) {
+                        Image(systemName: "trash.fill")
+                            .font(.system(size: 16, weight: .medium))
+                        Text("删除")
+                            .font(.system(size: 12, weight: .medium))
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    .foregroundColor(.white)
+                    .frame(width: deleteWidth)
+                    .frame(maxHeight: .infinity)
+                    .background(Color(hex: "C03828"))
                 }
-                .frame(width: geo.size.width + deleteWidth)
-                .offset(x: -deleteWidth)
-
-                // 内容行
-                content
-                    .frame(width: geo.size.width)
-                    .background(
-                        corners == []
-                            ? AnyView(Color(hex: "32323A"))
-                            : AnyView(Color(hex: "32323A").cornerRadius(12, corners: corners))
-                    )
-                    .offset(x: offset)
+                .buttonStyle(PlainButtonStyle())
+                // 初始完全在右边缘外（不可见），内容左移时才露出
+                .offset(x: deleteWidth)
             }
-            .frame(width: geo.size.width, height: geo.size.height)
+            .offset(x: offset)
             .clipped()
-        }
-        .contentShape(Rectangle())
+            .contentShape(Rectangle())
         .simultaneousGesture(
                 DragGesture(minimumDistance: 10, coordinateSpace: .local)
                     .onChanged { value in
