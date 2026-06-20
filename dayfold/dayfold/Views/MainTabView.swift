@@ -45,6 +45,10 @@ struct MainTabView: View {
                         PlaceholderView(icon: "map", title: "地图", subtitle: "即将推出")
                             .transition(.paperDrop)
                     }
+                    if selectedTab == .trash {
+                        PlaceholderView(icon: "trash", title: "回收箱", subtitle: "即将推出")
+                            .transition(.paperDrop)
+                    }
                     if selectedTab == .stats {
                         PlaceholderView(icon: "chart.bar", title: "数据统计", subtitle: "即将推出")
                             .transition(.paperDrop)

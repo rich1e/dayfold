@@ -3,13 +3,14 @@ import SwiftUI
 
 enum SidebarTab: String, CaseIterable, Hashable {
     case list, photos, map
-    case stats, settings
+    case trash, stats, settings
 
     var icon: String {
         switch self {
         case .list:     return "book.closed"
         case .photos:   return "photo.on.rectangle"
         case .map:      return "map"
+        case .trash:    return "trash"
         case .stats:    return "chart.bar"
         case .settings: return "gearshape"
         }
@@ -20,6 +21,7 @@ enum SidebarTab: String, CaseIterable, Hashable {
         case .list:     return "全部日记"
         case .photos:   return "相册"
         case .map:      return "地图"
+        case .trash:    return "回收箱"
         case .stats:    return "数据统计"
         case .settings: return "设置"
         }
@@ -34,7 +36,7 @@ private let drawerText    = Color(red: 0.92, green: 0.92, blue: 0.92)
 private let drawerGroupLabel = Color(hex: "5BC8D8")
 
 private let group1: [SidebarTab] = [.list, .photos, .map]
-private let group2: [SidebarTab] = [.stats, .settings]
+private let group2: [SidebarTab] = [.trash, .stats, .settings]
 
 struct DrawerView: View {
     @Binding var selectedTab: SidebarTab
