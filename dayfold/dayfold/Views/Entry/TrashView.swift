@@ -4,6 +4,7 @@ import CoreData
 
 struct TrashView: View {
     @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.dismiss) private var dismiss
 
     @FetchRequest(
         sortDescriptors: [SortDescriptor(\.deletedAt, order: .reverse)],
@@ -41,6 +42,7 @@ struct TrashView: View {
 
     private var topBar: some View {
         HStack {
+            // 全部删除
             Button {
                 showingClearConfirm = true
             } label: {
@@ -63,11 +65,24 @@ struct TrashView: View {
 
             Spacer()
 
-            // 占位，保持标题居中
-            Color.clear.frame(width: 80, height: 36)
+            // 关闭按钮
+            Button {
+                dismiss()
+            } label: {
+                ZStack {
+                    Circle()
+                        .fill(Color(red: 0.22, green: 0.22, blue: 0.24))
+                        .frame(width: 32, height: 32)
+                    Image(systemName: "xmark")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.68))
+                }
+            }
+            .buttonStyle(PlainButtonStyle())
+            .frame(width: 44, height: 44)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
         .background(Color(red: 0.10, green: 0.10, blue: 0.10))
     }
 

@@ -5,6 +5,7 @@ struct MainTabView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @State private var selectedTab: SidebarTab = .list
     @State private var showingNewEntry = false
+    @State private var showingTrash = false
     @State private var drawerOpen = false
     @State private var homeListMode = false
 
@@ -43,10 +44,6 @@ struct MainTabView: View {
                     }
                     if selectedTab == .map {
                         PlaceholderView(icon: "map", title: "地图", subtitle: "即将推出")
-                            .transition(.paperDrop)
-                    }
-                    if selectedTab == .trash {
-                        TrashView()
                             .transition(.paperDrop)
                     }
                     if selectedTab == .stats {
@@ -126,6 +123,17 @@ struct MainTabView: View {
         .ignoresSafeArea(edges: .bottom)
         .sheet(isPresented: $showingNewEntry) {
             EntryEditorView(context: viewContext)
+        }
+        .sheet(isPresented: $showingTrash, onDismiss: {
+            // 关闭后恢复到 list，避免 drawer 仍高亮 trash
+            if selectedTab == .trash { selectedTab = .list }
+        }) {
+            TrashView()
+        }
+        .onChange(of: selectedTab) { tab in
+            if tab == .trash {
+                showingTrash = true
+            }
         }
     }
 }
