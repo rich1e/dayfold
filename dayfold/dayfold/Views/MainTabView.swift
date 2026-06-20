@@ -37,12 +37,20 @@ struct MainTabView: View {
                         )
                         .transition(.paperDrop)
                     }
-                    if selectedTab == .tags {
-                        TagsView(context: viewContext)
+                    if selectedTab == .photos {
+                        EntryListView(context: viewContext)
                             .transition(.paperDrop)
                     }
-                    if selectedTab == .timeline {
-                        EntryListView(context: viewContext)
+                    if selectedTab == .map {
+                        PlaceholderView(icon: "map", title: "地图", subtitle: "即将推出")
+                            .transition(.paperDrop)
+                    }
+                    if selectedTab == .stats {
+                        PlaceholderView(icon: "chart.bar", title: "数据统计", subtitle: "即将推出")
+                            .transition(.paperDrop)
+                    }
+                    if selectedTab == .settings {
+                        PlaceholderView(icon: "gearshape", title: "设置", subtitle: "即将推出")
                             .transition(.paperDrop)
                     }
                 }
@@ -115,6 +123,28 @@ struct MainTabView: View {
         .sheet(isPresented: $showingNewEntry) {
             EntryEditorView(context: viewContext)
         }
+    }
+}
+
+private struct PlaceholderView: View {
+    let icon: String
+    let title: String
+    let subtitle: String
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(systemName: icon)
+                .font(.system(size: 56))
+                .foregroundColor(Color(hex: "4A4A58"))
+            Text(title)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundColor(Color(hex: "9090A0"))
+            Text(subtitle)
+                .font(.system(size: 14))
+                .foregroundColor(Color(hex: "6A6A78"))
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.warmPaper.ignoresSafeArea())
     }
 }
 

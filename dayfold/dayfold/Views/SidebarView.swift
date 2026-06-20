@@ -2,33 +2,39 @@
 import SwiftUI
 
 enum SidebarTab: String, CaseIterable, Hashable {
-    case timeline, list, tags
+    case list, photos, map
+    case stats, settings
 
     var icon: String {
         switch self {
-        case .timeline: return "clock"
         case .list:     return "book.closed"
-        case .tags:     return "tag"
+        case .photos:   return "photo.on.rectangle"
+        case .map:      return "map"
+        case .stats:    return "chart.bar"
+        case .settings: return "gearshape"
         }
     }
 
     var label: String {
         switch self {
-        case .timeline: return "时间轴"
         case .list:     return "全部日记"
-        case .tags:     return "标签"
+        case .photos:   return "相册"
+        case .map:      return "地图"
+        case .stats:    return "数据统计"
+        case .settings: return "设置"
         }
     }
-
-    // 在抽屉中显示的项（隐藏时间轴，主页封面替代）
-    static var drawerCases: [SidebarTab] { [.list, .tags] }
 }
 
-private let drawerBg = Color(red: 0.18, green: 0.18, blue: 0.20)
-private let drawerRowBg = Color(red: 0.22, green: 0.22, blue: 0.24)
+private let drawerBg      = Color(red: 0.18, green: 0.18, blue: 0.20)
+private let drawerRowBg   = Color(red: 0.22, green: 0.22, blue: 0.24)
 private let drawerDivider = Color(red: 0.28, green: 0.28, blue: 0.30)
-private let drawerAccent = Color(red: 0.95, green: 0.45, blue: 0.35)
-private let drawerText = Color(red: 0.92, green: 0.92, blue: 0.92)
+private let drawerAccent  = Color(red: 0.95, green: 0.45, blue: 0.35)
+private let drawerText    = Color(red: 0.92, green: 0.92, blue: 0.92)
+private let drawerGroupLabel = Color(hex: "5BC8D8")
+
+private let group1: [SidebarTab] = [.list, .photos, .map]
+private let group2: [SidebarTab] = [.stats, .settings]
 
 struct DrawerView: View {
     @Binding var selectedTab: SidebarTab
@@ -39,18 +45,54 @@ struct DrawerView: View {
             // 顶部标题
             HStack {
                 Text("DAYFOLD")
-                    .font(.system(size: 22, weight: .bold, design: .default))
+                    .font(.system(size: 22, weight: .bold))
                     .foregroundColor(drawerAccent)
                     .tracking(2)
                 Spacer()
             }
             .padding(.horizontal, 20)
             .padding(.top, 60)
-            .padding(.bottom, 20)
+            .padding(.bottom, 24)
 
-            // 导航列表
+            // 第一组
+            DrawerGroup(title: "日记", tabs: group1, selectedTab: $selectedTab, isOpen: $isOpen)
+
+            // 组间间距
+            Rectangle()
+                .fill(drawerDivider)
+                .frame(height: 1)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+
+            // 第二组
+            DrawerGroup(title: "更多", tabs: group2, selectedTab: $selectedTab, isOpen: $isOpen)
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(drawerBg.ignoresSafeArea())
+    }
+}
+
+private struct DrawerGroup: View {
+    let title: String
+    let tabs: [SidebarTab]
+    @Binding var selectedTab: SidebarTab
+    @Binding var isOpen: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // 组标题
+            Text(title.uppercased())
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(drawerGroupLabel)
+                .tracking(1.5)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 6)
+
+            // 行列表
             VStack(spacing: 0) {
-                ForEach(SidebarTab.drawerCases, id: \.self) { tab in
+                ForEach(tabs, id: \.self) { tab in
                     DrawerRow(
                         tab: tab,
                         isActive: selectedTab == tab
@@ -61,17 +103,14 @@ struct DrawerView: View {
                         }
                     }
 
-                    if tab != SidebarTab.drawerCases.last {
+                    if tab != tabs.last {
                         Divider()
                             .background(drawerDivider)
+                            .padding(.leading, 58)
                     }
                 }
             }
-
-            Spacer()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(drawerBg.ignoresSafeArea())
     }
 }
 
@@ -96,14 +135,12 @@ private struct DrawerRow: View {
 
                 Spacer()
 
-                if isActive {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(drawerAccent)
-                }
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundColor(isActive ? drawerAccent : drawerDivider)
             }
             .padding(.horizontal, 20)
-            .padding(.vertical, 16)
+            .padding(.vertical, 15)
             .background(isPressed ? drawerRowBg : Color.clear)
         }
         .buttonStyle(PlainButtonStyle())
@@ -116,6 +153,6 @@ private struct DrawerRow: View {
 }
 
 #Preview {
-    DrawerView(selectedTab: .constant(.timeline), isOpen: .constant(true))
+    DrawerView(selectedTab: .constant(.list), isOpen: .constant(true))
         .frame(width: 300)
 }
