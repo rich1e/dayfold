@@ -56,7 +56,7 @@ struct EntryEditorView: View {
 
             Spacer()
 
-            // 完毕
+            // 完成
             Button {
                 saveAndDismiss()
             } label: {
@@ -66,13 +66,13 @@ struct EntryEditorView: View {
                         .scaleEffect(0.8)
                         .frame(width: 44, height: 32)
                 } else {
-                    Text("完毕")
+                    Text("完成")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(accentCyan)
                         .frame(height: 32)
                 }
             }
-            .disabled(viewModel.isSaving || viewModel.content.isEmpty)
+            .disabled(viewModel.isSaving)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -239,8 +239,8 @@ struct EntryEditorView: View {
 
     private func saveAndDismiss() {
         Task {
-            let ok = await viewModel.save()
-            if ok { dismiss() } else { showingSaveError = true }
+            _ = await viewModel.save()
+            dismiss()
         }
     }
 }
