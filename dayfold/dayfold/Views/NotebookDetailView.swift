@@ -32,6 +32,7 @@ struct NotebookDetailView: View {
         self._timelineVM = StateObject(wrappedValue: TimelineViewModel(context: context))
         self._entries = FetchRequest(
             sortDescriptors: [NSSortDescriptor(keyPath: \Entry.createdAt, ascending: false)],
+            predicate: NSPredicate(format: "deletedAt == nil"),
             animation: .default
         )
     }
@@ -127,6 +128,9 @@ struct NotebookDetailView: View {
                                 // 该月条目卡片
                                 VStack(spacing: 0) {
                                     ForEach(Array(group.entries.enumerated()), id: \.element.id) { idx, entry in
+                                        let isFirst = idx == 0
+                                        let isLast  = idx == group.entries.count - 1
+
                                         SwipeToDeleteRow {
                                             entry.moveToTrash()
                                             try? context.save()
@@ -134,16 +138,20 @@ struct NotebookDetailView: View {
                                             TimelineEntryRow(entry: entry)
                                                 .onTapGesture { sheetMode = .entryDetail(entry) }
                                         }
+                                        .cornerRadius(12, corners: {
+                                            var c: UIRectCorner = []
+                                            if isFirst { c.formUnion([.topLeft, .topRight]) }
+                                            if isLast  { c.formUnion([.bottomLeft, .bottomRight]) }
+                                            return c
+                                        }())
 
-                                        if idx < group.entries.count - 1 {
+                                        if !isLast {
                                             Divider()
                                                 .background(Color(hex: "3A3A42"))
                                                 .padding(.leading, 56)
                                         }
                                     }
                                 }
-                                .background(Color(hex: "32323A"))
-                                .cornerRadius(12)
                                 .padding(.horizontal, 16)
                             }
                         }
