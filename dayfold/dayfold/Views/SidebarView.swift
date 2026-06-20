@@ -57,17 +57,18 @@ struct DrawerView: View {
             // 第一组
             DrawerGroup(title: "日记", tabs: group1, selectedTab: $selectedTab, isOpen: $isOpen)
 
-            // 组间间距
+            Spacer()
+
+            // 底部分隔线
             Rectangle()
                 .fill(drawerDivider)
                 .frame(height: 1)
                 .padding(.horizontal, 20)
-                .padding(.vertical, 12)
+                .padding(.bottom, 12)
 
-            // 第二组
+            // 第二组（固定底部）
             DrawerGroup(title: "更多", tabs: group2, selectedTab: $selectedTab, isOpen: $isOpen)
-
-            Spacer()
+                .padding(.bottom, 32)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(drawerBg.ignoresSafeArea())
