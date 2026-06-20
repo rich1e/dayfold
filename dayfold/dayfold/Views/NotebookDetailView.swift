@@ -352,7 +352,7 @@ private struct SwipeToDeleteRow<Content: View>: View {
 
     @State private var offset: CGFloat = 0
 
-    private let deleteWidth: CGFloat = 80
+    private let deleteWidth: CGFloat = 92
     private let threshold: CGFloat = 50
 
     init(corners: UIRectCorner = [], onDelete: @escaping () -> Void, @ViewBuilder content: () -> Content) {
@@ -378,12 +378,13 @@ private struct SwipeToDeleteRow<Content: View>: View {
                             .font(.system(size: 12, weight: .medium))
                     }
                     .foregroundColor(.white)
-                    .frame(width: deleteWidth)
+                    .frame(width: 72)
                     .frame(maxHeight: .infinity)
                     .background(Color(hex: "C03828"))
+                    .cornerRadius(10)
                 }
                 .buttonStyle(PlainButtonStyle())
-                // 初始完全在右边缘外（不可见），内容左移时才露出
+                // 初始完全在右边缘外，留 20px 间距后才是按钮
                 .offset(x: deleteWidth)
             }
             .offset(x: offset)
