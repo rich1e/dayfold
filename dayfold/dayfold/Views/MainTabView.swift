@@ -43,7 +43,7 @@ struct MainTabView: View {
                             .transition(.paperDrop)
                     }
                     if selectedTab == .map {
-                        PlaceholderView(icon: "map", title: "地图", subtitle: "即将推出")
+                        MapView(showingNewEntry: $showingNewEntry)
                             .transition(.paperDrop)
                     }
                     if selectedTab == .stats {
