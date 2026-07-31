@@ -2,35 +2,6 @@
 import SwiftUI
 import CoreData
 
-// MARK: - 笔记本数据模型
-
-struct Notebook: Identifiable {
-    let id: UUID
-    var name: String
-    var coverStyle: CoverStyle
-    var createdAt: Date
-
-    enum CoverStyle: Int, CaseIterable {
-        case chevronTeal, triangleRed, stripesBlack, leatherBrown, diagonalGray
-
-        var spineColor: Color {
-            switch self {
-            case .chevronTeal:   return Color(hex: "8A8A90")
-            case .triangleRed:   return Color(hex: "C04030")
-            case .stripesBlack:  return Color(hex: "303035")
-            case .leatherBrown:  return Color(hex: "2C1A0A")
-            case .diagonalGray:  return Color(hex: "606065")
-            }
-        }
-    }
-
-    static func make(style: CoverStyle? = nil) -> Notebook {
-        let styles = CoverStyle.allCases
-        let s = style ?? styles[Int.random(in: 0..<styles.count)]
-        return Notebook(id: UUID(), name: "UNTITLED", coverStyle: s, createdAt: Date())
-    }
-}
-
 // MARK: - HomeView
 
 struct HomeView: View {
@@ -38,11 +9,16 @@ struct HomeView: View {
     @Binding var isListMode: Bool
     var onNewEntry: () -> Void
 
-    @State private var notebooks: [Notebook] = [Notebook.make(style: .chevronTeal)]
     @State private var currentIndex: Int = 0
     @State private var confirmDelete = false
     @State private var showDetail = false
     @Namespace private var coverNamespace
+
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \Notebook.sortOrder, ascending: true),
+                          NSSortDescriptor(keyPath: \Notebook.createdAt, ascending: true)],
+        animation: .default
+    ) private var notebooks: FetchedResults<Notebook>
 
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \Entry.createdAt, ascending: false)],
@@ -98,7 +74,7 @@ struct HomeView: View {
         VStack(spacing: 0) {
             // 标题区
             VStack(spacing: 6) {
-                Text(currentNotebook?.name ?? "DAYFOLD")
+                Text(currentNotebook?.wrappedName ?? "DAYFOLD")
                     .font(.system(size: 26, weight: .black))
                     .foregroundColor(Color(hex: "D4A574"))
                     .tracking(3)
@@ -118,7 +94,7 @@ struct HomeView: View {
                 emptyState
             } else {
                 TabView(selection: $currentIndex) {
-                    ForEach(Array(notebooks.enumerated()), id: \.element.id) { idx, nb in
+                    ForEach(Array(notebooks.enumerated()), id: \.element.objectID) { idx, nb in
                         NotebookCoverView(notebook: nb)
                             .frame(width: 240, height: 340)
                             .shadow(color: .black.opacity(0.55), radius: 24, x: 0, y: 16)
@@ -188,7 +164,7 @@ struct HomeView: View {
             } else {
                 ScrollView {
                     VStack(spacing: 0) {
-                        ForEach(Array(notebooks.enumerated()), id: \.element.id) { idx, nb in
+                        ForEach(Array(notebooks.enumerated()), id: \.element.objectID) { idx, nb in
                             NotebookListRow(notebook: nb, isSelected: idx == currentIndex) {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                                     currentIndex = idx
@@ -234,17 +210,20 @@ struct HomeView: View {
     // MARK: - 操作
 
     private func addNotebook() {
-        let styles = Notebook.CoverStyle.allCases
-        let usedStyles = notebooks.map(\.coverStyle.rawValue)
+        let styles = NotebookCoverStyle.allCases
+        let usedStyles = notebooks.map { Int($0.coverStyleRaw) }
         let nextStyle = styles.first(where: { !usedStyles.contains($0.rawValue) }) ?? styles[notebooks.count % styles.count]
-        let nb = Notebook.make(style: nextStyle)
-        notebooks.append(nb)
+        let nb = Notebook.create(name: "UNTITLED", style: nextStyle, in: context)
+        nb.sortOrder = Int32(notebooks.count)
+        try? CoreDataStack.shared.save()
         currentIndex = notebooks.count - 1
     }
 
     private func deleteCurrentNotebook() {
         guard notebooks.indices.contains(currentIndex) else { return }
-        notebooks.remove(at: currentIndex)
+        let nb = notebooks[currentIndex]
+        nb.deleteWithEntriesToTrash(in: context)
+        try? CoreDataStack.shared.save()
         if currentIndex >= notebooks.count {
             currentIndex = max(0, notebooks.count - 1)
         }
@@ -254,7 +233,7 @@ struct HomeView: View {
 // MARK: - 笔记本封面视图
 
 struct NotebookCoverView: View {
-    let notebook: Notebook
+    @ObservedObject var notebook: Notebook
 
     var body: some View {
         GeometryReader { geo in
@@ -334,7 +313,7 @@ struct NotebookCoverView: View {
 // MARK: - 封面图案
 
 private struct CoverPatternView: View {
-    let style: Notebook.CoverStyle
+    let style: NotebookCoverStyle
 
     var body: some View {
         switch style {
@@ -536,7 +515,7 @@ private struct RoundedCornerShape: Shape {
 // MARK: - 笔记本列表行
 
 struct NotebookListRow: View {
-    let notebook: Notebook
+    @ObservedObject var notebook: Notebook
     let isSelected: Bool
     let action: () -> Void
     @State private var isPressed = false
@@ -561,7 +540,7 @@ struct NotebookListRow: View {
 
                 // 文字
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(notebook.name)
+                    Text(notebook.wrappedName)
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(isSelected ? Color(hex: "E05A3A") : Color(hex: "E8E8EC"))
                     Text("0 PHOTOS")
@@ -592,5 +571,8 @@ struct NotebookListRow: View {
 }
 
 #Preview {
-    HomeView(context: CoreDataStack.shared.viewContext, isListMode: .constant(false), onNewEntry: {})
+    let context = CoreDataStack.shared.viewContext
+    _ = Notebook.create(name: "预览", style: .chevronTeal, in: context)
+    return HomeView(context: context, isListMode: .constant(false), onNewEntry: {})
+        .environment(\.managedObjectContext, context)
 }

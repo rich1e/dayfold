@@ -15,7 +15,7 @@ private enum SheetMode: Identifiable {
 }
 
 struct NotebookDetailView: View {
-    let notebook: Notebook
+    @ObservedObject var notebook: Notebook
     var onNewEntry: () -> Void
     @Binding var isPresented: Bool
 
@@ -85,7 +85,7 @@ struct NotebookDetailView: View {
 
                 // 标题区
                 VStack(spacing: 4) {
-                    Text(notebook.name)
+                    Text(notebook.wrappedName)
                         .font(.system(size: 26, weight: .black))
                         .foregroundColor(Color(hex: "D4A574"))
                         .tracking(3)
@@ -503,7 +503,7 @@ private struct SwipeToDeleteRow<Content: View>: View {
 
 #Preview {
     let context = CoreDataStack.shared.viewContext
-    let nb = Notebook.make(style: .chevronTeal)
+    let nb = Notebook.create(name: "预览", style: .chevronTeal, in: context)
     return NotebookDetailView(
         notebook: nb,
         onNewEntry: {},
