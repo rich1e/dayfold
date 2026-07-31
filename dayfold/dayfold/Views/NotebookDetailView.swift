@@ -21,11 +21,7 @@ struct NotebookDetailView: View {
 
     @Environment(\.managedObjectContext) private var context
     @StateObject private var timelineVM: TimelineViewModel
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Entry.createdAt, ascending: false)],
-        predicate: NSPredicate(format: "deletedAt == nil"),
-        animation: .default
-    ) private var entries: FetchedResults<Entry>
+    @FetchRequest private var entries: FetchedResults<Entry>
     @State private var sheetMode: SheetMode?
 
     init(notebook: Notebook, onNewEntry: @escaping () -> Void, isPresented: Binding<Bool>) {
@@ -33,6 +29,11 @@ struct NotebookDetailView: View {
         self.onNewEntry = onNewEntry
         self._isPresented = isPresented
         self._timelineVM = StateObject(wrappedValue: TimelineViewModel(context: CoreDataStack.shared.viewContext))
+        self._entries = FetchRequest(
+            sortDescriptors: [NSSortDescriptor(keyPath: \Entry.createdAt, ascending: false)],
+            predicate: NSPredicate(format: "deletedAt == nil AND notebook == %@", notebook),
+            animation: .default
+        )
     }
 
     var latestDate: String {
