@@ -193,7 +193,7 @@ struct NotebookDetailView: View {
             case .calendar:
                 ZStack {
                     Color(hex: "2A2A30").ignoresSafeArea()
-                    CalendarView(viewModel: timelineVM)
+                    CalendarView(viewModel: timelineVM, notebook: notebook)
                 }
                 .environment(\.managedObjectContext, context)
                 .presentationDetents([.large])
