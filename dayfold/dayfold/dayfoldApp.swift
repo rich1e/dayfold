@@ -26,6 +26,7 @@ struct dayfoldApp: App {
             }
             .onAppear {
                 coreDataStack.createPresetTags()
+                coreDataStack.ensureDefaultNotebook()
             }
         }
     }
