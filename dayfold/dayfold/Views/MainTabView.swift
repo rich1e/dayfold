@@ -1,5 +1,6 @@
 // Views/MainTabView.swift
 import SwiftUI
+import CoreData
 
 struct MainTabView: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -13,6 +14,13 @@ struct MainTabView: View {
         (UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }
             .first?.windows.first?.safeAreaInsets.top) ?? 0
+    }
+
+    private var defaultNotebook: Notebook? {
+        let request: NSFetchRequest<Notebook> = Notebook.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \Notebook.sortOrder, ascending: true)]
+        request.fetchLimit = 1
+        return try? viewContext.fetch(request).first
     }
 
     var body: some View {
@@ -122,7 +130,8 @@ struct MainTabView: View {
         }
         .ignoresSafeArea(edges: .bottom)
         .sheet(isPresented: $showingNewEntry) {
-            EntryEditorView(context: viewContext)
+            EntryEditorView(context: viewContext, notebook: defaultNotebook)
+                .environment(\.managedObjectContext, viewContext)
         }
         .sheet(isPresented: $showingTrash, onDismiss: {
             // 关闭后恢复到 list，避免 drawer 仍高亮 trash

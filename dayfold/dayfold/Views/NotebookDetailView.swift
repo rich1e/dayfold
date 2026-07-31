@@ -199,7 +199,7 @@ struct NotebookDetailView: View {
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
             case .newEntry:
-                EntryEditorView(context: context)
+                EntryEditorView(context: context, notebook: notebook)
                     .environment(\.managedObjectContext, context)
             case .entryDetail(let entry):
                 EntryDetailView(entry: entry)
