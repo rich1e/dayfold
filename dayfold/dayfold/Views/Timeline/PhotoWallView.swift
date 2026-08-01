@@ -5,6 +5,7 @@ struct PhotoWallView: View {
     @ObservedObject var viewModel: TimelineViewModel
     var scrollTarget: UUID?
     var onSelectEntry: ((Entry) -> Void)?
+    var onEditEntry: ((Entry) -> Void)?
 
     private var entries: [Entry] { viewModel.entriesWithPhotos }
 
@@ -18,6 +19,9 @@ struct PhotoWallView: View {
                         entries: entries,
                         onNavigate: { entry in
                             onSelectEntry?(entry)
+                        },
+                        onEdit: { entry in
+                            onEditEntry?(entry)
                         }
                     )
                     .padding(2)
@@ -56,6 +60,7 @@ struct PhotoWallView: View {
 struct PhotoWallGrid: View {
     let entries: [Entry]
     var onNavigate: (Entry) -> Void
+    var onEdit: (Entry) -> Void
 
     // 布局计算：收藏条目占2×2大格（不连续），其余小格
     private var layout: [(entry: Entry, isLarge: Bool)] {
@@ -111,7 +116,8 @@ struct PhotoWallGrid: View {
                             entry: item.entry,
                             size: size,
                             isLarge: item.isLarge,
-                            onTap: onNavigate
+                            onTap: onNavigate,
+                            onEdit: onEdit
                         )
                         .id(item.entry.id)
                     }
@@ -127,6 +133,7 @@ struct PhotoWallCell: View {
     let size: CGSize
     let isLarge: Bool
     var onTap: (Entry) -> Void = { _ in }
+    var onEdit: (Entry) -> Void = { _ in }
 
     @State private var thumbnail: UIImage?
 
@@ -179,7 +186,7 @@ struct PhotoWallCell: View {
         .buttonStyle(PlainButtonStyle())
         .contextMenu {
             Button {
-                // 跳转编辑由调用方处理
+                onEdit(entry)
             } label: {
                 Label("编辑条目", systemImage: "pencil")
             }

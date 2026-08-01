@@ -5,6 +5,19 @@ import CoreData
 struct TimelineView: View {
     @StateObject private var viewModel: TimelineViewModel
     @State private var photoWallScrollTarget: UUID?
+    @Environment(\.managedObjectContext) private var viewContext
+    @State private var activeSheet: SheetMode?
+
+    private enum SheetMode: Identifiable {
+        case detail(Entry)
+        case edit(Entry)
+        var id: String {
+            switch self {
+            case .detail(let e): return "detail-\(e.objectID.uriRepresentation())"
+            case .edit(let e):   return "edit-\(e.objectID.uriRepresentation())"
+            }
+        }
+    }
 
     init(context: NSManagedObjectContext) {
         _viewModel = StateObject(wrappedValue: TimelineViewModel(context: context))
@@ -34,7 +47,12 @@ struct TimelineView: View {
                             .transition(.paperDrop)
                     }
                     if viewModel.viewMode == .photoWall {
-                        PhotoWallView(viewModel: viewModel, scrollTarget: photoWallScrollTarget)
+                        PhotoWallView(
+                            viewModel: viewModel,
+                            scrollTarget: photoWallScrollTarget,
+                            onSelectEntry: { entry in activeSheet = .detail(entry) },
+                            onEditEntry: { entry in activeSheet = .edit(entry) }
+                        )
                             .transition(.paperDrop)
                     }
                 }
@@ -42,6 +60,16 @@ struct TimelineView: View {
             }
             .navigationTitle("时间轴")
             .background(Color.warmPaper)
+            .sheet(item: $activeSheet) { mode in
+                switch mode {
+                case .detail(let entry):
+                    NavigationView { EntryDetailView(entry: entry) }
+                        .environment(\.managedObjectContext, viewContext)
+                case .edit(let entry):
+                    NavigationView { EntryEditorView(entry: entry, context: viewContext) }
+                        .environment(\.managedObjectContext, viewContext)
+                }
+            }
         }
     }
 }
