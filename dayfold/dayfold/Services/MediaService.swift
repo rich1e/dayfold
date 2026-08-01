@@ -100,6 +100,12 @@ class MediaService {
         }
     }
 
+    func deleteImages(filenames: [String]) async {
+        for filename in filenames {
+            await deleteImage(filename: filename)
+        }
+    }
+
     private func isValidFilename(_ filename: String) -> Bool {
         // Prevent path traversal attacks
         return !filename.isEmpty

@@ -20,6 +20,7 @@ class EntryEditorViewModel: ObservableObject {
     @Published var weather: WeatherData?
     @Published var isSaving = false
     @Published var isFavorite = false
+    @Published var lastSaveError: Error?
 
     private let viewContext: NSManagedObjectContext
     private var entry: Entry?
@@ -31,6 +32,8 @@ class EntryEditorViewModel: ObservableObject {
     private let notebook: Notebook?
     private var isLoadingImages = false
     private var imagesChanged = false
+    private var originalSnapshot: EntrySnapshot?
+    private var deferredOldFilenames: [String] = []
 
     var isNewEntry: Bool {
         isNewEntryOnInit
@@ -42,6 +45,34 @@ class EntryEditorViewModel: ObservableObject {
 
     var readingTime: Int {
         max(1, wordCount / 200)
+    }
+
+    private struct EntrySnapshot {
+        var title: String
+        var content: String
+        var mood: String
+        var isFavorite: Bool
+        var tags: [Tag]
+        var mediaFilenames: [String]
+        var placeName: String?
+        var weatherTemperature: Double
+        var weatherCondition: String
+        var weatherIcon: String
+
+        static func capture(from entry: Entry, selectedTags: [Tag]) -> EntrySnapshot {
+            EntrySnapshot(
+                title: entry.wrappedTitle,
+                content: entry.wrappedContent,
+                mood: entry.wrappedMood,
+                isFavorite: entry.isFavorite,
+                tags: selectedTags,
+                mediaFilenames: entry.mediaAssetsArray.map { $0.wrappedFilename },
+                placeName: entry.location?.wrappedPlaceName,
+                weatherTemperature: entry.location?.weatherTemperature ?? 0,
+                weatherCondition: entry.location?.weatherCondition ?? "",
+                weatherIcon: entry.location?.weatherIcon ?? "sun.max.fill"
+            )
+        }
     }
 
     init(context: NSManagedObjectContext, entry: Entry? = nil, prefillDate: Date? = nil, notebook: Notebook? = nil) {
@@ -68,6 +99,7 @@ class EntryEditorViewModel: ObservableObject {
             }
 
             loadExistingImages(from: entry)
+            self.originalSnapshot = EntrySnapshot.capture(from: entry, selectedTags: entry.tagsArray)
         } else {
             fetchLocationAndWeather()
         }
@@ -145,11 +177,13 @@ class EntryEditorViewModel: ObservableObject {
 
         // 保存图片 (一对多关系)：仅当图片有增删时全量重建，避免编辑未动图片时误删
         if imagesChanged {
-            // 删除旧的 MediaAsset 记录与磁盘文件
+            // 延迟删除:仅记录旧文件名,真正删除推迟到 save() 成功之后
+            let oldFilenames = entryToSave.mediaAssetsArray.map { $0.wrappedFilename }
+            deferredOldFilenames.append(contentsOf: oldFilenames)
+
+            // 删除旧 MediaAsset 记录(关系自动解绑),不删磁盘文件
             for asset in entryToSave.mediaAssetsArray {
-                let filename = asset.wrappedFilename
                 viewContext.delete(asset)
-                Task { await MediaService.shared.deleteImage(filename: filename) }
             }
             // 按当前 images 顺序重新保存
             for (index, image) in images.enumerated() {
@@ -165,10 +199,77 @@ class EntryEditorViewModel: ObservableObject {
             imagesChanged = false
         }
 
-        try? CoreDataStack.shared.save()
+        do {
+            try CoreDataStack.shared.save()
+        } catch {
+            lastSaveError = error
+            isSaving = false
+            return false
+        }
+
+        // 保存成功后,真正物理删除被替换的旧图文件
+        if !deferredOldFilenames.isEmpty {
+            let toDelete = deferredOldFilenames
+            deferredOldFilenames.removeAll()
+            Task { await MediaService.shared.deleteImages(filenames: toDelete) }
+        }
 
         isSaving = false
         return true
+    }
+
+    func cancel() async {
+        autoSaveTimer?.invalidate()
+
+        // 取消编辑:把 current VM 状态回滚到 snapshot 前的字段
+        if let snapshot = originalSnapshot {
+            guard let existing = entry else { return }
+            existing.title = snapshot.title.isEmpty ? nil : snapshot.title
+            existing.content = snapshot.content
+            existing.mood = snapshot.mood.isEmpty ? nil : snapshot.mood
+            existing.isFavorite = snapshot.isFavorite
+            existing.tags = NSSet(array: snapshot.tags)
+            existing.modifiedAt = Date()
+            existing.needsSync = true
+
+            // 还原 location/weather 字段
+            if let location = existing.location {
+                location.placeName = snapshot.placeName
+                location.weatherTemperature = snapshot.weatherTemperature
+                location.weatherCondition = snapshot.weatherCondition.isEmpty ? nil : snapshot.weatherCondition
+                location.weatherIcon = snapshot.weatherIcon
+            }
+
+            // 还原图片:删除当前 MediaAsset 记录,按 snapshot 重建
+            for asset in existing.mediaAssetsArray {
+                viewContext.delete(asset)
+            }
+            for (index, filename) in snapshot.mediaFilenames.enumerated() {
+                let asset = MediaAsset.create(type: .photo, filename: filename, in: viewContext)
+                asset.order = Int32(index)
+                asset.entry = existing
+            }
+
+            // 取消时不删 deferred 旧图(用户没点完成)
+            deferredOldFilenames.removeAll()
+
+            try? CoreDataStack.shared.save()
+            return
+        }
+
+        // 新建日记:entry 已 auto-save 创建 → 物理删除(不进回收站)
+        guard let draft = entry else { return }
+        for asset in draft.mediaAssetsArray {
+            let filename = asset.wrappedFilename
+            viewContext.delete(asset)
+            Task { await MediaService.shared.deleteImage(filename: filename) }
+        }
+        if let location = draft.location {
+            viewContext.delete(location)
+        }
+        viewContext.delete(draft)
+        deferredOldFilenames.removeAll()
+        try? CoreDataStack.shared.save()
     }
 
     func addTag(_ tag: Tag) {
