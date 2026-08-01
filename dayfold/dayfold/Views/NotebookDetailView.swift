@@ -15,17 +15,13 @@ private enum SheetMode: Identifiable {
 }
 
 struct NotebookDetailView: View {
-    let notebook: Notebook
+    @ObservedObject var notebook: Notebook
     var onNewEntry: () -> Void
     @Binding var isPresented: Bool
 
     @Environment(\.managedObjectContext) private var context
     @StateObject private var timelineVM: TimelineViewModel
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Entry.createdAt, ascending: false)],
-        predicate: NSPredicate(format: "deletedAt == nil"),
-        animation: .default
-    ) private var entries: FetchedResults<Entry>
+    @FetchRequest private var entries: FetchedResults<Entry>
     @State private var sheetMode: SheetMode?
 
     init(notebook: Notebook, onNewEntry: @escaping () -> Void, isPresented: Binding<Bool>) {
@@ -33,6 +29,11 @@ struct NotebookDetailView: View {
         self.onNewEntry = onNewEntry
         self._isPresented = isPresented
         self._timelineVM = StateObject(wrappedValue: TimelineViewModel(context: CoreDataStack.shared.viewContext))
+        self._entries = FetchRequest(
+            sortDescriptors: [NSSortDescriptor(keyPath: \Entry.createdAt, ascending: false)],
+            predicate: NSPredicate(format: "deletedAt == nil AND notebook == %@", notebook),
+            animation: .default
+        )
     }
 
     var latestDate: String {
@@ -85,7 +86,7 @@ struct NotebookDetailView: View {
 
                 // 标题区
                 VStack(spacing: 4) {
-                    Text(notebook.name)
+                    Text(notebook.wrappedName)
                         .font(.system(size: 26, weight: .black))
                         .foregroundColor(Color(hex: "D4A574"))
                         .tracking(3)
@@ -192,13 +193,13 @@ struct NotebookDetailView: View {
             case .calendar:
                 ZStack {
                     Color(hex: "2A2A30").ignoresSafeArea()
-                    CalendarView(viewModel: timelineVM)
+                    CalendarView(viewModel: timelineVM, notebook: notebook)
                 }
                 .environment(\.managedObjectContext, context)
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
             case .newEntry:
-                EntryEditorView(context: context)
+                EntryEditorView(context: context, notebook: notebook)
                     .environment(\.managedObjectContext, context)
             case .entryDetail(let entry):
                 EntryDetailView(entry: entry)
@@ -503,7 +504,7 @@ private struct SwipeToDeleteRow<Content: View>: View {
 
 #Preview {
     let context = CoreDataStack.shared.viewContext
-    let nb = Notebook.make(style: .chevronTeal)
+    let nb = Notebook.create(name: "预览", style: .chevronTeal, in: context)
     return NotebookDetailView(
         notebook: nb,
         onNewEntry: {},

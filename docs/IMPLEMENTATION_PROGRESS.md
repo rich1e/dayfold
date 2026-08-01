@@ -163,6 +163,47 @@
 
 ---
 
+## 阶段 A · 笔记本持久化 (2026-07-31)
+
+设计规格: `.superpowers/sdd/2026-07-31-notebook-persistence/`
+实现方式: 子代理驱动开发 (Task 1-8 实现 + Task 9 端到端验证)
+
+将首页笔记本从 `HomeView` 内的内存态 `struct Notebook` 升级为 Core Data 实体，实现「重启保留 / 按本隔离日记 / 删本软删 / 恢复选本 / 默认本兜底」。存量日记不做迁移（`Entry.notebook` 可空），历史条目 `notebook == nil` 时仍可用，新数据落到默认本。
+
+### 按文件汇总改动
+
+| 文件 | 改动 |
+|------|------|
+| `dayfold.xcdatamodeld/.../contents` | 新增 `Notebook` 实体（id / name / coverStyleRaw / createdAt / sortOrder）；`Entry` 新增可空 `notebook` 关系；双向关系 `Entry.notebook`↔`Notebook.entries` 删除规则均为 **Nullify**（删本不级联删日记，软删的日记保留在回收站） |
+| `Models/Notebook.swift` | 新建。`NotebookCoverStyle` 枚举从 HomeView 迁出为顶层类型；`Notebook` 扩展：`wrappedName` / `coverStyle` / `entriesArray`（本下未软删日记倒序）；工厂 `create(name:style:in:)`；`deleteWithEntriesToTrash(in:)`（本下 `deletedAt==nil` 日记逐个 `moveToTrash()` 后 `context.delete(self)`） |
+| `Services/CoreDataStack.swift` | 新增 `ensureDefaultNotebook()`：库中无任何 Notebook 时种入「我的日记」默认本（`sortOrder=0`），幂等 |
+| `dayfoldApp.swift` | `.onAppear` 调用 `ensureDefaultNotebook()`，首启兜底 |
+| `Views/HomeView.swift` | 封面墙改用 `@FetchRequest<Notebook>`（按 sortOrder/createdAt 升序）；新建/删除笔记本写库；`deleteCurrentNotebook()` → `nb.deleteWithEntriesToTrash(in:)` + save |
+| `Views/NotebookDetailView.swift` | `@ObservedObject var notebook`；`@FetchRequest` 谓词 `deletedAt == nil AND notebook == %@` 实现按本隔离 |
+| `ViewModels/EntryEditorViewModel.swift` | `init` 新增 `notebook:` 参数；`save()` 新建分支写 `entryToSave.notebook = notebook` |
+| `Views/MainTabView.swift` | `defaultNotebook`（按 sortOrder 取第一个）；全局新建 sheet 透传 `notebook: defaultNotebook` |
+| `Views/Common/NotebookPickerSheet.swift` | 新建组件。`@FetchRequest<Notebook>` 列出可选本；顶栏「+」`createAndSelect()` 提供新建入口（零本/删默认本边界的恢复通道） |
+| `Views/Entry/TrashView.swift` | 恢复流程改为 `.sheet(item:)` 弹 `NotebookPickerSheet`，选本后 `entry.restore()` + `entry.notebook = notebook` + save |
+
+### 验收核对（spec 第五节 A · 全程代码路径核对，非模拟器交互）
+
+CLI 环境无法真机点按，验证方式为「入口 → 写库」的代码路径闭合性核对，配合全量构建 **BUILD SUCCEEDED**。
+
+| # | 验收项 | 对应实现（文件:行） | 结论 |
+|---|--------|--------------------|------|
+| A.1 | 重启保留（持久化） | `Notebook` 为 Core Data 实体（`Models/Notebook.swift:24`）+ `HomeView` `@FetchRequest<Notebook>`（`Views/HomeView.swift:17`） | ✅ 路径闭合 |
+| A.2 | 按本隔离日记 | `NotebookDetailView` 谓词 `deletedAt == nil AND notebook == %@`（`Views/NotebookDetailView.swift:34`） | ✅ 路径闭合 |
+| A.3 | 全局新建落默认本 | `MainTabView.defaultNotebook`（`Views/MainTabView.swift:19`）→ sheet 传 `notebook: defaultNotebook`（`:133`）→ `EntryEditorViewModel.save()` 写 `entryToSave.notebook`（`ViewModels/EntryEditorViewModel.swift:117`） | ✅ 路径闭合 |
+| A.4 | 删本=软删该本日记 | `HomeView.deleteCurrentNotebook()`（`Views/HomeView.swift:222`）→ `deleteWithEntriesToTrash(in:)` 对本下 `deletedAt==nil` 日记逐个 `moveToTrash()`（置 `deletedAt`）后删本实体（`Models/Notebook.swift:54`）；关系删除规则 Nullify，日记保留进回收站 | ✅ 路径闭合 |
+| A.5 | 恢复选本 | `TrashView.restore()` 弹 `NotebookPickerSheet`（`Views/Entry/TrashView.swift:45`）→ 选本后 `restore()` + `notebook=` + save（`:46-50`） | ✅ 路径闭合 |
+| A.6 | 零本边界不崩溃 | 首启 `ensureDefaultNotebook()` 幂等种默认本（`Services/CoreDataStack.swift:132`，`dayfoldApp.swift:29` 调用）；删到默认本时 `NotebookPickerSheet` 顶栏「+」提供新建入口（`Views/Common/NotebookPickerSheet.swift:32`）；`currentNotebook` / 索引访问均有 `indices.contains` 守卫（`Views/HomeView.swift:29,223`） | ✅ 路径闭合 |
+
+**核对结论：6/6 全部闭合，0 存疑。** 全量构建 BUILD SUCCEEDED，无功能代码改动。
+
+> 观察项（非缺陷）：`HomeView.deleteCurrentNotebook()` 在 `save()` 后读 `notebooks.count` 做索引纠偏，而 `@FetchRequest` 结果异步刷新，该 count 可能是旧值；但后续所有对 `notebooks` 的下标访问都经 `indices.contains` 守卫，不会崩溃，也不影响 A 验收项。
+
+---
+
 ## 开发过程中修复的 Bug
 
 ### 1. Auto-save 重复创建 Entry (严重)

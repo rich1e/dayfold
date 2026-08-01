@@ -14,6 +14,12 @@ struct TrashView: View {
     private var trashedEntries: FetchedResults<Entry>
 
     @State private var showingClearConfirm = false
+    @State private var restoringEntry: EntryRef?
+
+    private struct EntryRef: Identifiable {
+        let id: NSManagedObjectID
+        let entry: Entry
+    }
 
     private var viewModel: EntryListViewModel {
         EntryListViewModel(context: viewContext)
@@ -35,6 +41,14 @@ struct TrashView: View {
         .confirmationDialog("确认清空回收箱？删除后无法恢复。", isPresented: $showingClearConfirm, titleVisibility: .visible) {
             Button("全部删除", role: .destructive) { clearAll() }
             Button("取消", role: .cancel) {}
+        }
+        .sheet(item: $restoringEntry) { ref in
+            NotebookPickerSheet(title: "恢复到笔记本") { notebook in
+                ref.entry.restore()
+                ref.entry.notebook = notebook
+                try? viewContext.save()
+            }
+            .environment(\.managedObjectContext, viewContext)
         }
     }
 
@@ -197,8 +211,7 @@ struct TrashView: View {
     // MARK: - Actions
 
     private func restore(_ entry: Entry) {
-        entry.restore()
-        try? viewContext.save()
+        restoringEntry = EntryRef(id: entry.objectID, entry: entry)
     }
 
     private func permanentlyDelete(_ entry: Entry) {

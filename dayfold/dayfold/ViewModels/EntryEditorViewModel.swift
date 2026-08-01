@@ -28,6 +28,7 @@ class EntryEditorViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private let isNewEntryOnInit: Bool
     private let prefillDate: Date?
+    private let notebook: Notebook?
     private var isLoadingImages = false
     private var imagesChanged = false
 
@@ -43,11 +44,12 @@ class EntryEditorViewModel: ObservableObject {
         max(1, wordCount / 200)
     }
 
-    init(context: NSManagedObjectContext, entry: Entry? = nil, prefillDate: Date? = nil) {
+    init(context: NSManagedObjectContext, entry: Entry? = nil, prefillDate: Date? = nil, notebook: Notebook? = nil) {
         self.viewContext = context
         self.entry = entry
         self.isNewEntryOnInit = (entry == nil)
         self.prefillDate = prefillDate
+        self.notebook = notebook
 
         if let entry = entry {
             self.title = entry.wrappedTitle
@@ -111,6 +113,9 @@ class EntryEditorViewModel: ObservableObject {
             entryToSave = Entry.create(in: viewContext)
             if let prefillDate = prefillDate {
                 entryToSave.createdAt = prefillDate
+            }
+            if let notebook = notebook {
+                entryToSave.notebook = notebook
             }
             entry = entryToSave
         }

@@ -16,9 +16,9 @@ struct EntryEditorView: View {
     @State private var showingSaveError = false
     @State private var showingImagePicker = false
 
-    init(entry: Entry? = nil, context: NSManagedObjectContext, prefillDate: Date? = nil) {
+    init(entry: Entry? = nil, context: NSManagedObjectContext, prefillDate: Date? = nil, notebook: Notebook? = nil) {
         _viewModel = StateObject(wrappedValue: EntryEditorViewModel(
-            context: context, entry: entry, prefillDate: prefillDate))
+            context: context, entry: entry, prefillDate: prefillDate, notebook: notebook))
     }
 
     var body: some View {

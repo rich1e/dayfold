@@ -127,4 +127,20 @@ class CoreDataStack: ObservableObject {
             print("Failed to create preset tags: \(error.localizedDescription)")
         }
     }
+
+    /// 首启兜底：数据库无任何笔记本时种入一个默认本，避免空状态。幂等。
+    func ensureDefaultNotebook() {
+        let context = viewContext
+        let request: NSFetchRequest<Notebook> = Notebook.fetchRequest()
+        do {
+            let count = try context.count(for: request)
+            guard count == 0 else { return }
+            let nb = Notebook.create(name: "我的日记", style: .chevronTeal, in: context)
+            nb.sortOrder = 0
+            try save()
+            print("Default notebook created")
+        } catch {
+            print("Failed to ensure default notebook: \(error.localizedDescription)")
+        }
+    }
 }
