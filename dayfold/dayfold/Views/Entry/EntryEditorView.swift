@@ -13,7 +13,6 @@ struct EntryEditorView: View {
     @StateObject private var viewModel: EntryEditorViewModel
     @FocusState private var titleFocused: Bool
     @FocusState private var contentFocused: Bool
-    @State private var showingSaveError = false
     @State private var showingImagePicker = false
 
     init(entry: Entry? = nil, context: NSManagedObjectContext, prefillDate: Date? = nil, notebook: Notebook? = nil) {
@@ -38,8 +37,13 @@ struct EntryEditorView: View {
         .sheet(isPresented: $showingImagePicker) {
             MediaPicker(images: $viewModel.images)
         }
-        .alert("保存失败", isPresented: $showingSaveError) {
+        .alert("保存失败", isPresented: Binding(
+            get: { viewModel.lastSaveError != nil },
+            set: { if !$0 { viewModel.lastSaveError = nil } }
+        )) {
             Button("确定", role: .cancel) {}
+        } message: {
+            Text(viewModel.lastSaveError?.localizedDescription ?? "请重试")
         }
     }
 
@@ -55,6 +59,17 @@ struct EntryEditorView: View {
             }
 
             Spacer()
+
+            // 取消
+            Button("取消") {
+                Task {
+                    await viewModel.cancel()
+                    dismiss()
+                }
+            }
+            .font(.system(size: 16, weight: .regular))
+            .foregroundColor(editorSub)
+            .disabled(viewModel.isSaving)
 
             // 完成
             Button {
