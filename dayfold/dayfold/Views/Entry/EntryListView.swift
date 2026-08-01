@@ -5,6 +5,8 @@ import CoreData
 struct EntryListView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @StateObject private var viewModel: EntryListViewModel
+    @State private var isPresentingTagPicker = false
+    @State private var tagSelectionDraft: Set<Tag> = []
     @FetchRequest(
         sortDescriptors: [SortDescriptor(\.createdAt, order: .reverse)],
         predicate: NSPredicate(format: "deletedAt == nil"),
@@ -27,34 +29,77 @@ struct EntryListView: View {
 
     var body: some View {
         NavigationView {
-            ZStack {
-                Color.warmPaper.ignoresSafeArea()
+            VStack(spacing: 0) {
+                filterBar
+                ZStack {
+                    Color.warmPaper.ignoresSafeArea()
 
-                if filteredEntries.isEmpty {
-                    emptyState
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 16) {
-                            ForEach(Array(filteredEntries.enumerated()), id: \.element.id) { index, entry in
-                                NavigationLink(destination: EntryDetailView(entry: entry)) {
-                                    EntryCard(entry: entry, viewModel: viewModel)
-                                        .frame(maxWidth: .infinity)
+                    if filteredEntries.isEmpty {
+                        emptyState
+                    } else {
+                        ScrollView {
+                            LazyVStack(spacing: 16) {
+                                ForEach(Array(filteredEntries.enumerated()), id: \.element.id) { index, entry in
+                                    NavigationLink(destination: EntryDetailView(entry: entry)) {
+                                        EntryCard(entry: entry, viewModel: viewModel)
+                                            .frame(maxWidth: .infinity)
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                    .transition(.paperDrop)
+                                    .animation(
+                                        .easeOut(duration: 0.38).delay(Double(min(index, 7)) * 0.07),
+                                        value: filteredEntries.count
+                                    )
                                 }
-                                .buttonStyle(PlainButtonStyle())
-                                .transition(.paperDrop)
-                                .animation(
-                                    .easeOut(duration: 0.38).delay(Double(min(index, 7)) * 0.07),
-                                    value: filteredEntries.count
-                                )
                             }
+                            .padding()
                         }
-                        .padding()
                     }
                 }
             }
             .navigationTitle("全部日记")
             .searchable(text: $viewModel.searchText, prompt: "搜索日记")
+            .sheet(isPresented: $isPresentingTagPicker, onDismiss: {
+                viewModel.selectedTags = tagSelectionDraft
+                // 清理已删 tag 的死引用
+                viewModel.selectedTags = viewModel.selectedTags.filter { $0.managedObjectContext != nil }
+            }) {
+                NavigationView {
+                    TagFilterSheet(selection: $tagSelectionDraft, allTags: viewModel.allTags)
+                        .environment(\.managedObjectContext, viewContext)
+                }
+            }
         }
+    }
+
+    private var filterBar: some View {
+        HStack(spacing: 12) {
+            Button {
+                viewModel.showFavoritesOnly.toggle()
+            } label: {
+                Image(systemName: viewModel.showFavoritesOnly ? "heart.fill" : "heart")
+                    .font(.system(size: 16))
+                    .foregroundColor(viewModel.showFavoritesOnly ? .warmAccent : .warmBrown)
+                    .frame(width: 32, height: 32)
+            }
+            Button {
+                tagSelectionDraft = viewModel.selectedTags
+                isPresentingTagPicker = true
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "tag.fill")
+                    Text(viewModel.selectedTags.isEmpty
+                         ? "筛选标签"
+                         : "\(viewModel.selectedTags.count) 个标签")
+                        .foregroundColor(viewModel.selectedTags.isEmpty ? .warmBrown : .warmAccent)
+                }
+                .font(.system(size: 14))
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(Color.warmLight)
     }
 
     private var emptyState: some View {
@@ -163,6 +208,34 @@ struct EntryCard: View {
             }
         }
         thumbnails = images
+    }
+}
+
+private struct TagFilterSheet: View {
+    @Binding var selection: Set<Tag>
+    let allTags: [Tag]
+
+    var body: some View {
+        List {
+            ForEach(allTags, id: \.objectID) { tag in
+                Button {
+                    if selection.contains(tag) { selection.remove(tag) }
+                    else { selection.insert(tag) }
+                } label: {
+                    HStack {
+                        Text(tag.wrappedName)
+                            .foregroundColor(.warmDark)
+                        Spacer()
+                        if selection.contains(tag) {
+                            Image(systemName: "checkmark")
+                                .foregroundColor(.warmAccent)
+                        }
+                    }
+                }
+            }
+        }
+        .navigationTitle("筛选标签(AND)")
+        .listStyle(.plain)
     }
 }
 

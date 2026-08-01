@@ -14,6 +14,13 @@ class EntryListViewModel: ObservableObject {
         self.viewContext = context
     }
 
+    /// 全部标签,按 order 升序。
+    var allTags: [Tag] {
+        let request: NSFetchRequest<Tag> = Tag.fetchRequest() as! NSFetchRequest<Tag>
+        request.sortDescriptors = [NSSortDescriptor(key: "order", ascending: true)]
+        return (try? viewContext.fetch(request)) ?? []
+    }
+
     func deleteEntry(_ entry: Entry) {
         entry.moveToTrash()
         try? CoreDataStack.shared.save()
