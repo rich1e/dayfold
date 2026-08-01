@@ -97,8 +97,8 @@ struct HomeView: View {
                     ForEach(Array(notebooks.enumerated()), id: \.element.objectID) { idx, nb in
                         NotebookCoverView(notebook: nb)
                             .frame(width: 240, height: 340)
-                            .shadow(color: .black.opacity(0.55), radius: 24, x: 0, y: 16)
                             .tag(idx)
+                            .notebookPageTurn(idx: idx, currentIndex: $currentIndex)   // 新增
                             .padding(.horizontal, 40)
                             .onTapGesture {
                                 currentIndex = idx
