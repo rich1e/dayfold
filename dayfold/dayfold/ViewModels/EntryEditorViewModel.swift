@@ -134,7 +134,7 @@ class EntryEditorViewModel: ObservableObject {
         autoSaveTimer?.invalidate()
     }
 
-    func save() async -> Bool {
+    func save(isAutoSave: Bool = false) async -> Bool {
         // 标题与正文都为空时不保存
         guard !title.isEmpty || !content.isEmpty else { return false }
 
@@ -178,8 +178,9 @@ class EntryEditorViewModel: ObservableObject {
             entryToSave.location = locationEntity
         }
 
-        // 保存图片 (一对多关系)：仅当图片有增删时全量重建，避免编辑未动图片时误删
-        if imagesChanged {
+        // 保存图片 (一对多关系)：仅在「完成」路径且图片有增删时全量重建。
+        // auto-save 跳过图片处理，避免在用户尚未决定完成/取消时就物理删除原图（防数据丢失）。
+        if !isAutoSave && imagesChanged {
             // 延迟删除:仅记录旧文件名,真正删除推迟到 save() 成功之后
             let oldFilenames = entryToSave.mediaAssetsArray.map { $0.wrappedFilename }
             deferredOldFilenames.append(contentsOf: oldFilenames)
@@ -243,15 +244,8 @@ class EntryEditorViewModel: ObservableObject {
                 location.weatherIcon = snapshot.weatherIcon
             }
 
-            // 还原图片:删除当前 MediaAsset 记录,按 snapshot 重建
-            for asset in existing.mediaAssetsArray {
-                viewContext.delete(asset)
-            }
-            for (index, filename) in snapshot.mediaFilenames.enumerated() {
-                let asset = MediaAsset.create(type: .photo, filename: filename, in: viewContext)
-                asset.order = Int32(index)
-                asset.entry = existing
-            }
+            // 图片无需回滚:auto-save 不参与图片重建,编辑期间数据库 MediaAsset 始终为原始集合,
+            // 用户内存中的图片改动(imagesChanged)从未落盘,取消即自然丢弃。
 
             // 取消时不删 deferred 旧图(用户没点完成)
             deferredOldFilenames.removeAll()
@@ -298,7 +292,7 @@ class EntryEditorViewModel: ObservableObject {
         autoSaveTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             Task { @MainActor in
-                _ = await self.save()
+                _ = await self.save(isAutoSave: true)
             }
         }
     }
