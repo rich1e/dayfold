@@ -42,3 +42,6 @@ Pods/
 *.ipa
 *.dSYM.zip
 *.dSYM
+
+# Stitch staging
+.stitch/
