@@ -5,7 +5,7 @@ import CoreData
 struct TagsView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @StateObject private var viewModel: TagManagerViewModel
-    @State private var editingTag: Tag?
+    @State private var activeSheet: TagSheet?
 
     @FetchRequest(
         sortDescriptors: [SortDescriptor(\.order)],
@@ -29,7 +29,7 @@ struct TagsView: View {
                         ForEach(Array(tags.enumerated()), id: \.element.id) { index, tag in
                             TagRow(tag: tag)
                                 .onTapGesture {
-                                    editingTag = tag
+                                    activeSheet = .edit(tag)
                                 }
                                 .transition(.paperDrop)
                                 .animation(
@@ -53,14 +53,31 @@ struct TagsView: View {
             .navigationTitle("标签管理")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
+                    HStack(spacing: 16) {
+                        Button {
+                            activeSheet = .newTag
+                        } label: {
+                            Image(systemName: "plus")
+                        }
                         .foregroundColor(.warmAccent)
+
+                        EditButton()
+                            .foregroundColor(.warmAccent)
+                    }
                 }
             }
         }
-        .sheet(item: $editingTag) { tag in
-            TagEditorView(tag: tag) { name, color, icon in
-                viewModel.updateTag(tag, name: name, color: color, icon: icon)
+        .sheet(item: $activeSheet) { sheet in
+            switch sheet {
+            case .newTag:
+                TagEditorView(tag: nil) { name, color, icon in
+                    viewModel.createTag(name: name, color: color, icon: icon)
+                }
+                .environment(\.managedObjectContext, viewContext)
+            case .edit(let tag):
+                TagEditorView(tag: tag) { name, color, icon in
+                    viewModel.updateTag(tag, name: name, color: color, icon: icon)
+                }
             }
         }
     }
@@ -81,6 +98,18 @@ struct TagsView: View {
         offsets.forEach { index in
             let tag = tags[index]
             viewModel.deleteTag(tag)
+        }
+    }
+}
+
+private enum TagSheet: Identifiable {
+    case newTag
+    case edit(Tag)
+
+    var id: String {
+        switch self {
+        case .newTag: return "newTag"
+        case .edit(let tag): return "edit-\(tag.id?.uuidString ?? ObjectIdentifier(tag).debugDescription)"
         }
     }
 }

@@ -50,6 +50,10 @@ struct MainTabView: View {
                         EntryListView(context: viewContext)
                             .transition(.paperDrop)
                     }
+                    if selectedTab == .tags {
+                        TagsView(context: viewContext)
+                            .transition(.paperDrop)
+                    }
                     if selectedTab == .map {
                         MapView(showingNewEntry: $showingNewEntry)
                             .transition(.paperDrop)
