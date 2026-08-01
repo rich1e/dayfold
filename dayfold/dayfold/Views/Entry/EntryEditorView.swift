@@ -119,39 +119,33 @@ struct EntryEditorView: View {
     // MARK: - 编辑区
 
     private var editorArea: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                // 标题
-                TextField("标题（可选）", text: $viewModel.title, axis: .vertical)
-                    .font(.system(size: 26, weight: .bold))
-                    .foregroundColor(editorText)
-                    .focused($titleFocused)
-                    .submitLabel(.next)
-                    .onSubmit { contentFocused = true }
+        VStack(alignment: .leading, spacing: 0) {
+            // 标题
+            TextField("标题（可选）", text: $viewModel.title, axis: .vertical)
+                .font(.system(size: 26, weight: .bold))
+                .foregroundColor(editorText)
+                .focused($titleFocused)
+                .submitLabel(.next)
+                .onSubmit { contentFocused = true }
+                .padding(.horizontal, 16)
+                .padding(.top, 20)
+                .padding(.bottom, 12)
+
+            // 正文 MarkdownEditor
+            MarkdownEditor(text: $viewModel.content,
+                           wordCount: viewModel.wordCount,
+                           readingTime: viewModel.readingTime)
+                .frame(minHeight: 320)
+
+            // 已选图片预览
+            if !viewModel.images.isEmpty {
+                imagePreviewRow
                     .padding(.horizontal, 16)
-                    .padding(.top, 20)
-                    .padding(.bottom, 12)
-
-                // 正文
-                TextEditor(text: $viewModel.content)
-                    .font(.system(size: 17, weight: .regular))
-                    .foregroundColor(editorText.opacity(0.88))
-                    .focused($contentFocused)
-                    .scrollContentBackground(.hidden)
-                    .background(Color.clear)
-                    .frame(minHeight: 320)
-                    .padding(.horizontal, 12)
-
-                // 已选图片预览
-                if !viewModel.images.isEmpty {
-                    imagePreviewRow
-                        .padding(.horizontal, 16)
-                        .padding(.top, 12)
-                }
-
-                // 键盘工具栏高度占位（避免内容被遮挡）
-                Spacer().frame(height: 56)
+                    .padding(.top, 12)
             }
+
+            // 键盘工具栏高度占位
+            Spacer().frame(height: 56)
         }
         .background(editorBg)
     }
@@ -207,9 +201,6 @@ struct EntryEditorView: View {
 
                 // 附件（占位）
                 toolbarButton(icon: "paperclip") {}
-
-                // 格式（占位）
-                toolbarButton(icon: "textformat") {}
             }
             .padding(.horizontal, 8)
             .frame(height: 44)
