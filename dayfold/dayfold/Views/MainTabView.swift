@@ -59,7 +59,7 @@ struct MainTabView: View {
                             .transition(.paperDrop)
                     }
                     if selectedTab == .stats {
-                        PlaceholderView(icon: "chart.bar", title: "数据统计", subtitle: "即将推出")
+                        StatsView(context: viewContext)
                             .transition(.paperDrop)
                     }
                     if selectedTab == .settings {
