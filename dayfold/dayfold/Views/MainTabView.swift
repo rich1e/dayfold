@@ -63,7 +63,7 @@ struct MainTabView: View {
                             .transition(.paperDrop)
                     }
                     if selectedTab == .settings {
-                        PlaceholderView(icon: "gearshape", title: "设置", subtitle: "即将推出")
+                        SettingsView()
                             .transition(.paperDrop)
                     }
                 }

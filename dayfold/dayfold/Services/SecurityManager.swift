@@ -7,6 +7,12 @@ class SecurityManager: ObservableObject {
     @Published var isEnabled = true
 
     private let context = LAContext()
+    private let defaults = UserDefaults.standard
+    private let isEnabledKey = "security.faceIDEnabled"
+
+    init() {
+        self.isEnabled = defaults.object(forKey: isEnabledKey) as? Bool ?? true
+    }
 
     func authenticate() async -> Bool {
         var error: NSError?
@@ -42,10 +48,15 @@ class SecurityManager: ObservableObject {
         isLocked = true
     }
 
-    func toggleSecurity() {
-        isEnabled.toggle()
-        if !isEnabled {
+    func setEnabled(_ newValue: Bool) {
+        defaults.set(newValue, forKey: isEnabledKey)
+        isEnabled = newValue
+        if !newValue {
             isLocked = false
         }
+    }
+
+    func toggleSecurity() {
+        setEnabled(!isEnabled)
     }
 }
