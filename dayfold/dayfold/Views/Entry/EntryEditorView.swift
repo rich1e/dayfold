@@ -144,6 +144,11 @@ struct EntryEditorView: View {
                     .padding(.top, 12)
             }
 
+            // 标签选择
+            TagPicker(selectedTags: $viewModel.selectedTags)
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+
             // 键盘工具栏高度占位
             Spacer().frame(height: 56)
         }
