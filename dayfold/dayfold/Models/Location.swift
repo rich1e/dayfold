@@ -12,6 +12,10 @@ extension Location {
         address ?? ""
     }
 
+    var wrappedCondition: String {
+        weatherCondition ?? ""
+    }
+
     var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }

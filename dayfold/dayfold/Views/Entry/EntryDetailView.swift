@@ -11,6 +11,9 @@ struct EntryDetailView: View {
     @ObservedObject var entry: Entry
     @State private var activeSheet: DetailSheet?
     @State private var loadedImages: [UIImage] = []
+    @State private var pdfShareURL: TempFileURL?
+    @State private var mdShareURL: TempFileURL?
+    @State private var exportError: String?
 
     var body: some View {
         ScrollView {
@@ -64,6 +67,27 @@ struct EntryDetailView: View {
                         Text("编辑")
                             .foregroundColor(.warmAccent)
                     }
+                    // 新增:导出 Menu
+                    Menu {
+                        Button("导出 PDF", systemImage: "doc.richtext") {
+                            if let url = EntryPDFExporter.renderPDF(entry: entry, images: loadedImages) {
+                                pdfShareURL = TempFileURL(url: url)
+                            } else {
+                                exportError = "PDF 生成失败"
+                            }
+                        }
+                        Button("导出 Markdown", systemImage: "text.alignleft") {
+                            let md = EntryMarkdownExporter.renderMarkdown(entry: entry)
+                            if let url = EntryMarkdownExporter.writeTempFile(md, entry: entry) {
+                                mdShareURL = TempFileURL(url: url)
+                            } else {
+                                exportError = "Markdown 生成失败"
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                            .foregroundColor(.warmAccent)
+                    }
                 }
             }
         }
@@ -79,6 +103,17 @@ struct EntryDetailView: View {
             case .card:
                 EntryCardPreviewSheet(entry: entry, images: loadedImages)
             }
+        }
+        .sheet(item: $pdfShareURL) { wrapped in
+            ExportShareSheet(items: [wrapped.url])
+        }
+        .sheet(item: $mdShareURL) { wrapped in
+            ExportShareSheet(items: [wrapped.url])
+        }
+        .alert("导出失败", isPresented: .constant(exportError != nil)) {
+            Button("好") { exportError = nil }
+        } message: {
+            Text(exportError ?? "")
         }
         .task {
             await loadImages()
@@ -100,4 +135,10 @@ struct EntryDetailView: View {
         }
         loadedImages = images
     }
+}
+
+/// Identifiable wrapper for URL (用于 .sheet(item:))
+struct TempFileURL: Identifiable {
+    let url: URL
+    var id: URL { url }
 }
