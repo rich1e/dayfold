@@ -2,6 +2,8 @@
 import SwiftUI
 
 struct TimelineListView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+
     @FetchRequest(
         sortDescriptors: [SortDescriptor(\.createdAt, order: .reverse)],
         animation: .default
@@ -18,6 +20,7 @@ struct TimelineListView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
+                OnThisDaySection(context: viewContext)
                 ForEach(groupedEntries, id: \.0) { date, dayEntries in
                     Section {
                         ForEach(Array(dayEntries.enumerated()), id: \.element.id) { localIdx, entry in
