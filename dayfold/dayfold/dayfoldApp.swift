@@ -22,6 +22,7 @@ struct dayfoldApp: App {
                     MainTabView()
                         .environment(\.managedObjectContext, coreDataStack.viewContext)
                         .environmentObject(securityManager)
+                        .environmentObject(coreDataStack)
                 }
             }
             .onAppear {
