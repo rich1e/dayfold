@@ -98,7 +98,7 @@ struct EntryEditorView: View {
 
     private var metaBar: some View {
         HStack(spacing: 6) {
-            Text("日记本")
+            Text(viewModel.notebookDisplayName)
                 .font(.system(size: 12))
                 .foregroundColor(editorSub)
 

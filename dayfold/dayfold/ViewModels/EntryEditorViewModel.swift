@@ -40,8 +40,27 @@ class EntryEditorViewModel: ObservableObject {
         isNewEntryOnInit
     }
 
+    /// 编辑器顶部展示用的笔记本名;新建时若已指定 notebook 则显示其名,否则显示「默认」
+    var notebookDisplayName: String {
+        notebook?.wrappedName ?? "默认"
+    }
+
     var wordCount: Int {
-        content.split(separator: " ").count
+        // 中文 / 日文 / 韩文字符按字计,英文 / 数字按空格分词后求和
+        var count = 0
+        var latinBuffer = ""
+        for scalar in content.unicodeScalars {
+            if scalar == " " {
+                if !latinBuffer.isEmpty { count += 1; latinBuffer = "" }
+            } else if CharacterSet.alphanumerics.contains(scalar) {
+                latinBuffer.unicodeScalars.append(scalar)
+            } else {
+                if !latinBuffer.isEmpty { count += 1; latinBuffer = "" }
+                count += 1
+            }
+        }
+        if !latinBuffer.isEmpty { count += 1 }
+        return count
     }
 
     var readingTime: Int {
