@@ -20,6 +20,7 @@ class EntryEditorViewModel: ObservableObject {
     @Published var weather: WeatherData?
     @Published var isSaving = false
     @Published var isFavorite = false
+    @Published var mood: String = ""
     @Published var lastSaveError: Error?
 
     private let viewContext: NSManagedObjectContext
@@ -87,6 +88,7 @@ class EntryEditorViewModel: ObservableObject {
             self.content = entry.wrappedContent
             self.selectedTags = entry.tagsArray
             self.isFavorite = entry.isFavorite
+            self.mood = entry.wrappedMood
             self.location = entry.location?.coordinate.toLocation()
             self.placeName = entry.location?.wrappedPlaceName
 
@@ -155,6 +157,7 @@ class EntryEditorViewModel: ObservableObject {
         entryToSave.title = title.isEmpty ? nil : title
         entryToSave.content = content
         entryToSave.isFavorite = isFavorite
+        entryToSave.mood = mood.isEmpty ? nil : mood
         entryToSave.modifiedAt = Date()
         entryToSave.needsSync = true
 

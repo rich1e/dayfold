@@ -124,6 +124,8 @@ struct EntryEditorView: View {
                     .foregroundColor(editorSub)
             }
 
+            MoodSelector(mood: $viewModel.mood)
+
             Spacer()
         }
         .padding(.horizontal, 16)
@@ -283,6 +285,32 @@ private struct KeyboardAdaptiveModifier: ViewModifier {
 private extension View {
     func keyboardAdaptive() -> some View {
         modifier(KeyboardAdaptiveModifier())
+    }
+}
+
+private struct MoodSelector: View {
+    @Binding var mood: String
+    private let options: [(symbol: String, value: String)] = [
+        ("face.dashed", "blank"),
+        ("cloud", "cloudy"),
+        ("sun.max", "sunny"),
+        ("moon.stars", "night"),
+        ("sparkles", "sparkle")
+    ]
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ForEach(options, id: \.value) { option in
+                Button {
+                    mood = (mood == option.value) ? "" : option.value
+                } label: {
+                    Image(systemName: option.symbol)
+                        .font(.system(size: 14, weight: mood == option.value ? .semibold : .regular))
+                        .foregroundColor(mood == option.value ? accentCyan : editorSub)
+                        .frame(width: 24, height: 24)
+                }
+            }
+        }
     }
 }
 
