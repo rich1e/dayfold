@@ -1,0 +1,280 @@
+<!DOCTYPE html><html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Dayfold - Entry Detail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "error-container": "#93000a",
+                "warmPaper": "#3C3C44",
+                "secondary-container": "#249fae",
+                "on-surface": "#f5ddd8",
+                "surface-dim": "#1c100e",
+                "on-primary-fixed-variant": "#8a1c01",
+                "surface-container-highest": "#40312e",
+                "surface-variant": "#40312e",
+                "primary-fixed-dim": "#ffb4a3",
+                "on-tertiary-fixed": "#001f26",
+                "primary": "#ffb4a3",
+                "background": "#1c100e",
+                "on-error": "#690005",
+                "primary-container": "#ef6544",
+                "surface-bright": "#453632",
+                "primary-fixed": "#ffdad2",
+                "tertiary": "#6ad5ef",
+                "secondary-fixed-dim": "#6ad6e6",
+                "on-primary-container": "#560d00",
+                "surface-container-high": "#352723",
+                "tertiary-container": "#239eb7",
+                "tertiary-fixed-dim": "#6ad5ef",
+                "surface": "#1c100e",
+                "coverCream": "#E8D5B8",
+                "surface-container-low": "#251916",
+                "secondary-fixed": "#96f0ff",
+                "inverse-on-surface": "#3b2d2a",
+                "warmCream": "#4A4A58",
+                "inverse-surface": "#f5ddd8",
+                "on-tertiary-container": "#002e38",
+                "on-secondary": "#003640",
+                "on-secondary-container": "#002f35",
+                "secondary": "#6ad6e6",
+                "outline": "#a78a83",
+                "drawerAccent": "#F27359",
+                "coverLeather": "#2C1A0A",
+                "surface-container": "#291d19",
+                "on-surface-variant": "#e0bfb8",
+                "warmLight": "#434350",
+                "on-secondary-fixed-variant": "#004f57",
+                "warmGray": "#52525F",
+                "warmBrown": "#9090A0",
+                "on-error-container": "#ffdad6",
+                "drawerBg": "#2D2D33",
+                "tertiary-fixed": "#acedff",
+                "warmDark": "#E8E8EC",
+                "on-background": "#f5ddd8",
+                "surface-tint": "#ffb4a3",
+                "on-tertiary": "#003640",
+                "on-tertiary-fixed-variant": "#004e5c",
+                "on-primary-fixed": "#3d0700",
+                "error": "#ffb4ab",
+                "surface-container-lowest": "#160b09",
+                "on-secondary-fixed": "#001f24",
+                "inverse-primary": "#ab3418",
+                "outline-variant": "#59413c",
+                "on-primary": "#621100",
+                "cyan-accent": "#5BC8D8",
+                "ember-orange": "#E05A3A"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "section-gap-sm": "14pt",
+                "gutter-tight": "4pt",
+                "card-padding-x": "20pt",
+                "section-gap-md": "20pt",
+                "section-gap-lg": "32pt",
+                "drawer-width": "85vw",
+                "card-padding-y": "16pt"
+            },
+            "fontFamily": {
+                "label-sm": ["system-rounded", "sans-serif"],
+                "headline-md": ["STSongti-SC", "serif"],
+                "display-lg": ["system-sans", "sans-serif"],
+                "label-xs": ["system-rounded", "sans-serif"],
+                "headline-lg": ["STSongti-SC", "serif"],
+                "label-md": ["system-rounded", "sans-serif"],
+                "body-md": ["Georgia", "serif"],
+                "body-lg": ["Georgia", "serif"]
+            },
+            "fontSize": {
+                "label-sm": ["11px", {"fontWeight": "400"}],
+                "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "400"}],
+                "display-lg": ["26px", {"letterSpacing": "3px", "fontWeight": "900"}],
+                "label-xs": ["10px", {"fontWeight": "400"}],
+                "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                "label-md": ["13px", {"fontWeight": "400"}],
+                "body-md": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+                "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #3C3C44;
+            color: #f5ddd8;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .paper-drop {
+            animation: paperDropEffect 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes paperDropEffect {
+            0% { opacity: 0; transform: translateY(12pt) rotateX(-8deg); }
+            100% { opacity: 1; transform: translateY(0) rotateX(0deg); }
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .vertical-rule {
+            border-left: 1px solid rgba(82, 82, 95, 0.3);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen flex flex-col font-body-lg text-body-lg">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-warmPaper/90 backdrop-blur-md flex justify-between items-center w-full px-section-gap-md py-4">
+<button class="hover:opacity-80 transition-opacity active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined text-cyan-accent text-[28px]">arrow_back_ios</span>
+</button>
+<div class="flex gap-6">
+<button class="hover:opacity-80 transition-opacity active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined text-cyan-accent">share</span>
+</button>
+<button class="hover:opacity-80 transition-opacity active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined text-cyan-accent">more_vert</span>
+</button>
+</div>
+</header>
+<main class="mt-16 pb-20 paper-drop overflow-x-hidden">
+<!-- Entry Header Information -->
+<section class="px-card-padding-x pt-6">
+<div class="mb-1">
+<span class="font-label-md text-label-md text-warmBrown tracking-wide">2026年7月29日 星期二</span>
+</div>
+<div class="flex items-center gap-3 text-ember-orange text-label-md font-label-md">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+<span>14:32</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+<span>北京市朝阳区</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">thermostat</span>
+<span>24°C</span>
+</div>
+</div>
+</section>
+<!-- Horizontal Tags Row -->
+<section class="mt-4 px-card-padding-x">
+<div class="flex gap-2 overflow-x-auto hide-scrollbar py-2">
+<span class="flex-shrink-0 px-3 py-1 rounded-[10px] bg-green-500/20 text-green-400 text-label-sm font-label-sm">生活</span>
+<span class="flex-shrink-0 px-3 py-1 rounded-[10px] bg-amber-500/20 text-amber-400 text-label-sm font-label-sm">旅行</span>
+<span class="flex-shrink-0 px-3 py-1 rounded-[10px] bg-blue-500/20 text-blue-400 text-label-sm font-label-sm">摄影</span>
+</div>
+</section>
+<!-- Divider -->
+<div class="mx-card-padding-x my-4 border-t border-warmGray/30"></div>
+<!-- Entry Title -->
+<article class="px-card-padding-x">
+<h1 class="font-headline-lg text-[20pt] leading-tight text-on-surface mb-6">
+                雨后的漫步，遇见了久违的宁静
+            </h1>
+<!-- Entry Body Text (Top Half) -->
+<div class="relative pl-4 mb-8">
+<div class="absolute left-0 top-0 bottom-0 w-[1px] bg-warmGray/40"></div>
+<p class="font-body-lg text-body-lg leading-[24px] text-on-surface/90 space-y-4">
+                    午后的阵雨刚停，空气中弥漫着一种泥土与青草混合的清香。我收起伞，独自走在朝阳公园的小径上。这里的喧嚣似乎都被刚才那场急雨洗刷干净了，只剩下偶尔几声清脆的鸟鸣。
+                </p>
+<p class="font-body-lg text-body-lg leading-[24px] text-on-surface/90 mt-4">
+                    远处的建筑在湿润的空气中显得柔和了许多，不再像平日里那样棱角分明。路边的石凳上还残留着晶莹的水滴，倒映着渐渐放晴的天空。这种久违的宁静感，让一直紧绷的神经终于松弛了下来。
+                </p>
+</div>
+</article>
+<!-- Gallery Section (Full Bleed) -->
+<section class="w-full">
+<!-- Featured Full-Width Image -->
+<div class="w-full h-[200pt] mb-[4pt]">
+<img class="w-full h-full object-cover rounded-sm" data-alt="A cinematic, wide-angle landscape shot of a lush green park in Beijing just after a rainstorm. The ground is damp with reflective puddles, and the foliage is a deep, saturated green. In the background, modern city architecture is partially obscured by a soft, misty atmosphere. The lighting is low-key and moody, consistent with a midnight-scribe and paper-texture aesthetic, using tones of deep gray and muted cyan." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCA1EracpHGhT9H3arJ-UpD4I0mZvM7Awrcm5-gosVJaJXSVNqe248fgsGxZVyrEuXK6t-ruXoOLNSF8bfS4obR7YGDAoNJHwXB32p-TjaOPWgjY5idtT4ee-lSbdtCXNVs5w7FkKGszAnq-RL16Sj46vY_xdMp3nH_9b7JmVe0526QFGuR2O1BoZ0O-tXfLULkZQNEosdA5Y08nr_-DWyHeSO1y-YG2U31DQHJa7kdEM9RBENioIYQ8YBAJZW1Ig70Mk7QcHlQCgzD">
+</div>
+<!-- Side-by-side Images -->
+<div class="grid grid-cols-2 gap-[4pt] px-1">
+<div class="aspect-square bg-warmLight rounded-[4px] overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A close-up, macro detail shot of crystalline rain droplets resting on a deep green leaf. The focus is sharp on the water droplets, which act like tiny lenses reflecting the overcast sky. The surrounding background is softly blurred in a cinematic bokeh. The color palette is dark and atmospheric, focusing on deep emerald and charcoal grays, capturing a sense of quiet contemplation." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB78sYMX2-RXIlS5dpv2Iv6tg4E5Ng2TolOhxECSWLf7ilyBMWCwzFGXMaON-Vxlv5YCuYRfv7VPEoVCZMuNmAvzAjR4nJU5iWePx-by9Zxubr4ZITHqGDT4I6pYJ_g2CWKcWJbLnernhaNyrtenfG05wZw0TW8jDy8Bfl8DsfEAauaUCD3gPJ9yZgxENwOUmnbd4E3s4ooiY__4inHhl7s80GLmQnrJcCIcq76mrgEGW3Rzqhr10f9kn7wtE8IKTzfmYAY1lzyeI4a">
+</div>
+<div class="aspect-square bg-warmLight rounded-[4px] overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A minimalist street scene of a damp, asphalt walking path leading into a misty forest area in an urban park. The wet surface reflects the soft, ambient light of a grey afternoon. The composition is clean and centered, emphasizing solitude and perspective. The mood is calm and introspective, matching a premium journal aesthetic with subtle textures and low contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxwLKYz0FBohWCTLUxdIZ0R9MVQnPsNeHsad9iJWcoIl4IbuKC7PH7-tQnoUILgerBZxmZh_mCgKxLubmzANJewVi1IRPP4CdnsAXlqwHynP1cYryobwPNvZj9OHGsidAWKtLqKCJY_4MKLWvuwo-ukCBE0q0yBfk4p1_8OQV2njnHE8wUmLY6XSqdgKFL0lnCmpqupbDBa8ywTpC9YzLWdcnhT2PLX_xfF2zggkiZm7KAJuA0QDN-4UggRAbFw42TqQSyFnGWTD_F">
+</div>
+</div>
+</section>
+<!-- Footer Text Section -->
+<article class="px-card-padding-x mt-8 pb-12">
+<div class="relative pl-4">
+<div class="absolute left-0 top-0 bottom-0 w-[1px] bg-warmGray/40"></div>
+<p class="font-body-lg text-body-lg leading-[24px] text-on-surface/90">
+                    生活总是在我们不停赶路的时候，偷偷藏起了一些细碎的美好。或许，我们需要的并不多，仅仅是一个可以安放思绪的瞬间，一处可以听见自己心跳的角落。
+                </p>
+<p class="font-body-lg text-body-lg leading-[24px] text-on-surface/90 mt-4">
+                    在这座快节奏的城市里，能拥有这样一个雨后的午后，确实是一种奢侈。日记本里的文字也许无法记录下所有的体悟，但此刻的这份心境，会被我珍藏在 Dayfold 的这个角落里。
+                </p>
+</div>
+</article>
+</main>
+<!-- Implicit Floating Interaction -->
+<div class="fixed bottom-8 right-6">
+<button class="w-[60px] h-[60px] rounded-full bg-drawerAccent shadow-2xl flex items-center justify-center text-warmDark active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">edit</span>
+</button>
+</div>
+<!-- Micro-interaction script -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mainContent = document.querySelector('main');
+            
+            // Subtle parallax effect on scroll
+            window.addEventListener('scroll', () => {
+                const scrolled = window.pageYOffset;
+                const topBar = document.querySelector('header');
+                
+                if (scrolled > 20) {
+                    topBar.classList.add('shadow-lg');
+                } else {
+                    topBar.classList.remove('shadow-lg');
+                }
+            });
+
+            // Smooth entrance for imagery
+            const observerOptions = {
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('paper-drop');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('section, article').forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+</body></html>

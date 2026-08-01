@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=system-rounded:wght@100..900&family=system-sans:wght@100..900&family=system-serif:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "drawerAccent": "#F27359",
+                    "outline-variant": "#59413c",
+                    "surface-container-lowest": "#160b09",
+                    "on-surface": "#f5ddd8",
+                    "on-primary-fixed": "#3d0700",
+                    "background": "#1c100e",
+                    "secondary-fixed-dim": "#6ad6e6",
+                    "warmDark": "#E8E8EC",
+                    "secondary": "#6ad6e6",
+                    "inverse-primary": "#ab3418",
+                    "warmPaper": "#3C3C44",
+                    "coverLeather": "#2C1A0A",
+                    "surface-container-low": "#251916",
+                    "on-secondary": "#00363d",
+                    "inverse-on-surface": "#3b2d2a",
+                    "on-secondary-fixed": "#001f24",
+                    "primary-fixed-dim": "#ffb4a3",
+                    "on-tertiary-fixed-variant": "#004e5c",
+                    "secondary-fixed": "#96f0ff",
+                    "on-tertiary": "#003640",
+                    "primary-fixed": "#ffdad2",
+                    "secondary-container": "#249fae",
+                    "tertiary-fixed": "#acedff",
+                    "tertiary": "#6ad5ef",
+                    "surface-tint": "#ffb4a3",
+                    "surface": "#1c100e",
+                    "tertiary-container": "#239eb7",
+                    "primary": "#ffb4a3",
+                    "on-primary-container": "#560d00",
+                    "tertiary-fixed-dim": "#6ad5ef",
+                    "on-primary-fixed-variant": "#8a1c01",
+                    "on-primary": "#621100",
+                    "on-tertiary-fixed": "#001f26",
+                    "on-error-container": "#ffdad6",
+                    "outline": "#a78a83",
+                    "on-tertiary-container": "#002e38",
+                    "warmGray": "#52525F",
+                    "on-error": "#690005",
+                    "surface-dim": "#1c100e",
+                    "surface-variant": "#40312e",
+                    "error": "#ffb4ab",
+                    "surface-container-high": "#352723",
+                    "warmLight": "#434350",
+                    "on-secondary-container": "#002f35",
+                    "surface-bright": "#453632",
+                    "warmCream": "#4A4A58",
+                    "drawerBg": "#2D2D33",
+                    "inverse-surface": "#f5ddd8",
+                    "surface-container-highest": "#40312e",
+                    "on-secondary-fixed-variant": "#004f57",
+                    "on-surface-variant": "#e0bfb8",
+                    "error-container": "#93000a",
+                    "primary-container": "#ef6544",
+                    "warmBrown": "#9090A0",
+                    "on-background": "#f5ddd8",
+                    "coverCream": "#E8D5B8",
+                    "surface-container": "#291d19"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "drawer-width": "85vw",
+                    "card-padding-y": "16pt",
+                    "card-padding-x": "20pt",
+                    "section-gap-md": "20pt",
+                    "section-gap-lg": "32pt",
+                    "section-gap-sm": "14pt",
+                    "gutter-tight": "4pt"
+            },
+            "fontFamily": {
+                    "display-lg": ["system-sans"],
+                    "body-lg": ["system-serif"],
+                    "label-md": ["system-rounded"],
+                    "headline-lg": ["STSongti-SC", "serif"],
+                    "label-sm": ["system-rounded"],
+                    "headline-md": ["STSongti-SC", "serif"],
+                    "body-md": ["system-serif"],
+                    "label-xs": ["system-rounded"]
+            },
+            "fontSize": {
+                    "display-lg": ["26px", {"letterSpacing": "3px", "fontWeight": "900"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-md": ["13px", {"fontWeight": "400"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "label-sm": ["11px", {"fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "label-xs": ["10px", {"fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #000000;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .paper-gradient {
+            background: linear-gradient(180deg, rgba(74, 74, 88, 0.3) 0%, rgba(74, 74, 88, 0.15) 100%);
+        }
+        .blur-edge {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen w-full">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 h-16 blur-edge bg-black/30">
+<button class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:opacity-80 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[28px]">close</span>
+</button>
+<button class="w-11 h-11 flex items-center justify-center rounded-full text-drawerAccent hover:opacity-80 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[26px]">share</span>
+</button>
+</header>
+<!-- Main Photo Viewer Canvas -->
+<main class="relative flex-1 flex items-center justify-center w-full group">
+<!-- Faint Navigation Chevrons -->
+<div class="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-10 transition-opacity duration-700 group-hover:opacity-30">
+<span class="material-symbols-outlined text-[64px] font-thin text-white">chevron_left</span>
+</div>
+<div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-10 transition-opacity duration-700 group-hover:opacity-30">
+<span class="material-symbols-outlined text-[64px] font-thin text-white">chevron_right</span>
+</div>
+<!-- The Content Image -->
+<div class="w-full h-auto max-h-[85vh] flex items-center justify-center overflow-hidden">
+<img alt="Beijing street scene in the rain" class="w-full h-auto object-contain transition-transform duration-500 hover:scale-[1.02]" src="https://lh3.googleusercontent.com/aida/AP1WRLthjukl6cQDnhlGpu8_NHqvjZ4Th5fv-XiqpSvueFZPDZaCyW9BqZ9lOcNJcHINR35q7BVgFyOzh-aTUttvPemoufy0vVRz-vMAQ7DA0Y1hb7qGJvoP7n4islXWgXEtdB5grseynmPd32uSrVLXhnT34UyMVecPnnyEIwronJfBwrwvSn-UWKPHb947YChcSYTCAvymn3yyJaNQwGHvReMHhAOZcpbpsm0MbLRqHR602ahKdmxmwKIyad8"/>
+</div>
+</main>
+<!-- Bottom UI Cluster -->
+<footer class="fixed bottom-0 left-0 right-0 z-40 pb-safe pointer-events-none">
+<!-- Pagination Indicator Pill -->
+<div class="flex justify-center mb-6">
+<div class="px-5 py-1.5 rounded-full bg-white/10 blur-edge border border-white/5 pointer-events-auto">
+<span class="font-label-md text-label-md text-white/90 tracking-widest">2 / 5</span>
+</div>
+</div>
+<!-- Caption Strip -->
+<div class="w-full blur-edge bg-black/60 pt-6 pb-10 px-8 pointer-events-auto">
+<div class="max-w-[340pt] mx-auto text-center">
+<p class="font-label-sm text-label-sm text-drawerAccent/70 tracking-widest mb-1">
+                    2026年7月31日 星期五
+                </p>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-wide">
+                    午后的阵雨
+                </h1>
+<!-- Interaction Hint -->
+<div class="mt-4 flex justify-center space-x-1.5 opacity-40">
+<div class="w-1.5 h-1.5 rounded-full bg-white/20"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-drawerAccent"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-white/20"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-white/20"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-white/20"></div>
+</div>
+</div>
+</div>
+</footer>
+<!-- Interactive Layer for Tap-to-Hide UI -->
+<script>
+        let uiVisible = true;
+        const topBar = document.querySelector('header');
+        const footer = document.querySelector('footer');
+        const hints = document.querySelectorAll('.group-hover\\:opacity-30');
+
+        document.body.addEventListener('click', (e) => {
+            // Only toggle if not clicking a button
+            if (e.target.closest('button')) return;
+            
+            uiVisible = !uiVisible;
+            const opacity = uiVisible ? '1' : '0';
+            const pointer = uiVisible ? 'auto' : 'none';
+            
+            topBar.style.opacity = opacity;
+            topBar.style.pointerEvents = pointer;
+            footer.style.opacity = opacity;
+            footer.style.pointerEvents = pointer;
+            
+            topBar.style.transition = 'opacity 0.4s ease-in-out';
+            footer.style.transition = 'opacity 0.4s ease-in-out';
+        });
+        
+        // Simple swipe gesture hint (simulated)
+        let touchStartX = 0;
+        document.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
+        document.addEventListener('touchend', e => {
+            const touchEndX = e.changedTouches[0].screenX;
+            if (Math.abs(touchEndX - touchStartX) > 50) {
+                // Flash navigation indicators on swipe
+                const chevrons = document.querySelectorAll('.material-symbols-outlined.font-thin');
+                chevrons.forEach(c => {
+                    c.parentElement.style.opacity = '0.6';
+                    setTimeout(() => c.parentElement.style.opacity = '', 400);
+                });
+            }
+        });
+    </script>
+</body></html>

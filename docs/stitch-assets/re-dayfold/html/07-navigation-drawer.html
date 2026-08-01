@@ -1,0 +1,287 @@
+<!DOCTYPE html><html class="dark" lang="zh-CN" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Dayfold Navigation Drawer</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "surface-bright": "#453632",
+                "on-primary-container": "#560d00",
+                "surface-dim": "#1c100e",
+                "secondary-container": "#249fae",
+                "warmDark": "#E8E8EC",
+                "on-secondary-container": "#002f35",
+                "coverLeather": "#2C1A0A",
+                "on-tertiary-container": "#002e38",
+                "inverse-primary": "#ab3418",
+                "primary-fixed-dim": "#ffb4a3",
+                "tertiary-container": "#239eb7",
+                "warmBrown": "#9090A0",
+                "on-tertiary-fixed-variant": "#004e5c",
+                "on-tertiary-fixed": "#001f26",
+                "warmGray": "#52525F",
+                "on-surface": "#f5ddd8",
+                "on-primary-fixed": "#3d0700",
+                "on-primary-fixed-variant": "#8a1c01",
+                "tertiary": "#6ad5ef",
+                "on-secondary": "#00363d",
+                "surface-tint": "#ffb4a3",
+                "surface": "#1c100e",
+                "primary": "#ffb4a3",
+                "secondary-fixed": "#96f0ff",
+                "inverse-surface": "#f5ddd8",
+                "tertiary-fixed": "#acedff",
+                "primary-container": "#ef6544",
+                "warmCream": "#4A4A58",
+                "on-tertiary": "#003640",
+                "on-primary": "#621100",
+                "warmLight": "#434350",
+                "error": "#ffb4ab",
+                "background": "#1c100e",
+                "surface-container-lowest": "#160b09",
+                "on-error-container": "#ffdad6",
+                "warmPaper": "#3C3C44",
+                "surface-variant": "#40312e",
+                "outline": "#a78a83",
+                "drawerBg": "#2D2D33",
+                "on-error": "#690005",
+                "coverCream": "#E8D5B8",
+                "on-surface-variant": "#e0bfb8",
+                "drawerAccent": "#F27359",
+                "surface-container": "#291d19",
+                "on-secondary-fixed": "#001f24",
+                "surface-container-low": "#251916",
+                "on-background": "#f5ddd8",
+                "secondary-fixed-dim": "#6ad6e6",
+                "surface-container-highest": "#40312e",
+                "tertiary-fixed-dim": "#6ad5ef",
+                "primary-fixed": "#ffdad2",
+                "outline-variant": "#59413c",
+                "secondary": "#6ad6e6",
+                "on-secondary-fixed-variant": "#004f57",
+                "surface-container-high": "#352723",
+                "inverse-on-surface": "#3b2d2a",
+                "error-container": "#93000a",
+                "cyan-accent": "#5BC8D8",
+                "ember-orange": "#E05A3A"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "card-padding-x": "20pt",
+                "section-gap-md": "20pt",
+                "section-gap-lg": "32pt",
+                "card-padding-y": "16pt",
+                "drawer-width": "85vw",
+                "gutter-tight": "4pt",
+                "section-gap-sm": "14pt"
+            },
+            "fontFamily": {
+                "label-xs": ["system-rounded", "sans-serif"],
+                "display-lg": ["system-sans", "sans-serif"],
+                "label-sm": ["system-rounded", "sans-serif"],
+                "body-md": ["STSongti-SC", "serif"],
+                "label-md": ["system-rounded", "sans-serif"],
+                "headline-md": ["STSongti-SC", "serif"],
+                "body-lg": ["STSongti-SC", "serif"],
+                "headline-lg": ["STSongti-SC", "serif"]
+            },
+            "fontSize": {
+                "label-xs": ["10px", {"fontWeight": "400"}],
+                "display-lg": ["26px", {"letterSpacing": "3px", "fontWeight": "900"}],
+                "label-sm": ["11px", {"fontWeight": "400"}],
+                "body-md": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+                "label-md": ["13px", {"fontWeight": "400"}],
+                "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "400"}],
+                "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                "headline-lg": ["22px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #1c100e;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'STSongti-SC', serif;
+        }
+
+        .paperDrop {
+            animation: paperDropEffect 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes paperDropEffect {
+            0% {
+                transform: rotateX(-8deg) translateY(-12pt);
+                opacity: 0;
+            }
+            100% {
+                transform: rotateX(0deg) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            font-size: 22px;
+        }
+
+        .active-row {
+            color: #E05A3A;
+        }
+
+        .drawer-shadow {
+            box-shadow: inset -15px 0 30px -15px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex h-screen w-full overflow-hidden">
+<!-- NAVIGATION DRAWER (The 85% Panel) -->
+<aside class="fixed inset-y-0 left-0 z-50 flex flex-col w-drawer-width bg-drawerBg drawer-shadow paperDrop" style="box-shadow: 12pt 0 24pt rgba(0,0,0,0.35);">
+<!-- Top Brand Block -->
+<header class="pt-[60pt] px-section-gap-md mb-section-gap-lg">
+<h1 class="text-ember-orange font-display-lg text-headline-lg tracking-[2pt] uppercase">DAYFOLD</h1>
+<p class="text-warmBrown font-label-md text-label-md mt-1">我的日记本</p>
+</header>
+<!-- Main Navigation Scroll Area -->
+<nav class="flex-1 overflow-y-auto px-0">
+<!-- Primary Group: 日记 -->
+<div class="mb-8">
+<div class="px-section-gap-md mb-2">
+<span class="text-cyan-accent font-label-sm text-label-sm font-semibold tracking-[1.5pt] uppercase">日记</span>
+</div>
+<ul class="space-y-1">
+<!-- Row 1: Active -->
+<li class="group">
+<a class="flex items-center justify-between py-[15pt] px-section-gap-md bg-surface-container-highest/10 transition-all active:scale-[0.98]" href="#">
+<div class="flex items-center gap-4 text-ember-orange">
+<span class="material-symbols-outlined" data-icon="book" style="font-variation-settings: 'FILL' 1;">book</span>
+<span class="font-body-lg text-body-lg">全部日记</span>
+</div>
+<span class="material-symbols-outlined text-ember-orange text-sm" data-icon="chevron_right">chevron_right</span>
+</a>
+</li>
+<!-- Row 2 -->
+<li class="group">
+<a class="flex items-center gap-4 py-[15pt] px-section-gap-md text-on-surface-variant hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="schedule">schedule</span>
+<span class="font-body-lg text-body-lg">时间轴</span>
+</a>
+</li>
+<!-- Row 3 -->
+<li class="group">
+<a class="flex items-center gap-4 py-[15pt] px-section-gap-md text-on-surface-variant hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="image">image</span>
+<span class="font-body-lg text-body-lg">照片墙</span>
+</a>
+</li>
+<!-- Row 4 -->
+<li class="group">
+<a class="flex items-center gap-4 py-[15pt] px-section-gap-md text-on-surface-variant hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="location_on">location_on</span>
+<span class="font-body-lg text-body-lg">地图</span>
+</a>
+</li>
+</ul>
+</div>
+<!-- Subtle Hairline Divider -->
+<div class="px-section-gap-md mb-8">
+<div class="h-[1px] w-full bg-white/5"></div>
+</div>
+<!-- Secondary Group: 更多 -->
+<div class="mb-8">
+<div class="px-section-gap-md mb-2">
+<span class="text-cyan-accent font-label-sm text-label-sm font-semibold tracking-[1.5pt] uppercase">更多</span>
+</div>
+<ul class="space-y-1">
+<!-- Row 5 -->
+<li class="group">
+<a class="flex items-center gap-4 py-[15pt] px-section-gap-md text-on-surface-variant hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+<span class="font-body-lg text-body-lg">回收站</span>
+</a>
+</li>
+<!-- Row 6 -->
+<li class="group">
+<a class="flex items-center gap-4 py-[15pt] px-section-gap-md text-on-surface-variant hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+<span class="font-body-lg text-body-lg">数据统计</span>
+</a>
+</li>
+<!-- Row 7 -->
+<li class="group">
+<a class="flex items-center gap-4 py-[15pt] px-section-gap-md text-on-surface-variant hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-lg text-body-lg">设置</span>
+</a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Bottom Fixed Area -->
+<footer class="mt-auto pb-[32pt] px-section-gap-md flex items-center justify-between border-t border-white/5 pt-6">
+<span class="text-warmBrown font-label-xs text-label-xs">v1.0.0</span>
+<div class="flex items-center gap-2 text-cyan-accent">
+<span class="material-symbols-outlined text-[14px]" data-icon="face">face</span>
+<span class="font-label-xs text-label-xs">已启用 Face ID</span>
+</div>
+</footer>
+</aside>
+<!-- RIGHT SLIVER (15% Home Screen Content) -->
+<main class="relative w-[15vw] ml-[85vw] h-full overflow-hidden">
+<!-- Dimmed/Blurred Background Screen -->
+<div class="absolute inset-0 bg-cover bg-center" data-alt="A high-fidelity mockup of a sophisticated digital journal interface. The background shows a beautifully textured paper-like surface with soft typography and a minimalist grid of photos. The entire view is heavily dimmed with a dark charcoal-blue overlay and a soft Gaussian blur to create a sense of depth and focus on the foreground navigation drawer. The mood is private, expensive, and quiet, fitting a midnight reading-room aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBEkp5vWoIIDFLH2p53FD74xf1nRwD6r2wNjlxT8Tus9H55EA6YRo8bYjbIkqTJj2UQbiB35zlh6oUxucPW9qFlCxx28oUuA1wTbLomTFBtoSKSwemHroqqpEtANXah2yFi8SxFDl8SYS5Acrgi21eRx5mHKCHh11P0qcQl0XYpoMtSnSrj8y2gpIfo2vuB8vWw4wHTxGfaizPWgCKR89RpU-zSbdrM6rT9RB1AbZc_r91kiBzPe7LMMjn6_n_mio6RKhSl3VNOJ8UO')">
+</div>
+<!-- Extra overlay to ensure dimming -->
+<div class="absolute inset-0 bg-black/60 backdrop-blur-[2px]"></div>
+</main>
+<script>
+        // Micro-interaction for navigation items
+        document.querySelectorAll('nav a').forEach(item => {
+            item.addEventListener('click', (e) => {
+                // Haptic feedback simulation
+                if (window.navigator && window.navigator.vibrate) {
+                    window.navigator.vibrate(10);
+                }
+            });
+        });
+
+        // Initialize Material Symbols
+        document.querySelectorAll('[data-icon]').forEach(el => {
+            const iconName = el.getAttribute('data-icon');
+            const span = document.createElement('span');
+            span.className = 'material-symbols-outlined';
+            span.textContent = iconName;
+            
+            // Respect existing styles or weight
+            if (el.classList.contains('material-symbols-outlined')) {
+                // already a span, just set text
+                el.textContent = iconName;
+            } else {
+                // Icon inside container
+                // This is already handled by static HTML but for safety:
+            }
+        });
+    </script>
+</body></html>

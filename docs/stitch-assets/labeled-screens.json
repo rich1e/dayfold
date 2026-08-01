@@ -1,0 +1,146 @@
+{
+  "project": {
+    "name": "projects/13633875149271731736",
+    "title": "re-dayfold"
+  },
+  "filter": "hidden !== true && has label",
+  "count": 15,
+  "screens": [
+    {
+      "id": "0bb61a462f3847cbab872ade414205c5",
+      "label": "Dayfold - 全屏图片查看器",
+      "sourceScreen": "projects/13633875149271731736/screens/0bb61a462f3847cbab872ade414205c5",
+      "width": 390,
+      "height": 884,
+      "x": 1363,
+      "y": 7345
+    },
+    {
+      "id": "1a603cf6c7de4c11acfe7380eedc9ea4",
+      "label": "Dayfold - 回收站",
+      "sourceScreen": "projects/13633875149271731736/screens/1a603cf6c7de4c11acfe7380eedc9ea4",
+      "width": 390,
+      "height": 884,
+      "x": 14,
+      "y": 8466
+    },
+    {
+      "id": "3386b0f33f6643f9ae1dd17471b980dd",
+      "label": "Dayfold 时间轴",
+      "sourceScreen": "projects/13633875149271731736/screens/3386b0f33f6643f9ae1dd17471b980dd",
+      "width": 390,
+      "height": 1252,
+      "x": 676,
+      "y": 3866
+    },
+    {
+      "id": "3d2503292833484182afcb83c744a9e6",
+      "label": "Dayfold - 锁屏页",
+      "sourceScreen": "projects/13633875149271731736/screens/3d2503292833484182afcb83c744a9e6",
+      "width": 390,
+      "height": 884,
+      "x": 0,
+      "y": 7345
+    },
+    {
+      "id": "3d2eb29401ed4da6be2228bbb93f6a98",
+      "label": "Dayfold - 照片墙",
+      "sourceScreen": "projects/13633875149271731736/screens/3d2eb29401ed4da6be2228bbb93f6a98",
+      "width": 390,
+      "height": 1487,
+      "x": 1330,
+      "y": 3866
+    },
+    {
+      "id": "444ab6b2b57a486a95d33d604ef6a8e7",
+      "label": "Dayfold Home - 日记本画廊2",
+      "sourceScreen": "projects/13633875149271731736/screens/444ab6b2b57a486a95d33d604ef6a8e7",
+      "width": 390,
+      "height": 881,
+      "x": 648,
+      "y": 2600
+    },
+    {
+      "id": "560bd222ce7646998c984dcf708859f4",
+      "label": "Dayfold - 抽屉导航",
+      "sourceScreen": "projects/13633875149271731736/screens/560bd222ce7646998c984dcf708859f4",
+      "width": 390,
+      "height": 863,
+      "x": -1,
+      "y": 2618
+    },
+    {
+      "id": "5a56616a8b244e87a454b26203f6005f",
+      "label": "Dayfold - 日历条目表",
+      "sourceScreen": "projects/13633875149271731736/screens/5a56616a8b244e87a454b26203f6005f",
+      "width": 390,
+      "height": 884,
+      "x": 2045,
+      "y": 7345
+    },
+    {
+      "id": "5e0808ce759b427c8e812919af4588a8",
+      "label": "Dayfold - 分享卡片",
+      "sourceScreen": "projects/13633875149271731736/screens/5e0808ce759b427c8e812919af4588a8",
+      "width": 390,
+      "height": 884,
+      "x": 681,
+      "y": 7345
+    },
+    {
+      "id": "a3ee51664f914467b20b45e296898da8",
+      "label": "Dayfold - 创建新日记",
+      "sourceScreen": "projects/13633875149271731736/screens/a3ee51664f914467b20b45e296898da8",
+      "width": 390,
+      "height": 884,
+      "x": 668,
+      "y": 5712
+    },
+    {
+      "id": "bbc9c71944844632a5e0d2c03d3177c5",
+      "label": "Dayfold - 日记详情页",
+      "sourceScreen": "projects/13633875149271731736/screens/bbc9c71944844632a5e0d2c03d3177c5",
+      "width": 390,
+      "height": 1420,
+      "x": 6,
+      "y": 5712
+    },
+    {
+      "id": "c5a37fd0421b4ae085f788ef0d452b0f",
+      "label": "Dayfold - 日历",
+      "sourceScreen": "projects/13633875149271731736/screens/c5a37fd0421b4ae085f788ef0d452b0f",
+      "width": 390,
+      "height": 884,
+      "x": 1984,
+      "y": 3866
+    },
+    {
+      "id": "d812a490a67e41c2a127dc0a192ac58e",
+      "label": "Dayfold - 标签管理页",
+      "sourceScreen": "projects/13633875149271731736/screens/d812a490a67e41c2a127dc0a192ac58e",
+      "width": 390,
+      "height": 884,
+      "x": 1330,
+      "y": 5712
+    },
+    {
+      "id": "e792f8e95da249e4981febebb93a4aee",
+      "label": "Dayfold - 地图",
+      "sourceScreen": "projects/13633875149271731736/screens/e792f8e95da249e4981febebb93a4aee",
+      "width": 390,
+      "height": 884,
+      "x": 22,
+      "y": 3866
+    },
+    {
+      "id": "f09fab85-722a-439b-8934-a16f96bb340b",
+      "label": "Dayfold Home - 日记本画廊",
+      "sourceScreen": "projects/13633875149271731736/screens/2528015755157635655",
+      "type": "SCREEN_INSTANCE",
+      "width": 512,
+      "height": 1112,
+      "x": 1298,
+      "y": 2369
+    }
+  ]
+}

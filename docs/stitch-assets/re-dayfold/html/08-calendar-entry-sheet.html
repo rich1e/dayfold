@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>Midnight Journal - Calendar View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "on-surface-variant": "#e0bfb8",
+                "coverLeather": "#2C1A0A",
+                "warmLight": "#434350",
+                "surface-tint": "#ffb4a3",
+                "tertiary-fixed": "#acedff",
+                "inverse-on-surface": "#3b2d2a",
+                "tertiary": "#6ad5ef",
+                "on-secondary-container": "#002f35",
+                "surface": "#1c100e",
+                "on-error": "#690005",
+                "surface-bright": "#453632",
+                "error": "#ffb4ab",
+                "on-background": "#f5ddd8",
+                "primary-fixed": "#ffdad2",
+                "on-surface": "#f5ddd8",
+                "secondary-container": "#249fae",
+                "warmDark": "#E8E8EC",
+                "on-tertiary": "#003640",
+                "on-primary": "#621100",
+                "drawerBg": "#2D2D33",
+                "error-container": "#93000a",
+                "on-tertiary-container": "#002e38",
+                "secondary-fixed": "#96f0ff",
+                "on-secondary-fixed": "#001f24",
+                "warmPaper": "#3C3C44",
+                "surface-container-lowest": "#160b09",
+                "on-tertiary-fixed": "#001f26",
+                "warmGray": "#52525F",
+                "on-tertiary-fixed-variant": "#004e5c",
+                "primary-container": "#ef6544",
+                "tertiary-fixed-dim": "#6ad5ef",
+                "surface-container-highest": "#40312e",
+                "drawerAccent": "#F27359",
+                "outline-variant": "#59413c",
+                "surface-variant": "#40312e",
+                "secondary-fixed-dim": "#6ad6e6",
+                "on-primary-container": "#560d00",
+                "on-error-container": "#ffdad6",
+                "surface-container": "#291d19",
+                "primary-fixed-dim": "#ffb4a3",
+                "surface-dim": "#1c100e",
+                "primary": "#ffb4a3",
+                "warmBrown": "#9090A0",
+                "tertiary-container": "#239eb7",
+                "outline": "#a78a83",
+                "on-secondary-fixed-variant": "#004f57",
+                "inverse-surface": "#f5ddd8",
+                "coverCream": "#E8D5B8",
+                "surface-container-high": "#352723",
+                "on-primary-fixed": "#3d0700",
+                "secondary": "#6ad6e6",
+                "background": "#1c100e",
+                "on-secondary": "#00363d",
+                "on-primary-fixed-variant": "#8a1c01",
+                "warmCream": "#4A4A58",
+                "surface-container-low": "#251916",
+                "inverse-primary": "#ab3418",
+                "warmAccent": "#E05A3A"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "2xl": "1rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "card-padding-x": "20pt",
+                "section-gap-lg": "32pt",
+                "section-gap-sm": "14pt",
+                "section-gap-md": "20pt",
+                "gutter-tight": "4pt",
+                "drawer-width": "85vw",
+                "card-padding-y": "16pt"
+            },
+            "fontFamily": {
+                "label-md": ["system-rounded", "sans-serif"],
+                "display-lg": ["system-sans", "sans-serif"],
+                "label-sm": ["system-rounded", "sans-serif"],
+                "headline-md": ["STSongti-SC", "serif"],
+                "body-md": ["Georgia", "serif"],
+                "body-lg": ["Georgia", "serif"],
+                "label-xs": ["system-rounded", "sans-serif"],
+                "headline-lg": ["STSongti-SC", "serif"]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .paper-gradient {
+            background: linear-gradient(180deg, rgba(74, 74, 88, 0.3) 0%, rgba(74, 74, 88, 0.15) 100%);
+        }
+        .paper-drop-animation {
+            animation: paperDrop 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes paperDrop {
+            0% { transform: translateY(12pt) rotateX(-8deg); opacity: 0; }
+            100% { transform: translateY(0) rotateX(0deg); opacity: 1; }
+        }
+        body {
+            background-color: #1c100e;
+            -webkit-font-smoothing: antialiased;
+            color: #f5ddd8;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="overflow-hidden">
+<!-- Top App Bar -->
+<header class="fixed top-0 w-full z-50 bg-background flex items-center justify-between px-section-gap-md h-16">
+<button class="material-symbols-outlined text-primary hover:opacity-80 transition-opacity active:scale-95 transition-transform" data-icon="menu">menu</button>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">Midnight Journal</h1>
+<button class="material-symbols-outlined text-primary hover:opacity-80 transition-opacity active:scale-95 transition-transform" data-icon="search">search</button>
+</header>
+<!-- Main Content: Background Calendar (Dimmed) -->
+<main class="pt-16 pb-20 px-4 min-h-screen bg-warmPaper opacity-40 select-none pointer-events-none">
+<div class="max-w-[340pt] mx-auto mt-4">
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-headline-lg text-warmDark">2026年7月</h2>
+<div class="flex gap-4">
+<span class="material-symbols-outlined">chevron_left</span>
+<span class="material-symbols-outlined">chevron_right</span>
+</div>
+</div>
+<div class="grid grid-cols-7 gap-2 text-center text-on-surface-variant font-label-md mb-4">
+<div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+</div>
+<div class="grid grid-cols-7 gap-2">
+<!-- Simple Calendar Grid Representation -->
+<div class="aspect-square flex items-center justify-center text-warmGray">28</div>
+<div class="aspect-square flex items-center justify-center text-warmGray">29</div>
+<div class="aspect-square flex items-center justify-center text-warmGray">30</div>
+<div class="aspect-square flex items-center justify-center">1</div>
+<div class="aspect-square flex items-center justify-center">2</div>
+<div class="aspect-square flex items-center justify-center">3</div>
+<div class="aspect-square flex items-center justify-center">4</div>
+<!-- ... more days ... -->
+<div class="aspect-square flex items-center justify-center">26</div>
+<div class="aspect-square flex items-center justify-center">27</div>
+<div class="aspect-square flex items-center justify-center bg-drawerAccent text-white rounded-full font-bold">28</div>
+<div class="aspect-square flex items-center justify-center">29</div>
+<div class="aspect-square flex items-center justify-center">30</div>
+<div class="aspect-square flex items-center justify-center">31</div>
+<div class="aspect-square flex items-center justify-center text-warmGray">1</div>
+</div>
+</div>
+</main>
+<!-- Bottom Sheet Scrim -->
+<div class="fixed inset-0 bg-black/40 z-[55]"></div>
+<!-- Active Bottom Sheet -->
+<div class="fixed bottom-0 left-0 right-0 z-[60] bg-warmPaper rounded-t-[24pt] shadow-[0_-8px_32px_rgba(0,0,0,0.5)] max-h-[751px] flex flex-col paper-drop-animation">
+<!-- Drag Handle -->
+<div class="w-full flex justify-center py-3">
+<div class="w-10 h-1.5 bg-warmGray/40 rounded-full"></div>
+</div>
+<!-- Sheet Header -->
+<div class="px-6 pb-4 border-b border-outline-variant/30">
+<div class="flex items-center gap-3">
+<h3 class="font-headline-lg text-warmDark tracking-tight">2026年7月28日 星期二</h3>
+<span class="bg-warmAccent text-white px-2.5 py-0.5 rounded-full font-label-sm text-[11px] uppercase tracking-wider">3 条日记</span>
+</div>
+</div>
+<!-- Entry List -->
+<div class="flex-1 overflow-y-auto px-6 py-6 space-y-4">
+<!-- Entry 1 -->
+<div class="bg-warmLight p-[16pt] rounded-2xl shadow-lg paper-gradient flex gap-4 items-start active:scale-[0.98] transition-transform">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-md text-warmBrown">10:42</span>
+<h4 class="font-headline-md text-warmDark">午后的咖啡馆</h4>
+</div>
+<p class="font-body-md text-on-surface-variant line-clamp-1">躲进西四的小书店里，满屋子都是陈年纸张的味道...</p>
+</div>
+<div class="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover opacity-80" data-alt="A moody close-up of a rustic ceramic coffee cup sitting on a dark wooden table next to an old open book. The lighting is soft and golden, coming from a nearby window in a dimly lit library. The overall aesthetic is warm, quiet, and reflective, matching the midnight journal's contemplative vibe." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJuesYI81TdRAz_VvrYY1bieADddCj0fniJg9UeOh_hrfs2BOEnluy035jIzxw_0AjzQH6HUQpJfaD5RyUobrf-42jp8supPbZdCqMCMAmTxcnZHysV15Iz8ZnIzivz3c8FE77kbyGQpyOcyuwLKIhwtj9Ub07-JxculLEjPgmTytD6gZGLJ_MgzSOiIMzs0RU7e8dlP-j2C1eH6hA4MC3bQeOdNlB5nBS85j5b4ObcI06NtCu8575KFPcEaJGYXQ1sfvpNrsJttV6"/>
+</div>
+</div>
+<!-- Entry 2 -->
+<div class="bg-warmLight p-[16pt] rounded-2xl shadow-lg paper-gradient flex gap-4 items-start active:scale-[0.98] transition-transform">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-md text-warmBrown">08:15</span>
+<h4 class="font-headline-md text-warmDark">清晨的雨后</h4>
+</div>
+<p class="font-body-md text-on-surface-variant line-clamp-1">北京的夏雨总是来得快，也得快。刚才还是乌云密布...</p>
+</div>
+<div class="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover opacity-80" data-alt="Macro photography of large rain droplets resting on a lush green leaf in the early morning light. The background is a soft blur of urban greenery under a gray, moody sky. The atmosphere is fresh and quiet, emphasizing the tactile and contemplative tone of a personal journal." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsuVJ7Z6ybzMlk91Ar2-lxME3h6TbdCEaKn6CJW-5XJrTEBNiM9Hp5u_eybvDVgyB059gGiZqAP2NTEnYoz96jnHqXz5bqGyo2KTGIw8mflJx8viNz1FnaPUgDXQari24eNcrLFJuxU1zFTABeFkYv2qHqThbBovx80-xuCwmyFsWJdprM0Sf3OdhksdfKEEafFVgEnzWCunCakQjcvPCQsPEZlnpPYi1ifL8BrPTag7Yz0qlU6Hzc9Q6P_I3WyrMthy4YJ67gBYNt"/>
+</div>
+</div>
+<!-- Entry 3 -->
+<div class="bg-warmLight p-[16pt] rounded-2xl shadow-lg paper-gradient active:scale-[0.98] transition-transform">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-md text-warmBrown">22:15</span>
+<h4 class="font-headline-md text-warmDark">深夜的思考</h4>
+</div>
+<p class="font-body-md text-on-surface-variant line-clamp-1">在宁静的街道上看到一株含苞待放的花...</p>
+</div>
+</div>
+<!-- Action Button -->
+<div class="p-6 pb-8 bg-warmPaper/80 backdrop-blur-md">
+<button class="w-full bg-warmAccent text-white h-14 rounded-xl font-headline-md shadow-lg shadow-warmAccent/20 hover:opacity-90 active:scale-95 transition-all">
+                在此日新建日记
+            </button>
+</div>
+</div>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 w-full z-50 bg-warmPaper border-t border-outline-variant flex justify-around items-center h-20 px-4 pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.35)] rounded-t-xl">
+<div class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-warmLight transition-all active:scale-95">
+<span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
+<span class="font-label-md text-label-md">Timeline</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-warmLight transition-all active:scale-95">
+<span class="material-symbols-outlined" data-icon="image">image</span>
+<span class="font-label-md text-label-md">Gallery</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-xl px-4 py-1 hover:bg-warmLight transition-all active:scale-95">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-label-md text-label-md">Calendar</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-warmLight transition-all active:scale-95">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</div>
+</nav>
+<script>
+        // Simple micro-interaction for the bottom sheet
+        const sheet = document.querySelector('.paper-drop-animation');
+        let startY = 0;
+        let currentY = 0;
+
+        sheet.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY;
+        });
+
+        sheet.addEventListener('touchmove', (e) => {
+            currentY = e.touches[0].clientY;
+            const diff = currentY - startY;
+            if (diff > 0) {
+                sheet.style.transform = `translateY(${diff}px)`;
+            }
+        });
+
+        sheet.addEventListener('touchend', (e) => {
+            const diff = currentY - startY;
+            if (diff > 150) {
+                // Logic to close could be added here
+                sheet.style.transition = 'transform 0.3s ease-out';
+                sheet.style.transform = 'translateY(100%)';
+            } else {
+                sheet.style.transition = 'transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)';
+                sheet.style.transform = 'translateY(0)';
+            }
+        });
+    </script>
+</body></html>

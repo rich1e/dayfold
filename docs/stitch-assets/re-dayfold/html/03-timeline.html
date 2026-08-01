@@ -1,0 +1,341 @@
+<!DOCTYPE html><html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport">
+<title>Dayfold Timeline</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=system-rounded:wght@100..900&amp;family=system-sans:wght@100..900&amp;family=system-serif:wght@100..900&amp;display=swap" rel="stylesheet">
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "primary-fixed-dim": "#ffb4a3",
+                "error-container": "#93000a",
+                "surface-container-lowest": "#160b09",
+                "surface-bright": "#453632",
+                "on-primary-fixed": "#3d0700",
+                "on-error-container": "#ffdad6",
+                "secondary-container": "#249fae",
+                "on-secondary-fixed-variant": "#004f57",
+                "surface-container-highest": "#40312e",
+                "on-tertiary-container": "#002e38",
+                "surface": "#1c100e",
+                "on-tertiary-fixed-variant": "#004e5c",
+                "secondary-fixed": "#96f0ff",
+                "on-error": "#690005",
+                "tertiary": "#6ad5ef",
+                "outline": "#a78a83",
+                "primary-fixed": "#ffdad2",
+                "secondary-fixed-dim": "#6ad6e6",
+                "drawerBg": "#2D2D33",
+                "on-background": "#f5ddd8",
+                "warmGray": "#52525F",
+                "warmDark": "#E8E8EC",
+                "warmCream": "#4A4A58",
+                "on-tertiary": "#003640",
+                "coverCream": "#E8D5B8",
+                "surface-container": "#291d19",
+                "on-secondary": "#00363d",
+                "primary-container": "#ef6544",
+                "on-secondary-container": "#002f35",
+                "surface-tint": "#ffb4a3",
+                "on-surface": "#f5ddd8",
+                "on-primary": "#621100",
+                "surface-container-high": "#352723",
+                "warmPaper": "#3C3C44",
+                "on-primary-container": "#560d00",
+                "drawerAccent": "#F27359",
+                "surface-variant": "#40312e",
+                "background": "#1c100e",
+                "surface-dim": "#1c100e",
+                "on-primary-fixed-variant": "#8a1c01",
+                "on-surface-variant": "#e0bfb8",
+                "inverse-on-surface": "#3b2d2a",
+                "inverse-surface": "#f5ddd8",
+                "warmLight": "#434350",
+                "on-secondary-fixed": "#001f24",
+                "surface-container-low": "#251916",
+                "inverse-primary": "#ab3418",
+                "primary": "#ffb4a3",
+                "outline-variant": "#59413c",
+                "error": "#ffb4ab",
+                "tertiary-fixed": "#acedff",
+                "secondary": "#6ad6e6",
+                "tertiary-fixed-dim": "#6ad5ef",
+                "coverLeather": "#2C1A0A",
+                "tertiary-container": "#239eb7",
+                "on-tertiary-fixed": "#001f26",
+                "warmBrown": "#9090A0"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "section-gap-lg": "32pt",
+                "gutter-tight": "4pt",
+                "drawer-width": "85vw",
+                "section-gap-sm": "14pt",
+                "card-padding-y": "16pt",
+                "section-gap-md": "20pt",
+                "card-padding-x": "20pt"
+            },
+            "fontFamily": {
+                "label-xs": ["system-rounded"],
+                "label-sm": ["system-rounded"],
+                "display-lg": ["system-sans"],
+                "label-md": ["system-rounded"],
+                "headline-md": ["STSongti-SC", "serif"],
+                "headline-lg": ["STSongti-SC", "serif"],
+                "body-md": ["system-serif"],
+                "body-lg": ["system-serif"]
+            },
+            "fontSize": {
+                "label-xs": ["10px", {"fontWeight": "400"}],
+                "label-sm": ["11px", {"fontWeight": "400"}],
+                "display-lg": ["26px", {"letterSpacing": "3px", "fontWeight": "900"}],
+                "label-md": ["13px", {"fontWeight": "400"}],
+                "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "400"}],
+                "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                "body-md": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+                "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #1c100e; /* Deep midnight */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .paper-shadow {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 22px;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background-color: rgba(82, 82, 95, 0.3);
+        }
+
+        .paper-texture {
+            background-image: linear-gradient(180deg, rgba(67, 67, 80, 0.3) 0%, rgba(67, 67, 80, 0.15) 100%);
+        }
+
+        .active-state:active {
+            transform: scale(0.95);
+            opacity: 0.8;
+            transition: transform 0.1s ease;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-background font-body-md selection:bg-primary/30">
+<!-- Top Navigation Bar -->
+<nav class="fixed top-0 left-0 w-full z-50 bg-background flex justify-between items-center px-section-gap-md h-16 shadow-none">
+<button class="active-state flex items-center justify-center w-11 h-11 text-secondary">
+<span class="material-symbols-outlined" style="font-size: 24px;">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md text-on-surface">时间轴</h1>
+<div class="flex items-center gap-1">
+<button class="active-state flex items-center justify-center w-11 h-11 text-secondary">
+<span class="material-symbols-outlined" style="font-size: 24px;">calendar_month</span>
+</button>
+<button class="active-state flex items-center justify-center w-11 h-11 text-secondary">
+<span class="material-symbols-outlined" style="font-size: 24px;">search</span>
+</button>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="pt-20 pb-24 px-0 max-w-md mx-auto relative min-h-screen">
+<!-- July 2026 Section -->
+<section class="relative mb-10">
+<header class="sticky top-16 bg-background/95 backdrop-blur-md z-40 px-section-gap-md py-4">
+<h2 class="font-label-md text-label-md text-secondary font-semibold uppercase tracking-[1.5pt]">
+                    2026年7月
+                </h2>
+</header>
+<div class="relative px-section-gap-md">
+<div class="timeline-line"></div>
+<!-- Entry 1 -->
+<article class="flex gap-4 relative py-section-gap-sm">
+<div class="w-11 flex flex-col items-center flex-shrink-0 z-10">
+<span class="font-label-xs text-label-xs text-warmBrown">周三</span>
+<span class="font-bold text-[22px] leading-tight text-on-surface">30</span>
+</div>
+<div class="flex-1 pb-6 border-b border-outline-variant/30">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">碎影与流光</h3>
+<p class="font-body-md text-body-md text-warmBrown line-clamp-2 leading-[22px] mb-3">
+                            今日在北京朝阳区的午后，阳光穿过落地窗投射下斑驳。这种静谧感让人想起了在京都度过的那个夏天，那里的木质走廊也有同样的温润。
+                        </p>
+<div class="flex gap-2 mb-3 scrollbar-hide overflow-x-auto">
+<img class="w-12 h-12 rounded-lg object-cover" data-alt="A moody, high-contrast photograph of a minimalist reading room at midnight. Warm low-key lighting illuminates a leather-bound journal and a cup of black coffee on a dark oak desk. The atmosphere is quiet and contemplative, with deep shadows and soft textures consistent with a dark, sophisticated journaling app aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAD4ghCauoeFxw7OhR3riBLL70Hf57r_Tdo3_oxvdAqN3OpTSCk4QWo-XngqbAnMvBFriVA-7gQzcEbHeOIy0cYxLhJbLOZaoA27epdC_n5isRqQtVhq61mCfdvG9hAGICB2VaGZPTFfh5HSwAoLhtDI7DkuO970yy13-VPcTW-gPSBOREOlb_OYrlfvwigAcOblUZ6xwuCW9vCAoBJLpkVIhCtufCc2vQAP2WND1nCdRnVRYIbCYpxpwSKuidEm4CuexcibLyhGIxz">
+<img class="w-12 h-12 rounded-lg object-cover" data-alt="Close-up of a window pane with soft afternoon shadows stretching across a textured wall. The visual style is cinematic and intimate, using a palette of deep browns, warm ambers, and midnight blues. Subtle grain adds a tactile, film-like quality to the image, evoking a sense of memory and reflection." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdAmtki6xQfeNxL8k2I8meVTsYnIdgJh8kFzJl83pf0YuTqI4ctaRxDyEFu2fzNf46hpGrDOdjooqHrhIFR7KXlSHh6Fm5vCDoAwu87t_-AqXeXA-jqNTWQz-VqGJJchCH7LbeNdy_Z_OI2F4lo66lCbLAJ6UHuqU8AsJOOAK9D1yeZHsXZbRn5yXEoGMnDg0bhGkb3_Q3vF0ayJQE3ySVYYRJuCHd23E-3K-xve-nf5IWuJGvNOe3f7BwHxlvc0GCxuDWalGhp47o">
+</div>
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-[#E05A3A]">
+<span>14:32</span>
+<span>·</span>
+<span>北京市朝阳区</span>
+<span>·</span>
+<span>晴 12°C</span>
+</div>
+</div>
+</article>
+<!-- Entry 2 (Same day) -->
+<article class="flex gap-4 relative py-section-gap-sm">
+<div class="w-11 flex-shrink-0 z-10"></div>
+<div class="flex-1 pb-6 border-b border-outline-variant/30">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">夜读随想</h3>
+<p class="font-body-md text-body-md text-warmBrown line-clamp-2 leading-[22px] mb-3">
+                            重新翻开了那本旧诗集，文字在昏黄的灯光下显得格外有分量。私密的夜晚总是能够给予灵魂最深处的慰藉。
+                        </p>
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-[#E05A3A]">
+<span>22:15</span>
+<span>·</span>
+<span>北京市朝阳区</span>
+<span>·</span>
+<span>清凉 8°C</span>
+</div>
+</div>
+</article>
+<!-- Entry 3 -->
+<article class="flex gap-4 relative py-section-gap-sm">
+<div class="w-11 flex flex-col items-center flex-shrink-0 z-10">
+<span class="font-label-xs text-label-xs text-warmBrown">周二</span>
+<span class="font-bold text-[22px] leading-tight text-on-surface">29</span>
+</div>
+<div class="flex-1 pb-6 border-b border-outline-variant/30">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">雨后的漫步</h3>
+<p class="font-body-md text-body-md text-warmBrown line-clamp-2 leading-[22px] mb-3">
+                            刚下过雨的街道空气清新极了，水泥地上倒映着霓虹灯的光泽。这是一种独特的都市浪漫，只有在独自一人时才能深刻感知。
+                        </p>
+<div class="flex gap-2 mb-3">
+<img class="w-12 h-12 rounded-lg object-cover" data-alt="A blurred city street at night after rain, showing reflections of neon lights on wet asphalt. The colors are dominated by deep blues and vibrant oranges, capturing a modern yet lonely urban atmosphere. The composition is artistic and minimalist, shot with a shallow depth of field for a soft, dreamy quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBH1BtShDKiGBq4aMYMcQhulodBi3tklzJ7vzVYCJAvs17_Yhhimkrop5aA1uE4dDOvSIGk85qhCSnTM-A_wz10J_BmrLfvqAwvX6Xjkh8B54n47U5vyRaujI4P9nUAvEXEii3C3yhOP8EWX0C0JY5Z99b9qvEeCEFGlDA_YTFucoKOpJaR-Y5qmNcyMRs4kJshuyBWQdfL210_PciRlVQmo8mQeecnpegMwvOd-_cxmYMnIyIfGoWqgsON7FBS6IpljSKK1XDSMHco">
+</div>
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-[#E05A3A]">
+<span>19:40</span>
+<span>·</span>
+<span>北京市朝阳区</span>
+<span>·</span>
+<span>小雨 10°C</span>
+</div>
+</div>
+</article>
+</div>
+</section>
+<!-- June 2026 Section -->
+<section class="relative">
+<header class="sticky top-16 bg-background/95 backdrop-blur-md z-40 px-section-gap-md py-4">
+<h2 class="font-label-md text-label-md text-secondary font-semibold uppercase tracking-[1.5pt]">
+                    2026年6月
+                </h2>
+</header>
+<div class="relative px-section-gap-md">
+<div class="timeline-line"></div>
+<!-- Entry 1 -->
+<article class="flex gap-4 relative py-section-gap-sm">
+<div class="w-11 flex flex-col items-center flex-shrink-0 z-10">
+<span class="font-label-xs text-label-xs text-warmBrown">周日</span>
+<span class="font-bold text-[22px] leading-tight text-on-surface">15</span>
+</div>
+<div class="flex-1 pb-6 border-b border-outline-variant/30">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">仲夏的午后</h3>
+<p class="font-body-md text-body-md text-warmBrown line-clamp-2 leading-[22px] mb-3">
+                            夏天的蝉鸣已经开始响亮起来。躲在冷气充足的咖啡馆里，手中的冰美式是唯一的救赎。
+                        </p>
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-[#E05A3A]">
+<span>15:05</span>
+<span>·</span>
+<span>北京市海淀区</span>
+<span>·</span>
+<span>晴 32°C</span>
+</div>
+</div>
+</article>
+<!-- Entry 2 -->
+<article class="flex gap-4 relative py-section-gap-sm">
+<div class="w-11 flex flex-col items-center flex-shrink-0 z-10">
+<span class="font-label-xs text-label-xs text-warmBrown">周六</span>
+<span class="font-bold text-[22px] leading-tight text-on-surface">14</span>
+</div>
+<div class="flex-1 pb-6">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">周末自省</h3>
+<p class="font-body-md text-body-md text-warmBrown line-clamp-2 leading-[22px] mb-3">
+                            一周结束了。在整理笔记时，发现很多琐碎的想法其实很有意义。我们需要在这个快节奏的世界里慢下来。
+                        </p>
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-[#E05A3A]">
+<span>10:20</span>
+<span>·</span>
+<span>北京市海淀区</span>
+<span>·</span>
+<span>多云 26°C</span>
+</div>
+</div>
+</article>
+</div>
+</section>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed bottom-24 right-6 w-[56px] h-[56px] bg-[#E05A3A] rounded-full flex items-center justify-center text-white shadow-lg active:scale-90 transition-transform z-50">
+<span class="material-symbols-outlined" style="font-size: 32px;">add</span>
+</button>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-40 bg-surface-container-low flex justify-around items-center px-4 py-3 pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.35)] rounded-t-xl">
+<button class="flex flex-col items-center justify-center text-on-surface-variant active-state">
+<span class="material-symbols-outlined">home</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full w-12 h-12 shadow-md">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">book</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant active-state">
+<span class="material-symbols-outlined">bookmark</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant active-state">
+<span class="material-symbols-outlined">person</span>
+</button>
+</nav>
+<!-- Micro-interaction Script -->
+<script>
+        // Simple scroll listener to change app bar opacity
+        const nav = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) {
+                nav.classList.add('bg-background/90', 'backdrop-blur-lg');
+                nav.classList.remove('bg-background');
+            } else {
+                nav.classList.remove('bg-background/90', 'backdrop-blur-lg');
+                nav.classList.add('bg-background');
+            }
+        });
+
+        // Add "Paper Drop" effect simulation on entry click
+        document.querySelectorAll('article').forEach(card => {
+            card.addEventListener('click', () => {
+                card.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease';
+                card.style.transform = 'translateY(4px) scale(0.98)';
+                setTimeout(() => {
+                    card.style.transform = 'translateY(0) scale(1)';
+                }, 150);
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html><html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=STSongti-SC:wght@100..900&amp;family=system-rounded:wght@100..900&amp;family=system-sans:wght@100..900&amp;family=system-serif:wght@100..900&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#3b2d2a",
+                        "tertiary-fixed": "#acedff",
+                        "surface-dim": "#1c100e",
+                        "on-primary": "#621100",
+                        "coverCream": "#E8D5B8",
+                        "background": "#1c100e",
+                        "surface-container-low": "#251916",
+                        "on-tertiary-fixed-variant": "#004e5c",
+                        "drawerAccent": "#F27359",
+                        "drawerBg": "#2D2D33",
+                        "on-primary-fixed": "#3d0700",
+                        "on-tertiary-container": "#002e38",
+                        "on-primary-fixed-variant": "#8a1c01",
+                        "tertiary-fixed-dim": "#6ad5ef",
+                        "error-container": "#93000a",
+                        "primary-fixed-dim": "#ffb4a3",
+                        "tertiary": "#6ad5ef",
+                        "on-surface-variant": "#e0bfb8",
+                        "on-tertiary-fixed": "#001f26",
+                        "surface-container-lowest": "#160b09",
+                        "secondary-fixed-dim": "#6ad6e6",
+                        "warmBrown": "#9090A0",
+                        "tertiary-container": "#239eb7",
+                        "inverse-surface": "#f5ddd8",
+                        "on-secondary-container": "#002f35",
+                        "outline-variant": "#59413c",
+                        "surface": "#1c100e",
+                        "primary-fixed": "#ffdad2",
+                        "secondary": "#6ad6e6",
+                        "on-secondary-fixed-variant": "#004f57",
+                        "on-error": "#690005",
+                        "surface-container-highest": "#40312e",
+                        "on-background": "#f5ddd8",
+                        "surface-variant": "#40312e",
+                        "inverse-primary": "#ab3418",
+                        "on-tertiary": "#003640",
+                        "warmCream": "#4A4A58",
+                        "warmLight": "#434350",
+                        "warmGray": "#52525F",
+                        "warmDark": "#E8E8EC",
+                        "primary": "#ffb4a3",
+                        "secondary-container": "#249fae",
+                        "on-primary-container": "#560d00",
+                        "surface-tint": "#ffb4a3",
+                        "warmPaper": "#3C3C44",
+                        "surface-container": "#291d19",
+                        "on-error-container": "#ffdad6",
+                        "on-surface": "#f5ddd8",
+                        "error": "#ffb4ab",
+                        "outline": "#a78a83",
+                        "surface-container-high": "#352723",
+                        "on-secondary": "#00363d",
+                        "surface-bright": "#453632",
+                        "on-secondary-fixed": "#001f24",
+                        "coverLeather": "#2C1A0A",
+                        "secondary-fixed": "#96f0ff",
+                        "primary-container": "#ef6544",
+                        "ember-orange": "#E05A3A"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "drawer-width": "85vw",
+                        "card-padding-y": "16pt",
+                        "section-gap-md": "20pt",
+                        "gutter-tight": "4pt",
+                        "card-padding-x": "20pt",
+                        "section-gap-sm": "14pt",
+                        "section-gap-lg": "32pt"
+                    },
+                    "fontFamily": {
+                        "body-md": ["system-serif"],
+                        "label-sm": ["system-rounded"],
+                        "headline-md": ["STSongti-SC"],
+                        "label-xs": ["system-rounded"],
+                        "label-md": ["system-rounded"],
+                        "display-lg": ["system-sans"],
+                        "headline-lg": ["STSongti-SC"],
+                        "body-lg": ["system-serif"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+                        "label-sm": ["11px", {"fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-xs": ["10px", {"fontWeight": "400"}],
+                        "label-md": ["13px", {"fontWeight": "400"}],
+                        "display-lg": ["26px", {"letterSpacing": "3px", "fontWeight": "900"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .paper-drop {
+            animation: paperDrop 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes paperDrop {
+            0% {
+                transform: translateY(20px) rotateX(-8deg) scale(0.95);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0) rotateX(0deg) scale(1);
+                opacity: 1;
+            }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .modal-blur {
+            backdrop-filter: blur(8px);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex items-end justify-center overflow-hidden">
+<!-- Dimmed Background Overlay -->
+<div class="fixed inset-0 bg-black/60 modal-blur z-0"></div>
+<!-- EntryCardPreviewSheet (Bottom Sheet) -->
+<div class="relative w-full h-[92vh] bg-surface-container-lowest rounded-t-[32px] z-10 flex flex-col shadow-2xl overflow-hidden border-t border-white/5">
+<!-- Sheet Handle -->
+<div class="absolute top-3 left-1/2 -translate-x-1/2 w-9 h-1 bg-warmGray rounded-full"></div>
+<!-- Sheet Title Bar -->
+<div class="flex items-center justify-between px-section-gap-md pt-8 pb-4">
+<h2 class="text-[17px] font-headline-md text-warmDark">分享日记</h2>
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">cancel</span>
+</button>
+</div>
+<!-- Scrollable Content Area -->
+<div class="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center pb-32">
+<!-- Card Preview Area -->
+<div class="w-full flex justify-center py-section-gap-md px-6">
+<div class="w-full max-w-[340px] bg-warmLight rounded-[16px] shadow-[0_8px_32px_rgba(0,0,0,0.6)] overflow-hidden paper-drop relative">
+<!-- Paper Texture Overlay -->
+<div class="absolute inset-0 pointer-events-none opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/natural-paper.png')]"></div>
+<div class="absolute inset-0 pointer-events-none bg-gradient-to-br from-white/10 to-transparent"></div>
+<!-- Card Header -->
+<div class="px-card-padding-x pt-card-padding-y pb-2">
+<p class="text-label-md font-label-md text-warmBrown mb-1">2026年7月31日 星期四</p>
+<div class="flex items-center gap-2 text-label-sm font-label-sm text-ember-orange">
+<span class="">14:32</span>
+<span class="opacity-30">•</span>
+<span class="">北京市朝阳区</span>
+<span class="opacity-30">•</span>
+<span class="">26°C</span>
+</div>
+</div>
+<!-- Divider -->
+<div class="mx-card-padding-x border-t border-warmGray/50 my-2"></div>
+<!-- Content -->
+<div class="px-card-padding-x py-3">
+<h3 class="text-[17px] font-headline-md font-bold text-warmDark mb-3">今天是个好日子</h3>
+<p class="text-body-md font-body-md text-warmDark/85 leading-[1.6] line-clamp-4 mb-4">
+                            北京的夏雨总是来得快，也得快。刚才还是乌云密布，转眼间天边就透出了几抹晚霞。空气中弥漫着泥土和青草被雨水冲刷后的清香。坐在窗前，看着屋檐下的水滴，心情也随之变得通透起来。日子虽平淡，却也因为这些细微的瞬时而闪烁。
+                        </p>
+<!-- Images Grid -->
+<div class="grid grid-cols-2 gap-[6px] mb-4">
+<div class="aspect-square rounded-[6px] overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover grayscale-[0.2] hover:grayscale-0 transition-all duration-500" src="https://lh3.googleusercontent.com/aida/AP1WRLuDjgRKpcKVrHueu4QUe2iQWWrBY_ZLSJNUNR-Juhiz5JcvKZ9ksWyOQHNjbnjNOGwV_6KP6IZT7LaoI4D6bq-63920pJne5CQYygNHW71wKvpJDYg3QbUllYAZqi7er3Wl5qnEgLP_k1j2alcXQY9VUTuqFmx9wiK84PfaaAQaC9QOkljsduvs9nnos6GmnlGtmm6BL8UhpK3BcPWV5tA5Ars_mks2YHvCErQ03kLRwzvNbivRERFVCz0s">
+</div>
+<div class="aspect-square rounded-[6px] overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover grayscale-[0.2] hover:grayscale-0 transition-all duration-500" src="https://lh3.googleusercontent.com/aida/AP1WRLsBEugnfjjtoqPmMmZUFVovj0j38V0hrqOI5cOW7-GyFJeILNIyuYvr2yrbHHadXrhUPY4zMfdU20TVgoafdmfDqD1QjtHlKaAgr7sCfTI8JRDSghmyV8VMIk4MyA95UYeAtv-khmf2kl7jDyF75sxEDuoPLV5h9upStjmMMi1_BJh43H2nwJMaYYhw_OdQoPIsuO8yjQ-nCtY3vn6hoC5PCI3gJ8Ntiw_sz5Xi_qVOUIeSrtzBD5dAg2c">
+</div>
+</div>
+</div>
+<!-- Footer -->
+<div class="px-card-padding-x pb-card-padding-y flex items-center justify-between">
+<div class="bg-green-900/30 text-green-400 text-[10px] px-2 py-0.5 rounded-[10px] font-label-sm border border-green-400/20">
+                            生活
+                        </div>
+<div class="flex items-center gap-1 text-[11px] font-label-md text-ember-orange font-bold tracking-tight">
+<span class="">Dayfold</span>
+<span class="material-symbols-outlined text-[14px]">menu_book</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Hint Text -->
+<div class="w-full px-section-gap-md mb-8">
+    <h4 class="text-label-sm font-label-sm text-warmBrown tracking-widest mb-4 uppercase">选择风格</h4>
+    <div class="flex gap-4 overflow-x-auto custom-scrollbar pb-2">
+        <!-- Midnight Style (Selected) -->
+        <div class="flex flex-col items-center gap-2 flex-shrink-0">
+            <button class="w-16 h-16 rounded-[16px] bg-warmPaper border-2 border-ember-orange shadow-lg active:scale-95 transition-all flex items-center justify-center"><img src="https://lh3.googleusercontent.com/aida/AP1WRLuzCK16j-fnjf1KHwWUHpHaoUJjsV5cP9t73nqZtPiYDrsDvY4BTtLoh48PgP2luGTlPrZThKa1E6r56cvBCP3i5SngY7-vv_D5sZbsZG2DBPYJfbc3TM33suLcjy5zNtD1mn6_8v2MQNpfYNTbx5q5j4jzLas4PKISfyl_THR3uGNPLk8ETb81JM3eqFpL-4GO2P-8WwZNYtGtJj2qS8BsAirS0zvhOPi5BB21wmYsikyL189_tcOC4wIg" class="w-8 h-8 object-contain mx-auto" alt="Midnight"></button>
+            <span class="text-label-xs text-warmDark font-label-md">深夜</span>
+        </div>
+        <!-- Paper Style -->
+        <div class="flex flex-col items-center gap-2 flex-shrink-0">
+            <button class="w-16 h-16 rounded-[16px] bg-coverCream border border-warmGray/30 active:scale-95 transition-all flex items-center justify-center"><img src="https://lh3.googleusercontent.com/aida/AP1WRLuewJ_15GpLWUHphEKuEkTMyb7j7dXcAM9l9sqbOIsdJ30So3gnP4qz-pT3Om5DqD2AYEX_JSTh8OXqY7iSjiNWZvtaFhFTpU8MMhU4M3NqO0dgu55jDqOn1VDj6acvpRTL0YNIJYiEDUZIvil7mDAt5a_D0OMkOQXOV_H5W5fn-nWQ_4MnShKKDE6GEv_8v7ancM8uztvJfZ0JM1YYTukdzlGEu_PmYkErDIYv_9Qi3oXQJInnseFnc4A" class="w-8 h-8 object-contain mx-auto" alt="Paper"></button>
+            <span class="text-label-xs text-warmBrown font-label-md">纸张</span>
+        </div>
+        <!-- Ink Style -->
+        <div class="flex flex-col items-center gap-2 flex-shrink-0">
+            <button class="w-16 h-16 rounded-[16px] bg-drawerBg border border-warmGray/30 active:scale-95 transition-all flex items-center justify-center"><img src="https://lh3.googleusercontent.com/aida/AP1WRLsOXrUiuT7be_cM1mbCmTM4KwJ9zRcSpEvl5An329EubQubl3J4MxF27r81M-rxZFBhRBXtzlnGH0Ho07g3SuGDhxaAuTU5fq-HtX81yRQX59-xzOLY9VjfotxJwYg8vhSXzZQX5iSTndSn99ydlna5S8smyk0QkYO_WhS9j9rRNvMSzsLvy-sjRP7KZQly08z5C4oamAeD0BRo8opnaAgCAPyJVlelsqonW0jq4B83HrLXfpz5fG1UVLA" class="w-8 h-8 object-contain mx-auto" alt="Ink"></button>
+            <span class="text-label-xs text-warmBrown font-label-md">墨迹</span>
+        </div>
+        <!-- Leather Style -->
+        <div class="flex flex-col items-center gap-2 flex-shrink-0">
+            <button class="w-16 h-16 rounded-[16px] bg-coverLeather border border-warmGray/30 active:scale-95 transition-all flex items-center justify-center"><img src="https://lh3.googleusercontent.com/aida/AP1WRLsa_8YGvEj4vCtWrplFnlwJNC43QN3temjSQB6KuWlOQ0RiQ-Ci8BqNDWuSB7qPE07Gu86ADwodtbkWN6sGriIYRGRr_ulIC6Pci3qhxXS3U1EfiJ_Xdnmkx-_dgsugaBWFWuTokm1SqE9Smbci-CLq7usNz40u3QhekP2WM8avRQfzC5OAedLMlCj2BCOvOU90Uyh9S9YKUWFSwAMFGD0sYUrX8IOlrJ0r-ZHDAoWDxDiWqV9bxvS19KA" class="w-8 h-8 object-contain mx-auto" alt="Leather"></button>
+            <span class="text-label-xs text-warmBrown font-label-md">皮革</span>
+        </div>
+    </div>
+</div><p class="text-label-sm text-warmBrown px-10 text-center mb-8 opacity-60">
+                预览已根据您的导出设置自动生成
+            </p>
+</div>
+<!-- Action Buttons Cluster -->
+<div class="fixed bottom-0 left-0 w-full bg-surface-container-lowest/80 backdrop-blur-xl px-section-gap-md pt-4 pb-10 flex flex-col gap-3">
+<button class="w-full h-12 bg-ember-orange text-white rounded-[12px] font-headline-md flex items-center justify-center gap-2 active:scale-95 transition-all duration-200 shadow-lg shadow-ember-orange/20">
+<span class="material-symbols-outlined text-[20px]">download</span>
+<span class="">保存到相册</span>
+</button>
+<button class="w-full h-12 bg-warmLight text-warmDark border border-warmGray/30 rounded-[12px] font-headline-md flex items-center justify-center gap-2 active:scale-95 transition-all duration-200">
+<span class="material-symbols-outlined text-[20px]">ios_share</span>
+<span class="">分享</span>
+</button>
+</div>
+</div>
+<!-- Micro-interaction Script -->
+<script>
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('touchstart', () => {
+                btn.style.transform = 'scale(0.97)';
+            });
+            btn.addEventListener('touchend', () => {
+                btn.style.transform = 'scale(1)';
+            });
+        });
+
+        // Close logic mock
+        document.querySelector('button .material-symbols-outlined').parentElement.addEventListener('click', () => {
+            const sheet = document.querySelector('.relative.w-full.h-\\[92vh\\]');
+            sheet.style.transform = 'translateY(100%)';
+            sheet.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            setTimeout(() => {
+                document.body.style.opacity = '0';
+                document.body.style.transition = 'opacity 0.3s ease';
+            }, 200);
+        });
+    </script>
+
+
+
+
+</body></html>

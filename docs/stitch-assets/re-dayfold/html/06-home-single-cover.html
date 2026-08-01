@@ -1,0 +1,248 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>Dayfold Journal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=system-rounded:wght@100..900&amp;family=system-sans:wght@100..900&amp;family=system-serif:wght@100..900&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#a78a83",
+                    "on-error": "#690005",
+                    "drawerAccent": "#F27359",
+                    "tertiary-container": "#239eb7",
+                    "inverse-primary": "#ab3418",
+                    "warmGray": "#52525F",
+                    "surface-container": "#291d19",
+                    "primary": "#ffb4a3",
+                    "tertiary-fixed": "#acedff",
+                    "on-secondary-fixed": "#001f24",
+                    "coverCream": "#E8D5B8",
+                    "on-tertiary": "#003640",
+                    "surface-tint": "#ffb4a3",
+                    "surface-container-highest": "#40312e",
+                    "on-tertiary-fixed-variant": "#004e5c",
+                    "warmCream": "#4A4A58",
+                    "on-primary-fixed": "#3d0700",
+                    "on-primary-container": "#560d00",
+                    "on-surface": "#f5ddd8",
+                    "inverse-surface": "#f5ddd8",
+                    "secondary": "#6ad6e6",
+                    "on-primary-fixed-variant": "#8a1c01",
+                    "warmDark": "#E8E8EC",
+                    "surface-variant": "#40312e",
+                    "tertiary-fixed-dim": "#6ad5ef",
+                    "surface-bright": "#453632",
+                    "error-container": "#93000a",
+                    "on-surface-variant": "#e0bfb8",
+                    "outline-variant": "#59413c",
+                    "warmBrown": "#9090A0",
+                    "primary-fixed": "#ffdad2",
+                    "on-background": "#f5ddd8",
+                    "on-secondary-fixed-variant": "#004f57",
+                    "secondary-fixed": "#96f0ff",
+                    "on-secondary-container": "#002f35",
+                    "drawerBg": "#2D2D33",
+                    "secondary-fixed-dim": "#6ad6e6",
+                    "on-tertiary-fixed": "#001f26",
+                    "surface": "#1c100e",
+                    "on-tertiary-container": "#002e38",
+                    "surface-container-low": "#251916",
+                    "on-secondary": "#00363d",
+                    "surface-container-lowest": "#160b09",
+                    "surface-container-high": "#352723",
+                    "primary-fixed-dim": "#ffb4a3",
+                    "warmLight": "#434350",
+                    "inverse-on-surface": "#3b2d2a",
+                    "secondary-container": "#249fae",
+                    "tertiary": "#6ad5ef",
+                    "primary-container": "#ef6544",
+                    "on-error-container": "#ffdad6",
+                    "background": "#1c100e",
+                    "warmPaper": "#3C3C44",
+                    "coverLeather": "#2C1A0A",
+                    "surface-dim": "#1c100e",
+                    "on-primary": "#621100",
+                    "error": "#ffb4ab"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap-lg": "32pt",
+                    "drawer-width": "85vw",
+                    "card-padding-x": "20pt",
+                    "section-gap-sm": "14pt",
+                    "section-gap-md": "20pt",
+                    "card-padding-y": "16pt",
+                    "gutter-tight": "4pt"
+            },
+            "fontFamily": {
+                    "body-md": ["system-serif"],
+                    "label-sm": ["system-rounded"],
+                    "headline-lg": ["STSongti-SC", "serif"],
+                    "label-md": ["system-rounded"],
+                    "display-lg": ["system-sans"],
+                    "headline-md": ["STSongti-SC", "serif"],
+                    "body-lg": ["system-serif"],
+                    "label-xs": ["system-rounded"]
+            },
+            "fontSize": {
+                    "body-md": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "label-sm": ["11px", {"fontWeight": "400"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "label-md": ["13px", {"fontWeight": "400"}],
+                    "display-lg": ["26px", {"letterSpacing": "3px", "fontWeight": "900"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-xs": ["10px", {"fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #3C3C44; /* warmPaper */
+            color: #f5ddd8;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        .paper-drop {
+            animation: paperDropEffect 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes paperDropEffect {
+            0% {
+                opacity: 0;
+                transform: translateY(-12pt) rotateX(-8deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) rotateX(0deg);
+            }
+        }
+
+        .notebook-perspective {
+            perspective: 1000px;
+        }
+
+        .notebook-container {
+            transform: rotateY(-10deg) rotateX(5deg);
+            transition: transform 0.6s ease;
+        }
+
+        .notebook-container:active {
+            transform: scale(0.98) rotateY(-5deg);
+        }
+
+        .diagonal-stripes {
+            background: repeating-linear-gradient(
+                45deg,
+                #1c100e,
+                #1c100e 4px,
+                #251916 4px,
+                #251916 8px
+            );
+        }
+
+        .triangle-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M0 40L20 0 40 40H0z' fill='%23434350' fill-opacity='0.15'/%3E%3C/svg%3E");
+            background-size: 60px 60px;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col min-h-screen">
+<!-- Top AppBar (Based on JSON instructions with overrides for prompt specifics) -->
+<header class="flex justify-between items-center px-card-padding-x h-16 w-full z-50 fixed top-0">
+<button class="w-11 h-11 flex items-center justify-center text-secondary hover:opacity-80 transition-opacity active:scale-95">
+<span class="material-symbols-outlined text-[28px]">settings</span>
+</button>
+<button class="w-11 h-11 flex items-center justify-center text-secondary hover:opacity-80 transition-opacity active:scale-95">
+<span class="material-symbols-outlined text-[28px]">notes</span>
+</button>
+</header>
+<main class="flex-grow flex flex-col items-center justify-center px-card-padding-x pt-24 pb-32">
+<!-- Title Block -->
+<div class="text-center mb-section-gap-lg paper-drop" style="animation-delay: 0.1s;">
+<h1 class="font-headline-lg text-display-lg text-coverCream tracking-[3pt] mb-2">
+                UNTITLED
+            </h1>
+<p class="font-label-md text-label-md text-on-surface-variant opacity-70 uppercase tracking-widest">
+                2026.07.29 / 3 ENTRIES
+            </p>
+</div>
+<!-- Hero: 3D Notebook Object -->
+<div class="notebook-perspective w-full max-w-[320px] flex justify-center mb-section-gap-lg paper-drop" style="animation-delay: 0.2s;">
+<div class="notebook-container relative flex w-full h-[420px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-[28px] overflow-hidden group">
+<!-- Spine -->
+<div class="w-10 h-full diagonal-stripes bg-surface-container-lowest border-r border-outline-variant/20 z-20"></div>
+<!-- Front Cover -->
+<div class="flex-grow bg-warmLight triangle-pattern relative flex items-center justify-center">
+<!-- Subtle Surface Gradient for tactile feel -->
+<div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
+<!-- Info Button -->
+<button class="absolute top-6 right-6 w-8 h-8 rounded-full bg-coverCream/90 flex items-center justify-center text-background hover:scale-110 transition-transform shadow-md">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'wght' 700;">info</span>
+</button>
+<!-- Embossed Core Element (Atmospheric) -->
+<div class="w-24 h-24 rounded-full border border-white/5 shadow-inner flex items-center justify-center">
+<span class="material-symbols-outlined text-warmBrown text-[48px] opacity-20">auto_stories</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Actions -->
+<div class="flex gap-section-gap-md paper-drop" style="animation-delay: 0.3s;">
+<!-- New Entry Button -->
+<button class="w-[64pt] h-[64pt] rounded-full bg-coverCream shadow-[0_8px_16px_rgba(0,0,0,0.3)] flex items-center justify-center text-surface active:scale-90 transition-all hover:bg-white">
+<span class="material-symbols-outlined text-[32px]">add</span>
+</button>
+<!-- Trash Button -->
+<button class="w-[64pt] h-[64pt] rounded-full bg-coverCream shadow-[0_8px_16px_rgba(0,0,0,0.3)] flex items-center justify-center text-surface active:scale-90 transition-all hover:bg-white">
+<span class="material-symbols-outlined text-[32px]">delete</span>
+</button>
+</div>
+</main>
+<!-- Micro-interaction script for atmospheric perspective shift -->
+<script>
+        const notebook = document.querySelector('.notebook-container');
+        const container = document.querySelector('.notebook-perspective');
+
+        container.addEventListener('mousemove', (e) => {
+            const rect = container.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateY = ((x - centerX) / centerX) * 15;
+            const rotateX = ((centerY - y) / centerY) * 15;
+            
+            notebook.style.transform = `rotateY(${rotateY - 10}deg) rotateX(${rotateX + 5}deg)`;
+        });
+
+        container.addEventListener('mouseleave', () => {
+            notebook.style.transform = `rotateY(-10deg) rotateX(5deg)`;
+        });
+    </script>
+</body></html>

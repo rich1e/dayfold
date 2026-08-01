@@ -1,0 +1,389 @@
+<!DOCTYPE html><html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#ffdad2",
+                    "drawerBg": "#2D2D33",
+                    "on-tertiary-container": "#002e38",
+                    "warmBrown": "#9090A0",
+                    "on-tertiary-fixed": "#001f26",
+                    "on-error-container": "#ffdad6",
+                    "tertiary-fixed": "#acedff",
+                    "on-secondary": "#00363d",
+                    "inverse-primary": "#ab3418",
+                    "surface-container-lowest": "#160b09",
+                    "on-primary": "#621100",
+                    "inverse-surface": "#f5ddd8",
+                    "primary-fixed-dim": "#ffb4a3",
+                    "outline-variant": "#59413c",
+                    "on-surface-variant": "#e0bfb8",
+                    "drawerAccent": "#F27359",
+                    "on-secondary-fixed-variant": "#004f57",
+                    "surface": "#1c100e",
+                    "error": "#ffb4ab",
+                    "surface-container-highest": "#40312e",
+                    "surface-variant": "#40312e",
+                    "warmCream": "#4A4A58",
+                    "inverse-on-surface": "#3b2d2a",
+                    "background": "#1c100e",
+                    "on-tertiary-fixed-variant": "#004e5c",
+                    "on-primary-fixed": "#3d0700",
+                    "on-tertiary": "#003640",
+                    "surface-container-low": "#251916",
+                    "coverLeather": "#2C1A0A",
+                    "surface-bright": "#453632",
+                    "on-secondary-container": "#002f35",
+                    "surface-container": "#291d19",
+                    "warmGray": "#52525F",
+                    "secondary-fixed": "#96f0ff",
+                    "primary-container": "#ef6544",
+                    "on-secondary-fixed": "#001f24",
+                    "on-error": "#690005",
+                    "on-background": "#f5ddd8",
+                    "tertiary-fixed-dim": "#6ad5ef",
+                    "secondary": "#6ad6e6",
+                    "warmPaper": "#3C3C44",
+                    "surface-container-high": "#352723",
+                    "primary": "#ffb4a3",
+                    "surface-tint": "#ffb4a3",
+                    "secondary-container": "#249fae",
+                    "tertiary-container": "#239eb7",
+                    "warmDark": "#E8E8EC",
+                    "surface-dim": "#1c100e",
+                    "on-primary-container": "#560d00",
+                    "coverCream": "#E8D5B8",
+                    "warmLight": "#434350",
+                    "secondary-fixed-dim": "#6ad6e6",
+                    "outline": "#a78a83",
+                    "tertiary": "#6ad5ef",
+                    "on-surface": "#f5ddd8",
+                    "error-container": "#93000a",
+                    "on-primary-fixed-variant": "#8a1c01"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "card-padding-y": "16pt",
+                    "section-gap-md": "20pt",
+                    "section-gap-sm": "14pt",
+                    "gutter-tight": "4pt",
+                    "drawer-width": "85vw",
+                    "section-gap-lg": "32pt",
+                    "card-padding-x": "20pt"
+            },
+            "fontFamily": {
+                    "label-sm": ["system-rounded", "ui-rounded", "sans-serif"],
+                    "label-xs": ["system-rounded", "ui-rounded", "sans-serif"],
+                    "headline-lg": ["STSongti-SC", "serif"],
+                    "body-lg": ["system-serif", "serif"],
+                    "headline-md": ["STSongti-SC", "serif"],
+                    "body-md": ["system-serif", "serif"],
+                    "display-lg": ["system-sans", "sans-serif"],
+                    "label-md": ["system-rounded", "ui-rounded", "sans-serif"]
+            },
+            "fontSize": {
+                    "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "400"}],
+                    "label-xs": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "display-lg": ["26px", {"letterSpacing": "3px", "fontWeight": "900"}],
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #1c100e;
+            color: #f5ddd8;
+            -webkit-tap-highlight-color: transparent;
+            overflow: hidden;
+        }
+
+        .paper-drop {
+            animation: paperDrop 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes paperDrop {
+            0% {
+                transform: translateY(-12pt) rotateX(-8deg);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0) rotateX(0);
+                opacity: 1;
+            }
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+        }
+
+        .day-cell {
+            height: 44pt;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .cyan-text { color: #5BC8D8; }
+        .ember-orange-bg { background-color: #E05A3A; }
+        .ember-orange-dot { background-color: #E05A3A; }
+        .ember-orange-text { color: #E05A3A; }
+
+        /* Custom scrollbar for Bottom Sheet */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface select-none">
+<!-- Top App Bar -->
+<header class="fixed top-0 w-full z-50 h-16 flex justify-between items-center px-section-gap-sm bg-warmPaper/80 backdrop-blur-md">
+<div class="flex items-center">
+<button class="w-11 h-11 flex items-center justify-center hover:opacity-80 active:scale-95 transition-all">
+<span class="material-symbols-outlined cyan-text text-[24px]">menu</span>
+</button>
+</div>
+<h1 class="font-headline-md text-headline-md text-warmDark absolute left-1/2 -translate-x-1/2">2026年7月</h1>
+<div class="flex items-center gap-2">
+<button class="w-10 h-10 flex items-center justify-center hover:opacity-80 active:scale-95 transition-all">
+<span class="material-symbols-outlined cyan-text text-[20px]">chevron_left</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center hover:opacity-80 active:scale-95 transition-all">
+<span class="material-symbols-outlined cyan-text text-[20px]">chevron_right</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center hover:opacity-80 active:scale-95 transition-all ml-1">
+<span class="material-symbols-outlined cyan-text text-[22px]">format_list_bulleted</span>
+</button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="pt-20 pb-40 px-4 h-screen overflow-y-auto no-scrollbar paper-drop">
+<!-- Weekday Header -->
+<div class="calendar-grid mb-2">
+<div class="text-center py-2 font-label-sm text-label-sm text-warmBrown">日</div>
+<div class="text-center py-2 font-label-sm text-label-sm text-warmBrown">一</div>
+<div class="text-center py-2 font-label-sm text-label-sm text-warmBrown">二</div>
+<div class="text-center py-2 font-label-sm text-label-sm text-warmBrown">三</div>
+<div class="text-center py-2 font-label-sm text-label-sm text-warmBrown">四</div>
+<div class="text-center py-2 font-label-sm text-label-sm text-warmBrown">五</div>
+<div class="text-center py-2 font-label-sm text-label-sm text-warmBrown">六</div>
+</div>
+<!-- Monthly Grid (July 2026 starts on Wednesday) -->
+<div class="calendar-grid">
+<!-- June Days (Offset) -->
+<div class="day-cell font-label-md text-label-md text-warmGray opacity-40">28</div>
+<div class="day-cell font-label-md text-label-md text-warmGray opacity-40">29</div>
+<div class="day-cell font-label-md text-label-md text-warmGray opacity-40">30</div>
+<!-- July Days -->
+<div class="day-cell font-label-md text-label-md text-warmDark">1</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">2</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">
+<span>3</span>
+<div class="w-1.5 h-1.5 rounded-full ember-orange-dot mt-1"></div>
+</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">4</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">
+<span>5</span>
+<div class="w-1.5 h-1.5 rounded-full ember-orange-dot mt-1"></div>
+</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">6</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">7</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">
+<span>8</span>
+<div class="w-1.5 h-1.5 rounded-full ember-orange-dot mt-1"></div>
+</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">9</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">10</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">11</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">
+<span>12</span>
+<div class="w-1.5 h-1.5 rounded-full ember-orange-dot mt-1"></div>
+</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">13</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">14</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">
+<span>15</span>
+<div class="w-1.5 h-1.5 rounded-full ember-orange-dot mt-1"></div>
+</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">16</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">17</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">
+<span>18</span>
+<div class="w-1.5 h-1.5 rounded-full ember-orange-dot mt-1"></div>
+</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">19</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">20</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">21</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">
+<span>22</span>
+<div class="w-1.5 h-1.5 rounded-full ember-orange-dot mt-1"></div>
+</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">23</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">24</div>
+<!-- Selected Day: 25th -->
+<div class="day-cell">
+<div class="absolute inset-0.5 bg-warmLight rounded-lg border border-warmGray/20"></div>
+<div class="relative flex flex-col items-center">
+<span class="font-label-md text-label-md text-warmDark">25</span>
+<div class="w-1.5 h-1.5 rounded-full ember-orange-dot mt-1"></div>
+</div>
+</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">26</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">
+<span>27</span>
+<div class="w-1.5 h-1.5 rounded-full ember-orange-dot mt-1"></div>
+</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">28</div>
+<!-- Today: 29th -->
+<div class="day-cell">
+<div class="w-10 h-10 rounded-full ember-orange-bg flex items-center justify-center shadow-lg shadow-orange-900/40">
+<span class="font-label-md text-label-md text-white font-bold">29</span>
+</div>
+<div class="absolute bottom-1 w-1.5 h-1.5 rounded-full ember-orange-dot"></div>
+</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">30</div>
+<div class="day-cell font-label-md text-label-md text-warmDark">31</div>
+<!-- August Days -->
+<div class="day-cell font-label-md text-label-md text-warmGray opacity-40">1</div>
+</div>
+<!-- Month Summary -->
+<div class="p-section-gap-md mt-4 text-center">
+<span class="font-label-md text-label-md text-warmBrown tracking-wide">本月 10 篇日记</span>
+</div>
+</main>
+<!-- Bottom Sheet -->
+<div class="fixed bottom-0 left-0 w-full h-[40%] bg-warmLight rounded-t-2xl z-[60] shadow-[0_-8px_30px_rgba(0,0,0,0.5)] transform translate-y-0 transition-transform duration-500 flex flex-col border-t border-white/5" id="bottomSheet">
+<!-- Handle -->
+<div class="w-full flex justify-center py-3">
+<div class="w-9 h-1 rounded-full bg-warmGray/50"></div>
+</div>
+<!-- Sheet Header -->
+<div class="px-section-gap-x pb-4">
+<h2 class="font-headline-md text-headline-md text-warmDark">7月25日 星期五</h2>
+</div>
+<!-- Sheet Content -->
+<div class="flex-1 overflow-y-auto px-section-gap-x pb-8 space-y-4">
+<!-- Entry 1 -->
+<div class="py-4 hover:bg-white/5 transition-colors rounded-lg cursor-pointer">
+<div class="flex items-start gap-4">
+<div class="ember-orange-text font-label-md mt-1 shrink-0">21:45</div>
+<div class="flex-1">
+<h3 class="font-headline-md text-warmDark mb-1">暮色中的书房</h3>
+<p class="font-body-md text-on-surface-variant line-clamp-2 leading-relaxed">
+                            今天把窗台上的栀子花修剪了一下，夕阳透过窗棂洒在深色的木地板上，那种静谧感正是 Dayfold 想要捕捉的时刻。
+                        </p>
+</div>
+</div>
+</div>
+<div class="h-px bg-warmGray/10 w-full"></div>
+<!-- Entry 2 -->
+<div class="py-4 hover:bg-white/5 transition-colors rounded-lg cursor-pointer">
+<div class="flex items-start gap-4">
+<div class="ember-orange-text font-label-md mt-1 shrink-0">14:20</div>
+<div class="flex-1">
+<h3 class="font-headline-md text-warmDark mb-1">灵感碎片：物理交互</h3>
+<p class="font-body-md text-on-surface-variant line-clamp-2 leading-relaxed">
+                            思考如何让应用更像一本真实的皮革笔记本。纸张的落影、细微的纹理，以及翻页时那种恰到好处的阻尼感。
+                        </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Bar (Contextual FAB Hidden per Rule) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-6 pb-safe bg-surface-container/90 backdrop-blur-xl z-50 rounded-t-xl shadow-[0_-4px_12px_rgba(0,0,0,0.35)]">
+<button class="flex items-center justify-center text-on-surface-variant w-12 h-12 hover:text-tertiary transition-colors">
+<span class="material-symbols-outlined text-[24px]">auto_stories</span>
+</button>
+<button class="flex items-center justify-center bg-tertiary-container text-on-tertiary-container rounded-full w-12 h-12 transform -translate-y-1 shadow-lg">
+<span class="material-symbols-outlined text-[24px]">calendar_month</span>
+</button>
+<button class="flex items-center justify-center text-on-surface-variant w-12 h-12 hover:text-tertiary transition-colors">
+<span class="material-symbols-outlined text-[24px]">search</span>
+</button>
+<button class="flex items-center justify-center text-on-surface-variant w-12 h-12 hover:text-tertiary transition-colors">
+<span class="material-symbols-outlined text-[24px]">person</span>
+</button>
+</nav>
+<script>
+        // Simple micro-interaction for the bottom sheet
+        let sheet = document.getElementById('bottomSheet');
+        let startY = 0;
+        let currentY = 0;
+
+        sheet.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY;
+        }, {passive: true});
+
+        sheet.addEventListener('touchmove', (e) => {
+            currentY = e.touches[0].clientY;
+            let diff = currentY - startY;
+            if (diff > 0) {
+                sheet.style.transform = `translateY(${diff}px)`;
+            }
+        }, {passive: true});
+
+        sheet.addEventListener('touchend', (e) => {
+            let diff = currentY - startY;
+            if (diff > 100) {
+                // Collapse logic would go here if we wanted to hide it
+                sheet.style.transform = `translateY(90%)`;
+            } else {
+                sheet.style.transform = `translateY(0)`;
+            }
+        });
+
+        // Tap day cell to "select" it
+        const cells = document.querySelectorAll('.day-cell');
+        cells.forEach(cell => {
+            cell.addEventListener('click', () => {
+                // Clear previous selection (simple mock)
+                document.querySelectorAll('.absolute.inset-0\\.5.bg-warmLight').forEach(el => el.remove());
+                
+                // Add select highlight if it's not a spacer
+                if (cell.innerText.trim() !== "" && !cell.classList.contains('opacity-40')) {
+                    const highlight = document.createElement('div');
+                    highlight.className = 'absolute inset-0.5 bg-warmLight rounded-lg border border-warmGray/20';
+                    cell.prepend(highlight);
+                    
+                    // Bounce sheet to show activity
+                    sheet.style.transform = 'translateY(-10px)';
+                    setTimeout(() => sheet.style.transform = 'translateY(0)', 200);
+                }
+            });
+        });
+    </script>
+</body></html>

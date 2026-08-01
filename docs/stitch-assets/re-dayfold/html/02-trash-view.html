@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dayfold - 回收站</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-low": "#251916",
+                    "coverLeather": "#2C1A0A",
+                    "on-surface": "#f5ddd8",
+                    "surface-container-highest": "#40312e",
+                    "primary-container": "#ef6544",
+                    "on-primary-container": "#560d00",
+                    "surface": "#1c100e",
+                    "coverCream": "#E8D5B8",
+                    "warmPaper": "#3C3C44",
+                    "surface-tint": "#ffb4a3",
+                    "surface-dim": "#1c100e",
+                    "on-secondary-fixed-variant": "#004f57",
+                    "error": "#ffb4ab",
+                    "primary-fixed": "#ffdad2",
+                    "outline-variant": "#59413c",
+                    "inverse-primary": "#ab3418",
+                    "warmBrown": "#9090A0",
+                    "tertiary-fixed": "#acedff",
+                    "on-tertiary-fixed": "#001f26",
+                    "background": "#1c100e",
+                    "on-tertiary": "#003640",
+                    "tertiary": "#6ad5ef",
+                    "drawerBg": "#2D2D33",
+                    "warmLight": "#434350",
+                    "on-background": "#f5ddd8",
+                    "on-tertiary-container": "#002e38",
+                    "on-secondary-container": "#002f35",
+                    "surface-container": "#291d19",
+                    "secondary": "#6ad6e6",
+                    "primary-fixed-dim": "#ffb4a3",
+                    "on-tertiary-fixed-variant": "#004e5c",
+                    "surface-bright": "#453632",
+                    "warmCream": "#4A4A58",
+                    "secondary-fixed-dim": "#6ad6e6",
+                    "on-surface-variant": "#e0bfb8",
+                    "on-primary-fixed": "#3d0700",
+                    "on-primary": "#621100",
+                    "surface-variant": "#40312e",
+                    "inverse-on-surface": "#3b2d2a",
+                    "tertiary-container": "#239eb7",
+                    "on-error": "#690005",
+                    "on-secondary-fixed": "#001f24",
+                    "error-container": "#93000a",
+                    "on-error-container": "#ffdad6",
+                    "drawerAccent": "#F27359",
+                    "tertiary-fixed-dim": "#6ad5ef",
+                    "on-primary-fixed-variant": "#8a1c01",
+                    "warmDark": "#E8E8EC",
+                    "secondary-container": "#249fae",
+                    "primary": "#ffb4a3",
+                    "outline": "#a78a83",
+                    "surface-container-lowest": "#160b09",
+                    "warmGray": "#52525F",
+                    "surface-container-high": "#352723",
+                    "inverse-surface": "#f5ddd8",
+                    "on-secondary": "#00363d",
+                    "secondary-fixed": "#96f0ff",
+                    "deepBrick": "#C03828",
+                    "cyanAccent": "#5BC8D8"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap-md": "20pt",
+                    "card-padding-x": "20pt",
+                    "gutter-tight": "4pt",
+                    "section-gap-sm": "14pt",
+                    "section-gap-lg": "32pt",
+                    "drawer-width": "85vw",
+                    "card-padding-y": "16pt"
+            },
+            "fontFamily": {
+                    "label-xs": ["system-rounded", "sans-serif"],
+                    "body-md": ["STSongti-SC-Regular", "serif"],
+                    "headline-lg": ["STSongti-SC", "serif"],
+                    "body-lg": ["STSongti-SC-Regular", "serif"],
+                    "headline-md": ["STSongti-SC", "serif"],
+                    "label-sm": ["system-rounded", "sans-serif"],
+                    "display-lg": ["system-sans", "sans-serif"],
+                    "label-md": ["system-rounded", "sans-serif"]
+            },
+            "fontSize": {
+                    "label-xs": ["10px", {"fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-sm": ["11px", {"fontWeight": "400"}],
+                    "display-lg": ["26px", {"letterSpacing": "3px", "fontWeight": "900"}],
+                    "label-md": ["13px", {"fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #1c100e;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .paper-gradient {
+            background: linear-gradient(180deg, rgba(74, 74, 88, 0.3) 0%, rgba(74, 74, 88, 0.15) 100%);
+        }
+        .paper-drop-animation {
+            animation: paperDrop 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes paperDrop {
+            0% { transform: translateY(20px) rotateX(-8deg); opacity: 0; }
+            100% { transform: translateY(0) rotateX(0); opacity: 1; }
+        }
+        .swipe-hint {
+            mask-image: linear-gradient(to right, black 80%, transparent 100%);
+        }
+        .scroll-hide::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex items-center justify-center min-h-screen overflow-hidden">
+<!-- Mock Background App Content -->
+<div class="fixed inset-0 bg-background flex flex-col pointer-events-none opacity-40">
+<header class="flex justify-between items-center px-section-gap-md h-16">
+<span class="font-headline-lg text-headline-lg text-primary tracking-tight">Dayfold</span>
+<span class="material-symbols-outlined text-on-surface-variant">settings</span>
+</header>
+<div class="px-6 py-4 space-y-4">
+<div class="h-32 w-full bg-warmLight rounded-xl"></div>
+<div class="h-32 w-full bg-warmLight rounded-xl"></div>
+</div>
+</div>
+<!-- TrashView Modal Sheet -->
+<div class="relative w-full max-w-[400px] h-[795px] bg-warmPaper rounded-t-[32px] shadow-2xl flex flex-col paper-drop-animation z-50 mt-16 border-t border-outline-variant/10">
+<!-- Pull Handle -->
+<div class="flex justify-center pt-3 pb-2">
+<div class="w-[36px] h-[4px] bg-warmGray rounded-full"></div>
+</div>
+<!-- Header -->
+<header class="flex items-center justify-between px-card-padding-x py-4">
+<h1 class="font-headline-md text-headline-md text-warmDark">回收站</h1>
+<button class="font-label-md text-label-md bg-deepBrick text-white px-4 py-1.5 rounded-full hover:opacity-90 active:scale-95 transition-all">
+                全部删除
+            </button>
+</header>
+<!-- Info Banner -->
+<div class="px-card-padding-x mb-4">
+<div class="flex items-center gap-2 py-2 px-3 bg-warmLight/40 rounded-lg">
+<span class="material-symbols-outlined text-[16px] text-warmBrown">info</span>
+<p class="font-label-sm text-label-sm text-warmBrown">30天后将自动永久删除</p>
+</div>
+</div>
+<!-- Content Area -->
+<div class="flex-1 overflow-y-auto scroll-hide px-card-padding-x pb-20">
+<!-- Section 1 -->
+<div class="mt-4">
+<h2 class="font-label-sm text-label-sm text-cyanAccent tracking-[1.5pt] uppercase mb-3">2026年7月28日</h2>
+<div class="space-y-3">
+<!-- Row 1: Swiped State Visualization -->
+<div class="relative group overflow-hidden rounded-xl bg-warmLight">
+<!-- Background Actions -->
+<div class="absolute inset-0 flex justify-between items-center px-4">
+<div class="flex items-center gap-2 text-green-500">
+<span class="material-symbols-outlined">settings_backup_restore</span>
+<span class="font-label-sm">恢复</span>
+</div>
+<div class="flex items-center gap-2 text-deepBrick">
+<span class="font-label-sm">永久删除</span>
+<span class="material-symbols-outlined">delete_forever</span>
+</div>
+</div>
+<!-- Content Layer (Simulating a slight drag or hover) -->
+<div class="relative flex justify-between items-start p-card-padding-y bg-warmLight paper-gradient hover:-translate-x-12 transition-transform duration-300">
+<div class="flex-1 pr-4">
+<h3 class="font-headline-md text-[15px] text-warmDark mb-1">夏日深夜的鸣蝉</h3>
+<p class="font-body-md text-label-md text-warmBrown line-clamp-2 leading-relaxed">
+                                    今晚的月色格外清冷，窗外的蝉鸣此起彼伏，仿佛在诉说着这个季节最后的繁华。我坐在桌前，翻开这本皮质封面...
+                                </p>
+</div>
+<span class="font-label-sm text-label-sm text-warmBrown pt-1">22:15</span>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="rounded-xl bg-warmLight paper-gradient flex justify-between items-start p-card-padding-y active:scale-[0.98] transition-transform">
+<div class="flex-1 pr-4">
+<h3 class="font-headline-md text-[15px] text-warmDark mb-1">关于深色模式的思考</h3>
+<p class="font-body-md text-label-md text-warmBrown line-clamp-2 leading-relaxed">
+                                设计一个如同深夜书房般的UI，需要对色彩有着极其细腻的把控。WarmPaper不仅是一个色值，更是一种...
+                            </p>
+</div>
+<span class="font-label-sm text-label-sm text-warmBrown pt-1">19:40</span>
+</div>
+</div>
+</div>
+<!-- Section 2 -->
+<div class="mt-8">
+<h2 class="font-label-sm text-label-sm text-cyanAccent tracking-[1.5pt] uppercase mb-3">2026年7月24日</h2>
+<div class="space-y-3">
+<!-- Row 3 -->
+<div class="rounded-xl bg-warmLight paper-gradient flex justify-between items-start p-card-padding-y">
+<div class="flex-1 pr-4">
+<h3 class="font-headline-md text-[15px] text-warmDark mb-1">待办事项清单</h3>
+<p class="font-body-md text-label-md text-warmBrown line-clamp-2 leading-relaxed">
+                                1. 更新设计规范文档<br/>2. 调整Bento Grid的间距至8px倍数...
+                            </p>
+</div>
+<span class="font-label-sm text-label-sm text-warmBrown pt-1">08:12</span>
+</div>
+</div>
+</div>
+<!-- Section 3 -->
+<div class="mt-8 opacity-60">
+<h2 class="font-label-sm text-label-sm text-cyanAccent tracking-[1.5pt] uppercase mb-3">2026年7月20日</h2>
+<div class="space-y-3">
+<!-- Row 4 -->
+<div class="rounded-xl bg-warmLight paper-gradient flex justify-between items-start p-card-padding-y">
+<div class="flex-1 pr-4">
+<h3 class="font-headline-md text-[15px] text-warmDark mb-1">无题</h3>
+<p class="font-body-md text-label-md text-warmBrown line-clamp-2 leading-relaxed">
+                                只是随手记录的一些碎片化想法。关于未来的日记形式，或许不仅仅是文字，更是一种情绪的载体。
+                            </p>
+</div>
+<span class="font-label-sm text-label-sm text-warmBrown pt-1">23:59</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Confirmation Overlay (Micro-interaction mockup) -->
+<div class="hidden absolute bottom-24 left-1/2 -translate-x-1/2 bg-surface-container-highest px-6 py-3 rounded-full shadow-xl flex items-center gap-3 border border-outline-variant/30" id="toast">
+<span class="material-symbols-outlined text-green-500">check_circle</span>
+<span class="font-label-md text-warmDark">已成功恢复 1 篇日记</span>
+</div>
+</div>
+<!-- Bottom Navigation Bar (Contextually hidden but placed for hierarchy) -->
+<nav class="fixed bottom-0 w-full h-20 bg-surface-container-low flex justify-around items-center px-4 pb-safe z-40 rounded-t-xl shadow-lg md:hidden opacity-20 pointer-events-none">
+<div class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-label-md">Today</span>
+</div>
+<div class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-label-md">Explore</span>
+</div>
+<div class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">auto_stories</span>
+<span class="font-label-md">Library</span>
+</div>
+<div class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-md">Profile</span>
+</div>
+</nav>
+<script>
+        // Simple Micro-interaction for demo
+        document.querySelectorAll('.rounded-xl').forEach(card => {
+            card.addEventListener('click', function() {
+                const toast = document.getElementById('toast');
+                toast.classList.remove('hidden');
+                toast.classList.add('flex');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                    toast.classList.remove('flex');
+                }, 3000);
+            });
+        });
+    </script>
+</body></html>

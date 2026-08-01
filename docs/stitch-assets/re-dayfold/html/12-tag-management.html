@@ -1,0 +1,305 @@
+<!DOCTYPE html><html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport">
+<title>Dayfold - 标签管理</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "primary-fixed-dim": "#ffb4a3",
+                "surface": "#1c100e",
+                "outline-variant": "#59413c",
+                "surface-container-low": "#251916",
+                "on-primary-fixed": "#3d0700",
+                "primary": "#ffb4a3",
+                "surface-container": "#291d19",
+                "on-surface": "#f5ddd8",
+                "surface-container-high": "#352723",
+                "surface-container-lowest": "#160b09",
+                "on-tertiary-fixed-variant": "#004e5c",
+                "surface-bright": "#453632",
+                "secondary-container": "#249fae",
+                "warmPaper": "#3C3C44",
+                "primary-fixed": "#ffdad2",
+                "on-secondary-container": "#002f35",
+                "on-error-container": "#ffdad6",
+                "tertiary": "#6ad5ef",
+                "secondary-fixed": "#96f0ff",
+                "outline": "#a78a83",
+                "on-background": "#f5ddd8",
+                "on-primary-container": "#560d00",
+                "surface-container-highest": "#40312e",
+                "on-tertiary-container": "#002e38",
+                "error-container": "#93000a",
+                "secondary": "#6ad6e6",
+                "primary-container": "#ef6544",
+                "on-secondary-fixed": "#001f24",
+                "warmGray": "#52525F",
+                "on-tertiary": "#003640",
+                "drawerBg": "#2D2D33",
+                "tertiary-container": "#239eb7",
+                "on-primary-fixed-variant": "#8a1c01",
+                "warmLight": "#434350",
+                "on-secondary-fixed-variant": "#004f57",
+                "inverse-on-surface": "#3b2d2a",
+                "coverCream": "#E8D5B8",
+                "tertiary-fixed-dim": "#6ad5ef",
+                "on-primary": "#621100",
+                "on-secondary": "#00363d",
+                "surface-variant": "#40312e",
+                "on-error": "#690005",
+                "background": "#1c100e",
+                "warmBrown": "#9090A0",
+                "error": "#ffb4ab",
+                "surface-tint": "#ffb4a3",
+                "drawerAccent": "#F27359",
+                "inverse-surface": "#f5ddd8",
+                "warmCream": "#4A4A58",
+                "inverse-primary": "#ab3418",
+                "tertiary-fixed": "#acedff",
+                "on-tertiary-fixed": "#001f26",
+                "warmDark": "#E8E8EC",
+                "coverLeather": "#2C1A0A",
+                "on-surface-variant": "#e0bfb8",
+                "secondary-fixed-dim": "#6ad6e6",
+                "surface-dim": "#1c100e"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "gutter-tight": "4pt",
+                "card-padding-y": "16pt",
+                "section-gap-lg": "32pt",
+                "section-gap-sm": "14pt",
+                "section-gap-md": "20pt",
+                "drawer-width": "85vw",
+                "card-padding-x": "20pt"
+            },
+            "fontFamily": {
+                "label-md": ["system-rounded", "sans-serif"],
+                "headline-lg": ["STSongti-SC", "serif"],
+                "display-lg": ["system-sans", "sans-serif"],
+                "body-md": ["system-serif", "serif"],
+                "body-lg": ["system-serif", "serif"],
+                "headline-md": ["STSongti-SC", "serif"],
+                "label-xs": ["system-rounded", "sans-serif"],
+                "label-sm": ["system-rounded", "sans-serif"]
+            },
+            "fontSize": {
+                "label-md": ["13px", {"fontWeight": "400"}],
+                "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                "display-lg": ["26px", {"letterSpacing": "3px", "fontWeight": "900"}],
+                "body-md": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+                "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "400"}],
+                "label-xs": ["10px", {"fontWeight": "400"}],
+                "label-sm": ["11px", {"fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #3C3C44;
+            color: #E8E8EC;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .paper-gradient {
+            background: linear-gradient(180deg, rgba(74, 74, 88, 0.3) 0%, rgba(74, 74, 88, 0.15) 100%);
+        }
+        .safe-bottom {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        /* Custom swipe animation simulation */
+        .swipe-active {
+            transform: translateX(-160px);
+        }
+        .transition-swipe {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen flex flex-col font-body-md text-body-md">
+<!-- Top App Bar -->
+<header class="w-full top-0 sticky z-40 bg-warmPaper flex justify-between items-center px-section-gap-md h-16">
+<button class="hover:opacity-80 transition-opacity active:scale-95 duration-150 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" style="font-size: 24px;">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md text-warmDark">标签</h1>
+<button class="hover:opacity-80 transition-opacity active:scale-95 duration-150 flex items-center justify-center">
+<span class="material-symbols-outlined" style="color: #E05A3A; font-size: 24px;">add</span>
+</button>
+</header>
+<!-- Main Content: Scrollable Tag List -->
+<main class="flex-1 overflow-y-auto pb-24">
+<div class="flex flex-col">
+<!-- Tag Row 1: 工作 -->
+<div class="relative overflow-hidden group">
+<div class="flex items-center px-4 py-[14pt] bg-warmPaper border-b border-warmCream/20 transition-swipe">
+<div class="w-[10pt] h-[10pt] rounded-full mr-4" style="background-color: #4A90E2;"></div>
+<span class="flex-1 font-headline-md text-[16px] text-warmDark">工作</span>
+<div class="flex items-center gap-3">
+<span class="font-label-md text-warmBrown">12 篇</span>
+<span class="material-symbols-outlined text-warmGray/50 text-[20px]">chevron_right</span>
+<span class="material-symbols-outlined text-warmGray/50 text-[20px]">drag_handle</span>
+</div>
+</div>
+</div>
+<!-- Tag Row 2: 生活 -->
+<div class="relative overflow-hidden group">
+<div class="flex items-center px-4 py-[14pt] bg-warmPaper border-b border-warmCream/20 transition-swipe">
+<div class="w-[10pt] h-[10pt] rounded-full mr-4" style="background-color: #7ED321;"></div>
+<span class="flex-1 font-headline-md text-[16px] text-warmDark">生活</span>
+<div class="flex items-center gap-3">
+<span class="font-label-md text-warmBrown">8 篇</span>
+<span class="material-symbols-outlined text-warmGray/50 text-[20px]">chevron_right</span>
+<span class="material-symbols-outlined text-warmGray/50 text-[20px]">drag_handle</span>
+</div>
+</div>
+</div>
+<!-- Tag Row 3: 旅行 (Active Swipe State) -->
+<div class="relative overflow-hidden group bg-warmPaper border-b border-warmCream/20">
+<!-- Action Buttons behind the row -->
+<div class="absolute right-0 top-0 bottom-0 flex h-full">
+<button class="bg-[#F5A623] text-white px-6 flex items-center justify-center font-body-md">编辑</button>
+<button class="bg-[#D0021B] text-white px-6 flex items-center justify-center font-body-md">删除</button>
+</div>
+<!-- Slid Row Content -->
+<div class="flex items-center px-4 py-[14pt] bg-warmPaper swipe-active transition-swipe relative z-10">
+<div class="w-[10pt] h-[10pt] rounded-full mr-4" style="background-color: #F5A623;"></div>
+<span class="flex-1 font-headline-md text-[16px] text-warmDark">旅行</span>
+<div class="flex items-center gap-3">
+<span class="font-label-md text-warmBrown">5 篇</span>
+<span class="material-symbols-outlined text-warmGray/50 text-[20px]">chevron_right</span>
+<span class="material-symbols-outlined text-warmGray/50 text-[20px]">drag_handle</span>
+</div>
+</div>
+</div>
+<!-- Tag Row 4: 美食 -->
+<div class="relative overflow-hidden group">
+<div class="flex items-center px-4 py-[14pt] bg-warmPaper border-b border-warmCream/20 transition-swipe">
+<div class="w-[10pt] h-[10pt] rounded-full mr-4" style="background-color: #D0021B;"></div>
+<span class="flex-1 font-headline-md text-[16px] text-warmDark">美食</span>
+<div class="flex items-center gap-3">
+<span class="font-label-md text-warmBrown">9 篇</span>
+<span class="material-symbols-outlined text-warmGray/50 text-[20px]">chevron_right</span>
+<span class="material-symbols-outlined text-warmGray/50 text-[20px]">drag_handle</span>
+</div>
+</div>
+</div>
+<!-- Tag Row 5: 运动 -->
+<div class="relative overflow-hidden group">
+<div class="flex items-center px-4 py-[14pt] bg-warmPaper border-b border-warmCream/20 transition-swipe">
+<div class="w-[10pt] h-[10pt] rounded-full mr-4" style="background-color: #BD10E0;"></div>
+<span class="flex-1 font-headline-md text-[16px] text-warmDark">运动</span>
+<div class="flex items-center gap-3">
+<span class="font-label-md text-warmBrown">4 篇</span>
+<span class="material-symbols-outlined text-warmGray/50 text-[20px]">chevron_right</span>
+<span class="material-symbols-outlined text-warmGray/50 text-[20px]">drag_handle</span>
+</div>
+</div>
+</div>
+<!-- Tag Row 6: 学习 -->
+<div class="relative overflow-hidden group">
+<div class="flex items-center px-4 py-[14pt] bg-warmPaper border-b border-warmCream/20 transition-swipe">
+<div class="w-[10pt] h-[10pt] rounded-full mr-4" style="background-color: #50E3C2;"></div>
+<span class="flex-1 font-headline-md text-[16px] text-warmDark">学习</span>
+<div class="flex items-center gap-3">
+<span class="font-label-md text-warmBrown">6 篇</span>
+<span class="material-symbols-outlined text-warmGray/50 text-[20px]">chevron_right</span>
+<span class="material-symbols-outlined text-warmGray/50 text-[20px]">drag_handle</span>
+</div>
+</div>
+</div>
+<!-- Tag Row 7: 娱乐 -->
+<div class="relative overflow-hidden group">
+<div class="flex items-center px-4 py-[14pt] bg-warmPaper border-b border-warmCream/20 transition-swipe">
+<div class="w-[10pt] h-[10pt] rounded-full mr-4" style="background-color: #FF6B6B;"></div>
+<span class="flex-1 font-headline-md text-[16px] text-warmDark">娱乐</span>
+<div class="flex items-center gap-3">
+<span class="font-label-md text-warmBrown">3 篇</span>
+<span class="material-symbols-outlined text-warmGray/50 text-[20px]">chevron_right</span>
+<span class="material-symbols-outlined text-warmGray/50 text-[20px]">drag_handle</span>
+</div>
+</div>
+</div>
+<!-- New Tag Row -->
+<button class="flex items-center px-4 py-5 hover:bg-warmLight/20 transition-colors active:scale-[0.98] duration-200">
+<span class="material-symbols-outlined mr-4" style="color: #E05A3A; font-size: 24px;">add_circle</span>
+<span class="font-body-lg text-[16px]" style="color: #E05A3A;">新建标签</span>
+</button>
+</div>
+<!-- Footer Info -->
+<footer class="mt-12 mb-20 flex flex-col items-center justify-center space-y-4">
+<p class="font-label-sm text-[12px] text-warmBrown">7 个标签 · 共 47 篇日记</p>
+<div class="opacity-60 flex items-center justify-center">
+<span class="material-symbols-outlined" style="color: rgb(224, 90, 58); font-size: 48px; font-variation-settings: &quot;FILL&quot; 1; transform: translateY(-4.97739px);">menu_book</span>
+</div>
+</footer>
+</main>
+<!-- Bottom Navigation Bar (Contextual Lock: Tags is active) -->
+<nav class="fixed bottom-0 w-full z-50 border-t border-outline-variant bg-surface-container-lowest shadow-[0_-4px_12px_rgba(0,0,0,0.35)] flex justify-around items-center h-20 pb-safe px-4">
+<!-- Entries -->
+<div class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 hover:opacity-100 transition-all active:scale-90 duration-200 cursor-pointer">
+<span class="material-symbols-outlined">edit_note</span>
+<span class="font-label-sm text-label-sm">Entries</span>
+</div>
+<!-- Calendar -->
+<div class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 hover:opacity-100 transition-all active:scale-90 duration-200 cursor-pointer">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-label-sm text-label-sm">Calendar</span>
+</div>
+<!-- Tags (ACTIVE) -->
+<div class="flex flex-col items-center justify-center text-primary-container bg-surface-container-high rounded-full px-4 py-1 active:scale-90 duration-200 cursor-pointer">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">sell</span>
+<span class="font-label-sm text-label-sm">Tags</span>
+</div>
+<!-- Profile -->
+<div class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 hover:opacity-100 transition-all active:scale-90 duration-200 cursor-pointer">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</div>
+</nav>
+<!-- Micro-interaction Script -->
+<script>
+        // Simple touch interaction feedback
+        document.querySelectorAll('.transition-swipe').forEach(row => {
+            row.addEventListener('touchstart', (e) => {
+                row.style.opacity = '0.85';
+            });
+            row.addEventListener('touchend', (e) => {
+                row.style.opacity = '1';
+            });
+        });
+
+        // Dynamic footer subtle animation
+        const bookIcon = document.querySelector('footer span');
+        if(bookIcon) {
+            let angle = 0;
+            setInterval(() => {
+                angle += 0.05;
+                const offset = Math.sin(angle) * 5;
+                bookIcon.style.transform = `translateY(${offset}px)`;
+            }, 50);
+        }
+    </script>
+</body></html>

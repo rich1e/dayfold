@@ -1,0 +1,319 @@
+<!DOCTYPE html><html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport">
+<title>Dayfold - Gallery</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        @font-face {
+            font-family: 'STSongti-SC';
+            src: local('STSongti-SC'), local('Songti SC');
+        }
+        
+        body {
+            background-color: #1c100e; /* surface from theme */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* Paper drop animation for section loading */
+        .paper-drop {
+            animation: paperDrop 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes paperDrop {
+            0% {
+                opacity: 0;
+                transform: translateY(12pt) rotateX(-8deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) rotateX(0);
+            }
+        }
+
+        /* Custom scrollbar for midnight reading aesthetic */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1c100e;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3C3C44;
+            border-radius: 2px;
+        }
+
+        .masonry-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-auto-rows: 10px;
+            gap: 2pt;
+        }
+        .item-sm { grid-row-end: span 12; }
+        .item-lg { grid-row-end: span 18; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed-dim": "#6ad5ef",
+                      "secondary": "#6ad6e6",
+                      "outline-variant": "#59413c",
+                      "on-surface-variant": "#e0bfb8",
+                      "drawerBg": "#2D2D33",
+                      "outline": "#a78a83",
+                      "tertiary-container": "#239eb7",
+                      "warmPaper": "#3C3C44",
+                      "on-background": "#f5ddd8",
+                      "on-error": "#690005",
+                      "on-primary-fixed": "#3d0700",
+                      "error-container": "#93000a",
+                      "primary-fixed": "#ffdad2",
+                      "surface-container-highest": "#40312e",
+                      "on-secondary-fixed": "#001f24",
+                      "tertiary-fixed": "#acedff",
+                      "on-secondary-fixed-variant": "#004f57",
+                      "on-tertiary-container": "#002e38",
+                      "on-error-container": "#ffdad6",
+                      "surface-dim": "#1c100e",
+                      "surface-container-low": "#251916",
+                      "tertiary": "#6ad5ef",
+                      "on-surface": "#f5ddd8",
+                      "error": "#ffb4ab",
+                      "surface": "#1c100e",
+                      "inverse-primary": "#ab3418",
+                      "surface-container-lowest": "#160b09",
+                      "warmGray": "#52525F",
+                      "inverse-on-surface": "#3b2d2a",
+                      "on-primary-fixed-variant": "#8a1c01",
+                      "surface-bright": "#453632",
+                      "inverse-surface": "#f5ddd8",
+                      "secondary-fixed-dim": "#6ad6e6",
+                      "secondary-fixed": "#96f0ff",
+                      "warmLight": "#434350",
+                      "on-primary": "#621100",
+                      "warmCream": "#4A4A58",
+                      "coverCream": "#E8D5B8",
+                      "secondary-container": "#249fae",
+                      "on-secondary-container": "#002f35",
+                      "on-tertiary-fixed-variant": "#004e5c",
+                      "on-secondary": "#00363d",
+                      "primary-fixed-dim": "#ffb4a3",
+                      "surface-tint": "#ffb4a3",
+                      "on-primary-container": "#560d00",
+                      "drawerAccent": "#F27359",
+                      "surface-variant": "#40312e",
+                      "primary-container": "#ef6544",
+                      "warmDark": "#E8E8EC",
+                      "surface-container-high": "#352723",
+                      "surface-container": "#291d19",
+                      "on-tertiary-fixed": "#001f26",
+                      "background": "#1c100e",
+                      "on-tertiary": "#003640",
+                      "primary": "#ffb4a3",
+                      "warmBrown": "#9090A0",
+                      "coverLeather": "#2C1A0A"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "card-padding-y": "16pt",
+                      "section-gap-lg": "32pt",
+                      "section-gap-sm": "14pt",
+                      "section-gap-md": "20pt",
+                      "card-padding-x": "20pt",
+                      "gutter-tight": "4pt",
+                      "drawer-width": "85vw"
+              },
+              "fontFamily": {
+                      "label-xs": ["system-rounded", "sans-serif"],
+                      "label-sm": ["system-rounded", "sans-serif"],
+                      "label-md": ["system-rounded", "sans-serif"],
+                      "body-md": ["system-serif", "serif"],
+                      "display-lg": ["system-sans", "sans-serif"],
+                      "body-lg": ["system-serif", "serif"],
+                      "headline-lg": ["STSongti-SC", "serif"],
+                      "headline-md": ["STSongti-SC", "serif"]
+              },
+              "fontSize": {
+                      "label-xs": ["10px", {"fontWeight": "400"}],
+                      "label-sm": ["11px", {"fontWeight": "400"}],
+                      "label-md": ["13px", {"fontWeight": "400"}],
+                      "body-md": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+                      "display-lg": ["26px", {"letterSpacing": "3px", "fontWeight": "900"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-warmPaper text-on-surface selection:bg-drawerAccent selection:text-white">
+<!-- Top Navigation Bar -->
+<header class="w-full top-0 sticky z-50 bg-background/80 backdrop-blur-lg h-16 flex items-center justify-between px-section-gap-md">
+<button aria-label="Menu" class="w-11 h-11 flex items-center justify-start text-secondary hover:opacity-80 transition-opacity active:scale-95">
+<span class="material-symbols-outlined text-[24px]">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md text-warmDark">相册</h1>
+<button aria-label="Toggle View" class="w-11 h-11 flex items-center justify-end text-secondary hover:opacity-80 transition-opacity active:scale-95">
+<span class="material-symbols-outlined text-[24px]">grid_view</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="w-full pb-10">
+<!-- July 2026 Section -->
+<section class="paper-drop">
+<!-- Section Header -->
+<div class="px-section-gap-md pt-section-gap-sm">
+<div class="border-t border-white/5 w-full pt-2 flex items-center justify-between">
+<span class="font-label-md text-label-md text-secondary uppercase tracking-[1.5pt] font-semibold">2026年7月</span>
+<span class="font-label-sm text-label-sm text-warmBrown">12张</span>
+</div>
+</div>
+<!-- Hero Photo Row -->
+<div class="mt-4 w-full h-[200pt] relative overflow-hidden group">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="A cinematic night-time photograph of a rainy city street reflecting warm amber neon lights in puddles. The composition is atmospheric and dark, with a deep midnight blue-gray color palette consistent with the Dayfold brand. The lighting is soft and moody, evoking a sense of quiet solitude and contemplation in a modern reading-room aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB6Z946OviU1o8_AcGdMfn2WX799wj2hf00EpVNqgM8LvvlAF6wL4lGoilJCY-IdBEFODuQy_GIofNjCajS01vcZmKGvNl5GleYkVG8UBkcovi8idyK0e1Z_8CoJj_FEhCYX0SzBrUa7ybF0uWK26-kViqlBe316Te2xO0QSBpAoflA6eO9dW7u-Q_4IOdNJXQK3U4xcWCyURzMuix8Y-o-9Umrcq5a1WecHVTTblsB5z5UuLHl9RmTOlpZJDmHHMs_zuJveqRgEni3')">
+</div>
+<!-- Gradient Scrim -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<!-- Overlay Text -->
+<div class="absolute bottom-5 left-5 right-5 flex flex-col gap-1">
+<span class="font-label-md text-label-md text-white/90">7月1日 星期四</span>
+<h2 class="font-headline-md text-headline-md text-white">雨后的漫步</h2>
+</div>
+</div>
+<!-- Photo Grid -->
+<div class="masonry-grid mt-[2pt]">
+<!-- Grid Item 1 -->
+<div class="relative item-lg overflow-hidden group">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="A vertical close-up shot of a steaming cup of coffee sitting on a dark wooden desk beside a leather journal. The scene is illuminated by a single warm candle flame, creating high contrast and a tactile, private reading-room atmosphere with deep shadows and warm highlights." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuClxjqbUiepLf1Z7fnKL2WgFo3lsnUhXTeye1i29s7CKQoc5mNVWW9NPFKNMgStZlb_W_KH9UGCWAviTS_l_O9lA60oha89Ybp9n3xnDWF3cJJec45kJxYVs2bfxLb4d3hrVKM5krsgp7BDLAiAumX_dHvrCWs2cAFWTJL3B2My9YpdP9Xw5IIwTdoakSNMkdoz4cuH6-mD46BcevEwbmggZ70AHWTlndtqFZzMNVs8CTfI7J2Ryu7de00zvAoQ_-E9LPZwQKqLrNIr')">
+</div>
+<span class="absolute bottom-2 left-2 font-label-xs text-white font-bold bg-black/20 px-1 rounded">29</span>
+</div>
+<!-- Grid Item 2 -->
+<div class="relative item-sm overflow-hidden group">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="A moody photograph of a quiet library at night, featuring a single green lamp illuminating a stack of old books. The surrounding environment is bathed in deep navy and charcoal tones, emphasizing the midnight theme and the tactile grain of the paper." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC5H8_j_nfw_PdfOy4NGTJp3nCULNeVA6PQUcHQJL72hRycpXUMeSRoGDrTfX9O_M-EMNN_Lxu2vsLmrKOQDXJhornN3EfVAna4sAVgZOOsgwf66tUo9OxI7jZR1iaLIRqKXrAp07HcTptMHeTWqGke4dblvEpIAJPByGGR3db6VAc74y55ilUV6gBg000vQvkjtmz13YP-j-ZWZbE2GyvWvZ6-o94hs7TvaHPsR6ScDYz4jNHXNjOydAQiAWa8g0QUHYXCweynakLk')">
+</div>
+<span class="absolute bottom-2 left-2 font-label-xs text-white font-bold bg-black/20 px-1 rounded">28</span>
+</div>
+<!-- Grid Item 3 -->
+<div class="relative item-lg overflow-hidden group">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="A high-contrast black and white shot of shadows cast by a window frame onto a textured plaster wall at dusk. The minimalist composition focuses on geometry and light, following the modern tactile design system with its emphasis on vertical rhythm and subtle depth." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBcaliBaSQMPz1-8S76g7x-iQX-TEDf0k41P96AXYkuVco1cUqhn3fZfxlNHyaomJUPlsbQEC01yW0l2YhVAvwpt42g2YIREZVvGCJ-rGDpTjV_moJhUsCajgCdWA03XVPayThOLJC7USTrzx41mu2_eK4htvBAoujtnSeKgU64-uQTR6KV-0Y3xITCouZmgdYgjO75vEYP6RzXWJpEo8VwxxzyyxIc81DzN1VSobrZg351LHxPBqzDzj1GXunVCt2Z98rsrMXCdMpZ')">
+</div>
+<span class="absolute bottom-2 left-2 font-label-xs text-white font-bold bg-black/20 px-1 rounded">27</span>
+</div>
+<!-- Grid Item 4 -->
+<div class="relative item-sm overflow-hidden group">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="A detailed macro photo of rain droplets on a dark window pane, with blurred city lights in the background creating a soft bokeh effect. The palette is dominated by cool grays and deep blues, maintaining the cinematic and contemplative visual tone of the Dayfold app." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCDAddo5Won5Cs0OVABdTkHtVQV0x2xKOMslNV9mNw4FBHqKCZcy-rkRo8jTN0g-YJUPbF6-e-h-YTHIoQRAIdFDcgadgxjpYcgIEsYYHIL4mtL-kFWRQA8Q3Q2WdLaQcgtcHtKhgnh7lTv7u1A1Rf10f9fDtiPwSSLBgX75TRKq_KcG4gmHgTyxxrCWVsEQvAsoUrF35z6WQSrUz0hNuQStlWc-PGamdOFD0Eo8i1E8FLc4ja_DncWlzPfX4VG1ShZNIMoNuSao2Ay')">
+</div>
+<span class="absolute bottom-2 left-2 font-label-xs text-white font-bold bg-black/20 px-1 rounded">25</span>
+</div>
+<!-- Grid Item 5 -->
+<div class="relative item-lg overflow-hidden group">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="An overhead flat-lay of an open fountain pen and an inkwell on a textured dark paper background. The lighting highlights the metallic sheen of the pen nib, evoking a tactile, journal-inspired feeling with sophisticated deep tones and intentional whitespace." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBBYXOQTYPt9Z64eFVDbfYySSPeUxp0vyqyF_7X2eTaj2_hsMupMRwc1pSWQjOo-LB9Svt8Y4jEAPlJRergU09mRx9W2JP8WrAbXSpJUHd4lhBKN1MeF2MATvX_E3aONSzP6x5tyBvSKHG4nrjgVUCDytPil6efD7orP5VT1AnmR8hRpb6t00TM72HcNbOo__9sydCAWb6vKfOdBPXXaYUi5D24E620JGS8L0kvdOtfrcGF66SOtD9TpCZjV4AX-0dU0CDISdMAun4d')">
+</div>
+<span class="absolute bottom-2 left-2 font-label-xs text-white font-bold bg-black/20 px-1 rounded">24</span>
+</div>
+<!-- Grid Item 6 -->
+<div class="relative item-sm overflow-hidden group">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="A serene shot of a park bench under a dim streetlight during a misty night. The atmosphere is quiet and lonely, with soft gradients of light falling off into the dark, reflecting the 'desk at midnight' aesthetic of the design system." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCBB2_kHZEytoZ4nj5xZeN5MnNIAyGx1Bzj8HXPWplZkAvkR8PXIu1AGLHuxn6qYPO-bQHM-uTVewgqJqfqFcYaVPz7VqDWUoSC3xacY15W0nY_ov-ZvCdS25zVauZIAn6h4omBkjCTKzgCSy3tflVOn7EewQDDUD1UaJmFtDPOWk1XNWijfChdW-IuWiu4088z0fPRhke34i6TB0Qe63owl_oLsZojPglW4y2IQaVRU4QaVRRaBYsNLxSgJ4Ohpu1lI2T_HuRbadAK')">
+</div>
+<span class="absolute bottom-2 left-2 font-label-xs text-white font-bold bg-black/20 px-1 rounded">22</span>
+</div>
+</div>
+</section>
+<!-- June 2026 Section -->
+<section class="paper-drop mt-10" style="animation-delay: 0.2s;">
+<!-- Section Header -->
+<div class="px-section-gap-md pt-section-gap-sm">
+<div class="border-t border-white/5 w-full pt-2 flex items-center justify-between">
+<span class="font-label-md text-label-md text-secondary uppercase tracking-[1.5pt] font-semibold">2026年6月</span>
+<span class="font-label-sm text-label-sm text-warmBrown">8张</span>
+</div>
+</div>
+<!-- Hero Photo Row -->
+<div class="mt-4 w-full h-[200pt] relative overflow-hidden group">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="A cinematic wide shot of a solitary figure walking through a forest of tall, dark pine trees during blue hour. The lighting is ethereal and dim, creating a strong sense of mood and mystery within the deep midnight-blue color palette of the brand." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA-6sptqn8d7lA_kqXu7BWF8qAZ7VjZWyMni4FAQDPU6e4NyP7i1Nxy3Y5nkzY13OLhFSy4m5eie62jfzTFxxrbMGHdLEBqaBbcdhUnksVFepLYeqdxz37kwvfbB6mQNzLJKYnIdaNPtTUN_o5p8hIg4wL4Esa6oGcA6maHfoZx6rGjWA0Ot8jDN9F4MRV_QZZO5bsAVashfzdzvtVpL-0ptnA20n-LfqNb3SG4LMgm9qxrFZOXkWbjNwhuaD_LBIDkMwrlpGmo4NVL')">
+</div>
+<!-- Gradient Scrim -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<!-- Overlay Text -->
+<div class="absolute bottom-5 left-5 right-5 flex flex-col gap-1">
+<span class="font-label-md text-label-md text-white/90">6月18日 星期日</span>
+<h2 class="font-headline-md text-headline-md text-white">夏至前的寂静</h2>
+</div>
+</div>
+<!-- Photo Grid -->
+<div class="masonry-grid mt-[2pt]">
+<div class="relative item-sm overflow-hidden group">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="A close-up of a vintage analog watch resting on a midnight blue velvet surface. The lighting is dramatic, highlighting the mechanical details and the tactile texture of the fabric, aligned with the luxurious and private feel of the UI." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuADzha_r5tujW7Xi2Q3moocrnttJHFm3agpcJuwjv3b-85Snh7cCTVC5FZ6CE9uw0fgbI_YnnAPBRV71xpTy_QtIVpFw6mLccbtfda-tdJphGsqEmakB9Jn8rkn_7THpE8Bcrshw4P-I4e6MTbzIjIvhTTM6TFiJ9S5xjypXFXrXuqXQ42jxWN1JfZIwWmmQlV368eVVSqwyy3PMZAs8wRKGHMSPvjvO_DReZ4EvN2bRuiLz94jrVwqXunkvPb6cetnPwh1bW8KrYRb')">
+</div>
+<span class="absolute bottom-2 left-2 font-label-xs text-white font-bold bg-black/20 px-1 rounded">15</span>
+</div>
+<div class="relative item-lg overflow-hidden group">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="A vertical shot through an old window with peeling paint, looking out at a hazy sunset over a quiet harbor. The colors are muted and sophisticated, blending warm creams with deep charcoal grays to match the brand identity." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBRFNRQM-9fKY7VAxtTBEOdkEY8LuVhQnL4NANNKsk25Ewq0VO0d-nQ5Tp0M3LKx0r8JlQCA5wql2LpCCFUkLLuuLYhXrlzfkQMK9OfeHXppxhNS1wW8xdspvaa-I1ohLLKTYyBPCGh1LZLfvNPlgXHrCq9zc2i9tafVcd-5rxhIWR3sdlmEv0MlOQUv3GZgzrywoVpNz-Uhb4ybSV8YTn4WwANlOC3xNjwV86lyNKASVZfgkF8N7G9jqDwI8oL5VgEJpIfgW3PhcW_')">
+</div>
+<span class="absolute bottom-2 left-2 font-label-xs text-white font-bold bg-black/20 px-1 rounded">12</span>
+</div>
+<div class="relative item-sm overflow-hidden group">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="A minimalist photograph of a single dried leaf pressed between the pages of a notebook. The focus is on the intricate veins of the leaf and the fiber of the paper, creating a strong tactile metaphor for personal reflection." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCgmnf-P68kPWiK1JmpHIODIuSWxOA7I6imW3Vo3aVmyUhJwUETtByycQGfvpEZZks8EoQHz03UoBK5tprGkbF23MaK3jdEhuaTe3_3XAratb9DtOJhnOc1BT2Sl-p8MzFFhFHjS29hTbQrLdrt5bFPrT5QDmhAw_qb230GxPNp2_aDmL18Tf60hC1fdphOIUPx3hzKQegoSlvSXFmNofod8YEr4D1wOqu8UenZENQFgxGPSlFkCvGumuhMMqsf6ogDsmCJdgn-drqo')">
+</div>
+<span class="absolute bottom-2 left-2 font-label-xs text-white font-bold bg-black/20 px-1 rounded">08</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Interactions Layer -->
+<script>
+        // Simple micro-interaction for images to simulate the tactile 'paper' feel
+        document.querySelectorAll('.group').forEach(item => {
+            item.addEventListener('mousedown', () => {
+                item.style.transform = 'scale(0.98)';
+                item.style.transition = 'transform 0.2s ease';
+            });
+            item.addEventListener('mouseup', () => {
+                item.style.transform = 'scale(1)';
+            });
+            item.addEventListener('mouseleave', () => {
+                item.style.transform = 'scale(1)';
+            });
+        });
+
+        // Lazy animation trigger on scroll
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('paper-drop');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
+    </script>
+</body></html>

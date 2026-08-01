@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=system-rounded:wght@100..900&family=system-sans:wght@100..900&family=system-serif:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#1c100e",
+                        "surface-variant": "#40312e",
+                        "on-primary-container": "#560d00",
+                        "inverse-surface": "#f5ddd8",
+                        "on-error": "#690005",
+                        "inverse-primary": "#ab3418",
+                        "surface-bright": "#453632",
+                        "on-secondary-fixed": "#001f24",
+                        "on-tertiary-fixed": "#001f26",
+                        "primary-fixed": "#ffdad2",
+                        "warmBrown": "#9090A0",
+                        "on-tertiary-container": "#002e38",
+                        "tertiary-container": "#239eb7",
+                        "surface-container-lowest": "#160b09",
+                        "on-primary": "#621100",
+                        "surface-container": "#291d19",
+                        "on-background": "#f5ddd8",
+                        "inverse-on-surface": "#3b2d2a",
+                        "coverCream": "#E8D5B8",
+                        "error": "#ffb4ab",
+                        "outline-variant": "#59413c",
+                        "coverLeather": "#2C1A0A",
+                        "tertiary": "#6ad5ef",
+                        "warmCream": "#4A4A58",
+                        "on-surface-variant": "#e0bfb8",
+                        "surface-dim": "#1c100e",
+                        "tertiary-fixed-dim": "#6ad5ef",
+                        "on-secondary-container": "#002f35",
+                        "on-secondary": "#00363d",
+                        "warmGray": "#52525F",
+                        "surface-container-highest": "#40312e",
+                        "outline": "#a78a83",
+                        "primary-fixed-dim": "#ffb4a3",
+                        "tertiary-fixed": "#acedff",
+                        "on-secondary-fixed-variant": "#004f57",
+                        "secondary-fixed-dim": "#6ad6e6",
+                        "surface-tint": "#ffb4a3",
+                        "warmPaper": "#3C3C44",
+                        "secondary-fixed": "#96f0ff",
+                        "surface-container-low": "#251916",
+                        "on-error-container": "#ffdad6",
+                        "background": "#1c100e",
+                        "on-tertiary": "#003640",
+                        "on-primary-fixed-variant": "#8a1c01",
+                        "drawerBg": "#2D2D33",
+                        "primary-container": "#ef6544",
+                        "on-primary-fixed": "#3d0700",
+                        "surface-container-high": "#352723",
+                        "warmLight": "#434350",
+                        "secondary-container": "#249fae",
+                        "secondary": "#6ad6e6",
+                        "on-surface": "#f5ddd8",
+                        "primary": "#ffb4a3",
+                        "warmDark": "#E8E8EC",
+                        "on-tertiary-fixed-variant": "#004e5c",
+                        "error-container": "#93000a",
+                        "drawerAccent": "#F27359",
+                        "emberOrange": "#E05A3A"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section-gap-lg": "32pt",
+                        "card-padding-x": "20pt",
+                        "section-gap-sm": "14pt",
+                        "gutter-tight": "4pt",
+                        "drawer-width": "85vw",
+                        "section-gap-md": "20pt",
+                        "card-padding-y": "16pt"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["system-serif"],
+                        "label-xs": ["system-rounded"],
+                        "body-md": ["system-serif"],
+                        "label-sm": ["system-rounded"],
+                        "label-md": ["system-rounded"],
+                        "headline-lg": ["STSongti-SC", "serif"],
+                        "display-lg": ["system-sans"],
+                        "headline-md": ["STSongti-SC", "serif"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-xs": ["10px", {"fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+                        "label-sm": ["11px", {"fontWeight": "400"}],
+                        "label-md": ["13px", {"fontWeight": "400"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "display-lg": ["26px", {"letterSpacing": "3px", "fontWeight": "900"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .paper-texture {
+            background-color: #3C3C44;
+            background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.1) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .paper-texture::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: 0.04;
+            pointer-events: none;
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+        }
+        .paperDrop {
+            animation: paperDropAnim 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes paperDropAnim {
+            0% { transform: perspective(1000px) rotateX(-8deg) translateY(-12pt); opacity: 0; }
+            100% { transform: perspective(1000px) rotateX(0deg) translateY(0); opacity: 1; }
+        }
+        .emboss-book {
+            text-shadow: -1px -1px 0px rgba(255,255,255,0.1), 1px 1px 0px rgba(0,0,0,0.5);
+            color: #E8D5B8;
+        }
+        .glow-hint {
+            animation: pulse 3s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-warmPaper text-on-surface antialiased select-none overflow-hidden">
+<!-- Main Lock Screen Container -->
+<main class="paper-texture h-screen w-full flex flex-col items-center justify-between py-16 px-8">
+<!-- Top Spacer for iOS Status Bar -->
+<div class="h-8"></div>
+<!-- App Identity Area -->
+<section class="flex flex-col items-center paperDrop" style="margin-top: 5vh;">
+<!-- App Icon -->
+<div class="w-[60pt] h-[60pt] bg-coverLeather rounded-[16pt] shadow-[0_8px_16px_rgba(0,0,0,0.4)] flex items-center justify-center relative overflow-hidden mb-6 group active:scale-95 transition-transform duration-200">
+<div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
+<span class="material-symbols-outlined text-[32pt] emboss-book" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+</div>
+<!-- Wordmark -->
+<h1 class="font-headline-lg text-[24px] text-emberOrange tracking-[2px] mb-4">DAYFOLD</h1>
+<!-- Divider -->
+<div class="w-[60pt] h-[1pt] bg-tertiary opacity-80 mb-4"></div>
+<!-- Tagline -->
+<p class="font-label-md text-label-md text-warmBrown tracking-widest">私人日记</p>
+</section>
+<!-- Unlock Area -->
+<section class="w-full max-w-[340pt] flex flex-col items-center gap-6 mt-auto mb-12">
+<!-- Unlock Button -->
+<button class="w-full h-14 bg-emberOrange active:scale-95 transition-all duration-200 rounded-xl flex items-center justify-center gap-3 shadow-[0_4px_12pt_rgba(224,90,58,0.35)] group" onclick="handleUnlock()">
+<span class="material-symbols-outlined text-white text-[20pt]">drafts</span>
+<span class="font-body-lg text-white font-medium">解锁 Dayfold</span>
+</button>
+<!-- Hint Text -->
+<div class="flex flex-col items-center gap-1 glow-hint">
+<p class="font-label-sm text-label-sm text-warmGray">使用 Face ID 或 Touch ID 解锁</p>
+</div>
+</section>
+<!-- Footer -->
+<footer class="pb-safe">
+<p class="font-label-sm text-label-sm text-warmBrown opacity-60">Dayfold · 私人日记</p>
+</footer>
+</main>
+<!-- Micro-interaction Script -->
+<script>
+        function handleUnlock() {
+            const btn = document.querySelector('button');
+            const icon = btn.querySelector('.material-symbols-outlined');
+            
+            // Visual feedback for click
+            btn.classList.add('scale-95');
+            
+            // Simulate FaceID success
+            setTimeout(() => {
+                icon.innerText = 'check_circle';
+                btn.style.backgroundColor = '#239eb7'; // cyan success
+                btn.querySelector('span:last-child').innerText = '已验证';
+                
+                // Add a little haptic-like shake or success feel
+                document.body.classList.add('transition-all', 'duration-500', 'opacity-0', 'scale-110');
+                
+                setTimeout(() => {
+                    // In a real app, this would navigate
+                    alert('欢迎回到 Dayfold');
+                    location.reload();
+                }, 600);
+            }, 800);
+        }
+
+        // Prevent accidental scrolling on iOS
+        document.addEventListener('touchmove', function (e) {
+            e.preventDefault();
+        }, { passive: false });
+    </script>
+</body></html>
