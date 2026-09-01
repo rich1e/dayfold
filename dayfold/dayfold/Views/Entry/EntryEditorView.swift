@@ -12,6 +12,8 @@ struct EntryEditorView: View {
     @State private var selectionLength: Int = 0
     @State private var showingDeleteConfirm = false
     @State private var textHeight: CGFloat = 320
+    /// 「是，使用」已消费 pendingMetadata，防止 alert dismiss 的 set false 误触发 decline
+    @State private var metadataConfirmConsumed = false
 
     init(entry: Entry? = nil, context: NSManagedObjectContext, prefillDate: Date? = nil, notebook: Notebook? = nil) {
         _viewModel = StateObject(wrappedValue: EntryEditorViewModel(
@@ -56,6 +58,24 @@ struct EntryEditorView: View {
             Button("确定", role: .cancel) {}
         } message: {
             Text(viewModel.lastSaveError?.localizedDescription ?? "请重试")
+        }
+        .alert("使用附件时间和位置？", isPresented: Binding(
+            get: { viewModel.pendingMetadata != nil },
+            set: { if !$0 {
+                if !metadataConfirmConsumed { viewModel.declineApplyPhotoMetadata() }
+                metadataConfirmConsumed = false
+            }}
+        )) {
+            Button("是，使用") {
+                metadataConfirmConsumed = true
+                viewModel.confirmApplyPhotoMetadata()
+            }
+            Button("否，保持不变", role: .cancel) {
+                metadataConfirmConsumed = true
+                viewModel.declineApplyPhotoMetadata()
+            }
+        } message: {
+            metadataMessage
         }
     }
 
@@ -313,6 +333,26 @@ struct EntryEditorView: View {
         fmt.locale = Locale(identifier: "zh_CN")
         fmt.dateFormat = "yyyy年M月d日 EEEE  HH:mm"
         return fmt.string(from: viewModel.effectiveDate)
+    }
+
+    /// 「使用附件时间和位置？」弹窗正文：时间行 + 位置行（地名异步就位后自动刷新）
+    private var metadataMessage: Text {
+        guard let meta = viewModel.pendingMetadata else { return Text("") }
+        var lines: [String] = []
+        if let date = meta.createdAt {
+            lines.append("时间：\(formattedDate(date))")
+        }
+        if meta.coordinate != nil {
+            lines.append(meta.placeName.map { "位置：\($0)" } ?? "位置：解析中…")
+        }
+        return lines.map { Text($0) }.reduce(Text(""), +)
+    }
+
+    private func formattedDate(_ date: Date) -> String {
+        let fmt = DateFormatter()
+        fmt.locale = Locale(identifier: "zh_CN")
+        fmt.dateFormat = "yyyy年M月d日 EEEE HH:mm"
+        return fmt.string(from: date)
     }
 
     private func saveAndDismiss() {

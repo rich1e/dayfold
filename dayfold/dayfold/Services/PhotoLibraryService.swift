@@ -246,7 +246,7 @@ final class PhotoLibraryService: ObservableObject {
 
     /// 输出格式对齐 LocationService：「city·area」/「city」/「area」，失败返回 nil。
     /// CLGeocoder 不可并发复用，每次新建实例。
-    func placeName(for coordinate: CLLocationCoordinate2D) async -> String? {
+    static func placeName(for coordinate: CLLocationCoordinate2D) async -> String? {
         let geocoder = CLGeocoder()
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
         let placemarks = try? await geocoder.reverseGeocodeLocation(location)

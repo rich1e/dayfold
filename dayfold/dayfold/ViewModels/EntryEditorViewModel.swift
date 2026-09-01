@@ -5,6 +5,14 @@ import CoreLocation
 import UIKit
 import Combine
 
+/// 「使用附件时间和位置？」弹窗的数据源：anchor 照片的拍摄时间与坐标
+struct PendingPhotoMetadata {
+    let createdAt: Date?
+    let coordinate: CLLocationCoordinate2D?
+    var placeName: String?
+    var isResolvingPlace: Bool
+}
+
 @MainActor
 class EntryEditorViewModel: ObservableObject {
     @Published var title = ""
@@ -22,6 +30,10 @@ class EntryEditorViewModel: ObservableObject {
     @Published var isFavorite = false
     @Published var mood: String = ""
     @Published var lastSaveError: Error?
+    /// 待确认的照片元数据；非 nil 时编辑器弹出「使用附件时间和位置？」
+    @Published var pendingMetadata: PendingPhotoMetadata?
+    /// 用户确认采纳的照片拍摄时间（保存时写入 entry.createdAt）
+    @Published private(set) var attachedCreatedAt: Date?
 
     private let viewContext: NSManagedObjectContext
     private var entry: Entry?
@@ -35,6 +47,8 @@ class EntryEditorViewModel: ObservableObject {
     private var imagesChanged = false
     private var originalSnapshot: EntrySnapshot?
     private var deferredOldFilenames: [String] = []
+    /// 照片地名解析代际：pending 被替换/清除时递增，使在途请求结果作废
+    private var placeResolveGeneration = 0
 
     var isNewEntry: Bool {
         isNewEntryOnInit
@@ -68,6 +82,7 @@ class EntryEditorViewModel: ObservableObject {
     }
 
     private struct EntrySnapshot {
+        var createdAt: Date
         var title: String
         var content: String
         var mood: String
@@ -81,6 +96,7 @@ class EntryEditorViewModel: ObservableObject {
 
         static func capture(from entry: Entry, selectedTags: [Tag]) -> EntrySnapshot {
             EntrySnapshot(
+                createdAt: entry.createdAt ?? Date(),
                 title: entry.wrappedTitle,
                 content: entry.wrappedContent,
                 mood: entry.wrappedMood,
@@ -179,6 +195,10 @@ class EntryEditorViewModel: ObservableObject {
         entryToSave.mood = mood.isEmpty ? nil : mood
         entryToSave.modifiedAt = Date()
         entryToSave.needsSync = true
+        // 用户确认采纳照片拍摄时间时覆盖 createdAt（新建/编辑统一，idempotent，auto-save 亦同步）
+        if let attachedDate = attachedCreatedAt {
+            entryToSave.createdAt = attachedDate
+        }
 
         // 保存标签 (多对多关系)
         entryToSave.tags = NSSet(array: selectedTags)
@@ -191,9 +211,12 @@ class EntryEditorViewModel: ObservableObject {
                 in: viewContext
             )
             locationEntity.placeName = placeName
-            locationEntity.weatherTemperature = weather?.temperature ?? 0
-            locationEntity.weatherCondition = weather?.condition
-            locationEntity.weatherIcon = weather?.symbolName
+            // 位置可能来自照片元数据（无天气数据），weather 为空时保留实体原值，避免清零
+            if let weather = weather {
+                locationEntity.weatherTemperature = weather.temperature
+                locationEntity.weatherCondition = weather.condition
+                locationEntity.weatherIcon = weather.symbolName
+            }
             entryToSave.location = locationEntity
         }
 
@@ -247,6 +270,7 @@ class EntryEditorViewModel: ObservableObject {
         // 取消编辑:把 current VM 状态回滚到 snapshot 前的字段
         if let snapshot = originalSnapshot {
             guard let existing = entry else { return }
+            existing.createdAt = snapshot.createdAt
             existing.title = snapshot.title.isEmpty ? nil : snapshot.title
             existing.content = snapshot.content
             existing.mood = snapshot.mood.isEmpty ? nil : snapshot.mood
@@ -307,15 +331,75 @@ class EntryEditorViewModel: ObservableObject {
         images.remove(at: index)
     }
 
-    /// 选择器回传：一次性追加，didSet 置脏 imagesChanged（单次 diff）
+    /// 选择器回传：一次性追加，didSet 置脏 imagesChanged（单次 diff）；
+    /// 同时取带拍摄元数据照片中最早者为 anchor，弹出「使用附件时间和位置？」确认。
+    /// 连续多批选图时与旧 pending 合并：时间取更早者，坐标/地名保留旧值（可能仍在解析中）。
     func addPickedPhotos(_ photos: [PickedPhoto]) {
         guard !photos.isEmpty else { return }
         images.append(contentsOf: photos.map(\.image))
+
+        guard let anchor = photos
+            .compactMap({ photo -> (date: Date, coordinate: CLLocationCoordinate2D?)? in
+                guard let date = photo.creationDate else { return nil }
+                return (date, photo.coordinate)
+            })
+            .min(by: { $0.date < $1.date })
+        else { return }
+
+        if let existing = pendingMetadata, let existingDate = existing.createdAt,
+           existingDate <= anchor.date {
+            return  // 已有待确认的更早 anchor，保持不变
+        }
+
+        pendingMetadata = PendingPhotoMetadata(
+            createdAt: anchor.date,
+            coordinate: pendingMetadata?.coordinate ?? anchor.coordinate,
+            placeName: pendingMetadata?.placeName,
+            isResolvingPlace: false
+        )
+        if let coordinate = pendingMetadata?.coordinate {
+            resolvePhotoPlaceName(for: coordinate)
+        }
     }
 
-    /// 编辑器顶部展示用的条目日期：编辑态用已存日期，新建态用预填日期，兜底当前时刻
+    /// 弹窗「是，使用」：日记时间改用照片拍摄时间，位置/地名改用照片坐标
+    func confirmApplyPhotoMetadata() {
+        guard let meta = pendingMetadata else { return }
+        attachedCreatedAt = meta.createdAt
+        if let coordinate = meta.coordinate {
+            location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+            placeName = meta.placeName
+        }
+        pendingMetadata = nil
+        // 地名仍在解析时，让在途请求完成后补写 placeName（见 resolvePhotoPlaceName）
+    }
+
+    /// 弹窗「否，保持不变」：丢弃待确认元数据
+    func declineApplyPhotoMetadata() {
+        pendingMetadata = nil
+        placeResolveGeneration += 1  // 作废在途地名解析
+    }
+
+    /// 照片坐标反向地理编码，结果写回 pendingMetadata；弹窗已确认则补写 placeName
+    private func resolvePhotoPlaceName(for coordinate: CLLocationCoordinate2D) {
+        placeResolveGeneration += 1
+        let generation = placeResolveGeneration
+        pendingMetadata?.isResolvingPlace = true
+        Task { [weak self] in
+            let name = await PhotoLibraryService.placeName(for: coordinate)
+            guard let self, self.placeResolveGeneration == generation else { return }
+            if self.pendingMetadata != nil {
+                self.pendingMetadata?.placeName = name
+                self.pendingMetadata?.isResolvingPlace = false
+            } else if self.attachedCreatedAt != nil {
+                self.placeName = name
+            }
+        }
+    }
+
+    /// 编辑器顶部展示用的条目日期：优先用户确认的照片时间，其次已存日期/预填日期
     var effectiveDate: Date {
-        entry?.createdAt ?? prefillDate ?? Date()
+        attachedCreatedAt ?? entry?.createdAt ?? prefillDate ?? Date()
     }
 
     private func startAutoSave() {
