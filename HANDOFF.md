@@ -1,76 +1,73 @@
-# Dayfold HANDOFF — 阶段 E++ 完成态(2026-08-01)
+# Dayfold HANDOFF — 阶段 F · 笔记本详情编辑路径修复(2026-09-01)
 
 ## 1. 当前任务目标与验收标准
 
-**已完成阶段(目标)**:
+**今日已闭合阶段(2026-09-01)**:
 
-| 阶段 | 范围 | commit(s) | 状态 |
-|------|------|----------|------|
-| 设计入库 | `docs/superpowers/specs/2026-07-31-dayfold-feature-completion-design.md` + stitch 资产 | `cb3f550` | ✅ |
-| 阶段 A · 笔记本持久化 | Notebook Core Data 实体 + 全链路接线 + 默认本兜底 | `b29d9e0`(merge)+ `a3ac3a2…fc01f88` | ✅ |
-| 阶段 B · 编辑器接线 | MarkdownEditor / FormattingToolbar / TagPicker / mood / 取消按钮 / saveError / 中文字数 / metaBar 本名 | `0f9ca9c…6f51869` + C1 数据丢失修复 `764035c` | ✅ |
-| 阶段 C · 搜索/导航 | TagsView 入口+新建 / EntryListView 筛选 UI / TimelineView PhotoWall 点击 | `3f4083c / ce0fa2a / d01546a` | ✅ |
-| 阶段 D · 统计/设置 | StatsView+VM / SettingsView / SecurityManager UserDefaults / 默认本设置 / CoreDataStack 注入 C1 修复 / M1 polish | `1acfe29 / ffa9813 / c4bd6ed / 74681d1` | ✅ |
-| 阶段 E · On This Day(MVP) | TimelineView 列表模式顶部周年回顾区块 | `4b66dfd` | ✅ |
-| 阶段 E+ · 笔记本封面 3D 翻页(MVP) | NotebookPageTurnModifier + HomeView 接入 3D rotation 动效 | `631af86` | ✅ |
-| 阶段 E++ · PDF/Markdown 导出(MVP) | EntryDetailView Toolbar 三点 Menu + EntryPDFExporter / EntryMarkdownExporter / ExportShareSheet | `563e7e7` | ✅ |
-| 文档归档 | 六 plan + 四 spec 入库 | `56da4bb / ce9489c` | ✅ |
+| 阶段 | 范围 | commit | 状态 |
+|------|------|--------|------|
+| F1 · 笔记本详情页 toolbar 隐藏 bug 修复 | `NotebookDetailView` 的 `entryDetail` sheet 缺 `NavigationStack`,导致 `EntryDetailView` 的 `.toolbar` (收藏/分享/**编辑**/导出) 整组不渲染 | `8b845ca` 之后未独立 commit,合并入 F2 同 commit | ✅ |
+| F2 · 单击条目直接进编辑器 | `SheetMode` 新增 `.entryEditor(Entry)` 分支,时间轴条目 + 照片墙 `onSelectEntry` 全部跳 `EntryEditorView`,跳过详情页二跳 | `21ff12f` | ✅ |
 
-**当前 main HEAD**:`ce9489c`(领先 origin/main 37 commits,本地未推)
+**当前 main HEAD**:`21ff12f`(领先 origin/main,本地未推)
 
-**阶段 E++ 验收**(已通过):
+**阶段 F 验收**(已通过):
 - ✅ `xcodebuild ... build` → `** BUILD SUCCEEDED **`
-- ✅ Task E++3 复审:规格合规全 10 项(E++3.1–E++3.10)通过,code quality approved
-- ✅ fix round 1 闭合 2 个 Minor(YAML 转义 + PDF 图片 scale 防无限页),scoped re-review(60 行 diff)自审通过
-- ✅ 零 schema 改动 / 零新依赖(PDFKit/UIKit/UIActivityViewController 系统框架) / 暖色 token 严格
+- ✅ 录屏复测:首页 → 笔记本 → 点条目 → 直接弹起 `EntryEditorView`(顶部日期 + 右上"⋯" + "完毕")→ 修改 → 完毕 → 返回列表,`@FetchRequest` 自动刷新
+
+**承上阶段未受影响**:E++ 导出菜单 / 阶段 A-E 笔记本持久化 / 阶段 B 编辑器接线全部不受本次改动波及。
 
 ## 2. 已读/已改的文件路径(本阶段增量)
 
-阶段 E++ 范围内:
-
-- 新建:`dayfold/dayfold/Services/EntryPDFExporter.swift`、`dayfold/dayfold/Services/EntryMarkdownExporter.swift`、`dayfold/dayfold/Views/Common/ExportShareSheet.swift`
-- 改:`dayfold/dayfold/Views/Entry/EntryDetailView.swift`(Toolbar 加 Menu + `@State pdfShareURL/mdShareURL/exportError` + `TempFileURL` wrapper + 两个 `.sheet(item:)` + `.alert`)
-- 改(非 schema):`dayfold/dayfold/Models/Location.swift`(补计算属性 `var wrappedCondition: String { weatherCondition ?? "" }`,`.xcdatamodeld` 零改)
-- 归档:`docs/superpowers/specs/2026-08-01-entry-export-pdf-markdown-design.md`、`docs/superpowers/plans/2026-08-01-entry-export-pdf-markdown.md`
+- 改:`dayfold/dayfold/Views/NotebookDetailView.swift`
+  - `SheetMode` 枚举(行 5-14)新增 `.entryEditor(Entry)`,id = `"editor-\(objectID)"`
+  - 行 144 时间轴条目 `onTapGesture` → `sheetMode = .entryEditor(row.entry)`
+  - 行 187 照片墙 `onSelectEntry` → `sheetMode = .entryEditor(entry)`
+  - 行 204-209 新增 `case .entryEditor(let entry):` → `EntryEditorView(entry:, context:)`
+  - 行 208-210 `.entryDetail` 分支前一轮保留 `NavigationStack` 包裹 + `.environment(\.managedObjectContext, context)` —— 为未来长按/分享等走详情页的入口备路
+- 未改:`EntryDetailView` / `EntryEditorView` / `PhotoWallView` / `TimelineEntryRow` —— 路径切换是 sheet 调度层的事,不动业务视图
 
 ## 3. 测试结果与构建状态
 
-最后一次构建(amend fix 后):
+最后一次构建(本阶段):
 ```
 cd dayfold && xcodebuild -project dayfold.xcodeproj -scheme dayfold \
   -destination 'platform=iOS Simulator,name=iPhone 16 Pro' build 2>&1 | tail -5
 → ** BUILD SUCCEEDED **
 ```
 
-App 模拟器运行验证:本阶段未跑(E++3 有 ⚠️ Cannot Verify 项靠 reviewer 标运行时验证,留给用户验收)。**建议下次启动 App 时人工核对:打开任意 Entry → Toolbar 三点 Menu → 导出 PDF/Markdown → 系统分享面板弹出 → 选「存储到文件」验证文件能打开**。
+模拟器录屏验证:
+- ✅ F1 修复前:笔记本→条目→详情页,右上角收藏/分享/**编辑**/⋯ 菜单全部缺失,看似"无法编辑"
+- ✅ F1 + F2 修复后:笔记本→条目→**直接进入 `EntryEditorView`**(单跳),顶部日期 + 右上三件套(⋯ / 完毕)正常,保存后回到列表能立刻看到改动
+- ✅ 回归:笔记本左下 `+` 新建 / 照片墙 / 日历 sheet(相册) 三条路径均未受影响
+- ✅ 回归:`EntryListView` NavigationLink → 详情 → 编辑(两跳老路径)未改动,仍能用
 
 ## 4. 已做的决策及其理由
 
-1. **入口 = EntryDetailView Toolbar 三点 Menu**:用户已选,与既有 3 按钮(收藏/分享卡片/编辑)并列扩展。
-2. **Markdown = Obsidian 风格 front-matter + 图片文件名(不复制二进制)**:用户已选,适配外部知识库迁移。
-3. **PDF = 文本型 + 图片独立页插入**:用户已选,`UIGraphicsPDFRenderer` A4 72dpi。
-4. **两个 exporter 各持一份 filenameSlug**:reviewer 标 Minor-3 重复,判为可接受(行为一致无分叉),延后。
-5. **实现层偏差**:`mediaType == .photo`(非 brief 的 `type == .photo`,因 `type` 是 Core Data String,`mediaType` 才是 enum 计算属性);`Location.wrappedCondition` brief 假定存在但原扩展缺,补计算属性(schema 零改)。二者均合理。
-6. **顺手修 2 个 Minor**:Minor-1(YAML 特殊字符不转义,日记标题含冒号概率高) + Minor-2(PDF 极端图片比例无限页崩溃路径,真实 crash),成本低,amend 进同 commit。
-7. **amend 而非新增 commit**:保持「E++3 = 1 个 commit」纪律。
-8. **final whole-branch review 未单独再跑**:本阶段仅 1 task,diff 已被 task reviewer + scoped re-review 覆盖两轮,范围完全重合,判为已满足质量门。
+1. **F1 用 `NavigationStack` 包裹而非在 `NotebookDetailView` 顶部加 `NavigationView`**:`NotebookDetailView` 自身已被 `HomeView.fullScreenCover` 嵌套,顶部再加 `NavigationView` 会和 fullScreenCover 的退出手势冲突;最小破坏面是只在 `.entryDetail` 这个 sheet 子树里补 `NavigationStack`,让 toolbar 有可依附的 navigation bar。
+2. **F2 走单跳,跳过详情页**:用户明确诉求"不要二次点击"。`EntryEditorView` 本身已完整支持"完毕 → save() → 关闭" + "⋯ / 删除 → 取消编辑" + "空内容守卫",不需要经过只读 detail 中转。
+3. **`.entryDetail(Entry)` case 保留而非删除**:`EntryDetailView` 仍有"详情先于编辑"价值(未来长按/分享/菜单跳详情);既然不再主动触发,留着零成本,删了万一以后回滚要回写。
+4. **不动 `EntryCard` / `EntryListView` / `TimelineListView` 的 NavigationLink 路径**:那些路径默认两跳(列表→详情→编辑),用户也习惯了。只有"笔记本内"这个特殊场景用户明确要单跳,其他路径保持现状。
+5. **未拆 commit**:`8b845ca` 之后 F1 + F2 一次开发,但 F1 修复被 F2 单跳方案部分覆盖(sheet 入口改了),两者语义不可分,合成一个 commit。
 
 ## 5. 失败过的尝试及原因(避免重复踩坑)
 
-1. **brief 属性名与真实代码不符**:brief 写 `$0.type == .photo` / `Location.wrappedCondition`,implementer 核对真实代码后改用 `mediaType`(enum 计算属性) + 补 `wrappedCondition`。**下次写 exporter plan 前先核对 Model 扩展的真实计算属性名,别照抄 spec 假定**。
-2. **PDF 图片只约束宽度会无限页**:第一版 `imgW = min(maxW, w); imgH = imgW * aspect`,极端竖图 imgH 恒 > 页高 → 换页后仍放不下 → 每轮 beginPage 无限循环。改用 `scale = min(宽比, 高比, 1)` 同时约束宽高。**下次任何「元素放页面 + 超出换页」逻辑,缩放必须同时钳住两个维度**。
-3. **YAML front-matter 直接插值用户输入**:title/location/mood 含冒号/换行会破坏 YAML。**下次生成 YAML/JSON 等结构化文本,用户输入字段一律转义 + 引号包裹**。
+1. **误判根因为"漏注 managedObjectContext"**:第一轮排查时盯 `.sheet` 没注入 context 这一项,核对源码发现其实已注入。**下次先按"页面表现缺失"倒推:详情页内容都能渲染 + 用户报的"不能编辑" → 第一怀疑应是 toolbar 不显示,而非数据写入链**。
+2. **`NavigationView` 加顶部会被 `fullScreenCover` 退出手势吃掉**:**被 fullScreenCover 推入的子视图,顶部新增 NavigationView 容易冲突,优先用 `NavigationStack` 包需要 toolbar 的子树,而不要在父级加**。
+3. **`SheetMode` 的 `id` 必须随新 case 更新**:switch 的 `id` 用 `objectID` 拼接同一类后缀(`detail-` vs `editor-`),否则 SwiftUI 切 case 时会因为 id 撞车复用同一 sheet 实例。
 
 ## 6. 待办(给后续接手者)
 
-1. **`git push origin main`**(37 commits ahead)— **等用户明确指令再推**,详见 `~/.claude/projects/.../memory/feedback_no-auto-push.md`
-2. **阶段 E++ 运行时验证**(人工):
-   - 模拟器启动 → 打开任意 Entry → Toolbar 出现三点 Menu(ellipsis.circle)
-   - 点「导出 PDF」→ 系统分享面板弹出 → 选「存储到文件」/「AirDrop」→ 文件能打开,含标题+元信息+正文+图片页
-   - 点「导出 Markdown」→ 分享面板 → 文件用文本编辑器打开,front-matter + 正文正确,含特殊字符(冒号)标题不破坏 YAML
-   - 边界:全空 Entry / 仅标题 / 仅正文 / 带极端竖长图片(验证 PDF 不无限页)
-   - iPad 上分享面板 popover 是否需 sourceView(⚠️ reviewer 标)
-3. **阶段 E++ 残余 Minor(3 项,均无功能阻塞)**:filenameSlug 两处重复(可提 Entry 扩展) / EntryPDFExporter 多余 `import PDFKit`(实际用 UIKit) / 非 ASCII 标题 slug 接收方兼容
-4. **阶段 D 残余 deferred minor**(5 项):时区边缘 / GeometryReader / TagStat stale id / Info.plist 显式字段 / defaultNotebookName 同步 fetch
-5. **阶段 E 残余 Minor**:`warmPaper` token 统一(spec vs plan)
-6. **后续候选**(已扫描):E++2 视频附件 / E++5 私密条目 / E++4 深色模式 / E++6 年视图
+1. **`git push origin main`**(本阶段 21ff12f + 之前未推 commits)— **等用户明确指令再推**,详见 `~/.claude/projects/.../memory/feedback_no-auto-push.md`
+2. **可选增强(待用户决定)**:
+   - 进入单跳编辑器后,**长按**仍走 `EntryDetailView`(只读预览)?当前已具备该能力(预留 `.entryDetail` 分支),只差一个 `.onLongPressGesture` 添加
+   - 照片墙里点击照片是否仍走单跳,还是回到"详情只读"模式?目前复用了 `entryEditor` 分支
+3. **阶段 F 残余 Minor(0)**:无
+4. **阶段 E++ 运行时验证**(未动,沿用上阶段 TODO):模拟器打开任意 Entry → Toolbar 三点 Menu → 导出 PDF/Markdown 走通
+5. **阶段 E++ 残余 Minor(3 项,沿用上阶段 TODO)**:filenameSlug 重复 / 多余 `import PDFKit` / 非 ASCII 标题 slug 兼容
+6. **阶段 D 残余 deferred minor(5 项,沿用上阶段 TODO)**:时区边缘 / GeometryReader / TagStat stale id / Info.plist 显式字段 / defaultNotebookName
+7. **阶段 E 残余 Minor**:`warmPaper` token 统一
+8. **后续候选**(沿用上阶段):E++2 视频附件 / E++5 私密条目 / E++4 深色模式 / E++6 年视图
+
+---
+(承上阶段 E++ 完成态备份保留于 git 历史 `eeecb00 / 56da4bb / ce9489c / 563e7e7 / 8b845ca`,详见先前 HANDOFF 描述)
