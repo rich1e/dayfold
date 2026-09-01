@@ -35,6 +35,9 @@ struct PhotoLibraryPickerView: View {
 
             switch status {
             case .authorized, .limited:
+                if status == .limited {
+                    limitedBanner
+                }
                 photoGrid
             case .notDetermined:
                 // 系统授权弹窗会覆盖在空态之上，授权结果返回后重载
@@ -138,6 +141,29 @@ struct PhotoLibraryPickerView: View {
         ProgressView()
             .tint(.warmDark)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    /// limited 权限提示条：补选走系统 PHPicker（不依赖相册权限，可访问全部照片）
+    private var limitedBanner: some View {
+        HStack(spacing: 8) {
+            Text("仅可访问部分照片")
+                .font(.system(size: 13))
+                .foregroundColor(.white.opacity(0.7))
+            Spacer()
+            Button {
+                showingSystemPicker = true
+            } label: {
+                Text("选择更多照片")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Capsule().fill(Color.warmAccent))
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(Color.warmLight)
     }
 
     private var emptyState: some View {
