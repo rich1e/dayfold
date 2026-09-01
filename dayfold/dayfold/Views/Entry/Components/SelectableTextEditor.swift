@@ -14,6 +14,10 @@ import UIKit
 struct SelectableTextEditor: UIViewRepresentable {
     @Binding var text: String
     let onSelectionChange: (Int) -> Void
+    /// false 时文本框自适应内容不滚动（配合外层 ScrollView 使用）
+    var isScrollEnabled: Bool = true
+    /// isScrollEnabled = false 时回报内容实高（sizeThatFits），供外层撑开 frame
+    var onHeightChange: ((CGFloat) -> Void)? = nil
 
     func makeUIView(context: Context) -> UITextView {
         let tv = UITextView()
@@ -22,7 +26,8 @@ struct SelectableTextEditor: UIViewRepresentable {
         tv.font = UIFont.preferredFont(forTextStyle: .body)
         tv.adjustsFontForContentSizeCategory = true
         tv.textColor = .label
-        tv.alwaysBounceVertical = true
+        tv.isScrollEnabled = isScrollEnabled
+        tv.alwaysBounceVertical = isScrollEnabled
         tv.keyboardDismissMode = .interactive
         tv.textContainerInset = UIEdgeInsets(top: 12, left: 16, bottom: 12, right: 16)
         tv.text = text
@@ -32,6 +37,11 @@ struct SelectableTextEditor: UIViewRepresentable {
     func updateUIView(_ uiView: UITextView, context: Context) {
         if uiView.text != text {
             uiView.text = text
+            context.coordinator.reportHeight(uiView)
+        }
+        if uiView.isScrollEnabled != isScrollEnabled {
+            uiView.isScrollEnabled = isScrollEnabled
+            uiView.alwaysBounceVertical = isScrollEnabled
         }
     }
 
@@ -45,10 +55,20 @@ struct SelectableTextEditor: UIViewRepresentable {
 
         func textViewDidChange(_ textView: UITextView) {
             parent.text = textView.text
+            reportHeight(textView)
         }
 
         func textViewDidChangeSelection(_ textView: UITextView) {
             parent.onSelectionChange(textView.selectedRange.length)
+        }
+
+        /// 回报当前内容实高（宽度取自 textView bounds，含 textContainerInset）
+        func reportHeight(_ textView: UITextView) {
+            guard !textView.isScrollEnabled else { return }
+            let height = textView.sizeThatFits(
+                CGSize(width: textView.bounds.width, height: .greatestFiniteMagnitude)
+            ).height
+            parent.onHeightChange?(height)
         }
     }
 }

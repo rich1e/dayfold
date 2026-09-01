@@ -307,6 +307,17 @@ class EntryEditorViewModel: ObservableObject {
         images.remove(at: index)
     }
 
+    /// 选择器回传：一次性追加，didSet 置脏 imagesChanged（单次 diff）
+    func addPickedPhotos(_ photos: [PickedPhoto]) {
+        guard !photos.isEmpty else { return }
+        images.append(contentsOf: photos.map(\.image))
+    }
+
+    /// 编辑器顶部展示用的条目日期：编辑态用已存日期，新建态用预填日期，兜底当前时刻
+    var effectiveDate: Date {
+        entry?.createdAt ?? prefillDate ?? Date()
+    }
+
     private func startAutoSave() {
         autoSaveTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
             guard let self = self else { return }

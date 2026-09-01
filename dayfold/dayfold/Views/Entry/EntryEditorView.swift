@@ -11,6 +11,7 @@ struct EntryEditorView: View {
     @State private var showingTagSelector = false
     @State private var selectionLength: Int = 0
     @State private var showingDeleteConfirm = false
+    @State private var textHeight: CGFloat = 320
 
     init(entry: Entry? = nil, context: NSManagedObjectContext, prefillDate: Date? = nil, notebook: Notebook? = nil) {
         _viewModel = StateObject(wrappedValue: EntryEditorViewModel(
@@ -31,8 +32,10 @@ struct EntryEditorView: View {
             keyboardToolbar
                 .ignoresSafeArea(.keyboard, edges: .bottom)
         }
-        .sheet(isPresented: $showingImagePicker) {
-            MediaPicker(images: $viewModel.images)
+        .fullScreenCover(isPresented: $showingImagePicker) {
+            PhotoLibraryPickerView { picked in
+                viewModel.addPickedPhotos(picked)
+            }
         }
         .sheet(isPresented: $showingTagSelector) {
             TagSelectorSheet(selectedTags: $viewModel.selectedTags)
@@ -152,75 +155,90 @@ struct EntryEditorView: View {
         .background(Color.warmPaper)
     }
 
-    // MARK: - 编辑区
+    // MARK: - 编辑区（外层 ScrollView：正文自适应高度 + 图片流随之滚动）
 
     private var editorArea: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // 标题
-            TextField("标题", text: $viewModel.title, axis: .vertical)
-                .font(.system(size: 26, weight: .bold))
-                .foregroundColor(.warmDark)
-                .focused($titleFocused)
-                .submitLabel(.next)
-                .padding(.horizontal, 16)
-                .padding(.top, 20)
-                .padding(.bottom, 12)
+        ScrollViewReader { proxy in
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 0) {
+                    // 标题
+                    TextField("标题", text: $viewModel.title, axis: .vertical)
+                        .font(.system(size: 26, weight: .bold))
+                        .foregroundColor(.warmDark)
+                        .focused($titleFocused)
+                        .submitLabel(.next)
+                        .padding(.horizontal, 16)
+                        .padding(.top, 20)
+                        .padding(.bottom, 12)
 
-            // 正文 SelectableTextEditor
-            SelectableTextEditor(text: $viewModel.content) { len in
-                selectionLength = len
-            }
-            .frame(minHeight: 320)
+                    // 正文 SelectableTextEditor（不自身滚动，随内容撑高）
+                    SelectableTextEditor(
+                        text: $viewModel.content,
+                        onSelectionChange: { len in
+                            selectionLength = len
+                        },
+                        isScrollEnabled: false,
+                        onHeightChange: { textHeight = $0 }
+                    )
+                    .frame(height: max(320, textHeight))
+                    .id("editorAnchor")
 
-            // 已选标签 chip 行
-            if !viewModel.selectedTags.isEmpty {
-                SelectedTagsRow(tags: viewModel.selectedTags) { tag in
-                    viewModel.removeTag(tag)
+                    // 已选标签 chip 行
+                    if !viewModel.selectedTags.isEmpty {
+                        SelectedTagsRow(tags: viewModel.selectedTags) { tag in
+                            viewModel.removeTag(tag)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 12)
+                    }
+
+                    // 已选图片（纵向大图流）
+                    if !viewModel.images.isEmpty {
+                        imageFlow
+                            .padding(.horizontal, 16)
+                            .padding(.top, 16)
+                    }
+
+                    // 键盘工具栏高度占位
+                    Spacer().frame(height: 56)
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 12)
             }
-
-            // 已选图片预览
-            if !viewModel.images.isEmpty {
-                imagePreviewRow
-                    .padding(.horizontal, 16)
-                    .padding(.top, 12)
+            .scrollDismissesKeyboard(.interactively)
+            .onChange(of: textHeight) { oldValue, newValue in
+                // 正文长高（新增行）时滚到正文底，保证行尾光标可见
+                if newValue > oldValue {
+                    withAnimation { proxy.scrollTo("editorAnchor", anchor: .bottom) }
+                }
             }
-
-            // 键盘工具栏高度占位
-            Spacer().frame(height: 56)
         }
         .background(Color.warmPaper)
     }
 
-    // MARK: - 图片预览
+    // MARK: - 图片预览（纵向大图流）
 
-    private var imagePreviewRow: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(Array(viewModel.images.enumerated()), id: \.offset) { idx, img in
-                    ZStack(alignment: .topTrailing) {
-                        Image(uiImage: img)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 72, height: 72)
-                            .clipped()
-                            .cornerRadius(8)
+    private var imageFlow: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            ForEach(Array(viewModel.images.enumerated()), id: \.offset) { idx, img in
+                ZStack(alignment: .topTrailing) {
+                    Image(uiImage: img)
+                        .resizable()
+                        .aspectRatio(
+                            img.size.width > 0 ? img.size.width / img.size.height : 1,
+                            contentMode: .fit
+                        )
+                        .frame(maxWidth: .infinity)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
 
-                        Button {
-                            viewModel.removeImage(at: idx)
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .font(.system(size: 18))
-                                .foregroundColor(.white)
-                                .shadow(radius: 2)
-                        }
-                        .offset(x: 6, y: -6)
+                    Button {
+                        viewModel.removeImage(at: idx)
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 22))
+                            .foregroundStyle(.white, Color.black.opacity(0.55))
                     }
+                    .padding(8)
                 }
             }
-            .padding(.vertical, 4)
         }
     }
 
@@ -294,7 +312,7 @@ struct EntryEditorView: View {
         let fmt = DateFormatter()
         fmt.locale = Locale(identifier: "zh_CN")
         fmt.dateFormat = "yyyy年M月d日 EEEE  HH:mm"
-        return fmt.string(from: Date())
+        return fmt.string(from: viewModel.effectiveDate)
     }
 
     private func saveAndDismiss() {
