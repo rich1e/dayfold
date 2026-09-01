@@ -145,9 +145,31 @@ struct TagSelectorSheet: View {
     }
 }
 
+// MARK: - 已选标签 chip 行（独立视图，复用 TagChip）
+
+struct SelectedTagsRow: View {
+    let tags: [Tag]
+    let onRemove: (Tag) -> Void
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(tags, id: \.id) { tag in
+                    TagChip(tag: tag, isSelected: true) {
+                        onRemove(tag)
+                    }
+                }
+            }
+            .padding(.vertical, 2)
+        }
+    }
+}
+
 #Preview {
-    TagPicker(selectedTags: .constant([]))
-        .padding()
-        .background(Color.warmPaper)
-        .environment(\.managedObjectContext, CoreDataStack.shared.viewContext)
+    SelectedTagsRow(
+        tags: [],
+        onRemove: { _ in }
+    )
+    .padding()
+    .background(Color.warmPaper)
 }
