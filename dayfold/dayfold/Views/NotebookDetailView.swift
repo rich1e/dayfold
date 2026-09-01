@@ -3,12 +3,13 @@ import SwiftUI
 import CoreData
 
 private enum SheetMode: Identifiable {
-    case photos, calendar, newEntry, entryDetail(Entry)
+    case photos, calendar, newEntry, entryEditor(Entry), entryDetail(Entry)
     var id: String {
         switch self {
         case .photos: return "photos"
         case .calendar: return "calendar"
         case .newEntry: return "newEntry"
+        case .entryEditor(let e): return "editor-\(e.objectID)"
         case .entryDetail(let e): return "detail-\(e.objectID)"
         }
     }
@@ -141,7 +142,7 @@ struct NotebookDetailView: View {
                                             try? context.save()
                                         } content: {
                                             TimelineEntryRow(entry: row.entry, showDate: row.showDate)
-                                                .onTapGesture { sheetMode = .entryDetail(row.entry) }
+                                                .onTapGesture { sheetMode = .entryEditor(row.entry) }
                                         }
                                         .frame(minHeight: 60)
 
@@ -184,7 +185,7 @@ struct NotebookDetailView: View {
                 ZStack {
                     Color(hex: "2A2A30").ignoresSafeArea()
                     PhotoWallView(viewModel: timelineVM, onSelectEntry: { entry in
-                        sheetMode = .entryDetail(entry)
+                        sheetMode = .entryEditor(entry)
                     })
                 }
                 .environment(\.managedObjectContext, context)
@@ -201,9 +202,19 @@ struct NotebookDetailView: View {
             case .newEntry:
                 EntryEditorView(context: context, notebook: notebook)
                     .environment(\.managedObjectContext, context)
-            case .entryDetail(let entry):
-                EntryDetailView(entry: entry)
+            case .entryEditor(let entry):
+                // 单击直接进编辑器：跳过详情页，减少一次跳转。
+                // 关闭后 SwiftUI 自动通过 @FetchRequest 刷新父级列表。
+                EntryEditorView(entry: entry, context: context)
                     .environment(\.managedObjectContext, context)
+            case .entryDetail(let entry):
+                // 套一层 NavigationStack，让 EntryDetailView 的 .toolbar (右上角"编辑" 等)
+                // 在 sheet 子树里有可依附的 navigation bar — 否则 toolbar 不渲染,
+                // 用户看到的现象是"打开的日记不能编辑"。
+                NavigationStack {
+                    EntryDetailView(entry: entry)
+                }
+                .environment(\.managedObjectContext, context)
             }
         }
     }
