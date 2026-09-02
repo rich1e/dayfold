@@ -1,73 +1,105 @@
-# Dayfold HANDOFF — 阶段 F · 笔记本详情编辑路径修复(2026-09-01)
+# Dayfold HANDOFF — 阶段 H · 图文混排改造（2026-09-02）
 
 ## 1. 当前任务目标与验收标准
 
-**今日已闭合阶段(2026-09-01)**:
+**阶段 H 全部完成**：日记编辑与展示从「正文区 + 底部独立图片流（且最小撑高 320pt 导致大片空白）」改造为对标 Day One / Apple Notes 的 **图文混排（Inline Rich Text）**，并解决图文混排架构下的 view updates 死循环与选择器卡死问题。
 
-| 阶段 | 范围 | commit | 状态 |
-|------|------|--------|------|
-| F1 · 笔记本详情页 toolbar 隐藏 bug 修复 | `NotebookDetailView` 的 `entryDetail` sheet 缺 `NavigationStack`,导致 `EntryDetailView` 的 `.toolbar` (收藏/分享/**编辑**/导出) 整组不渲染 | `8b845ca` 之后未独立 commit,合并入 F2 同 commit | ✅ |
-| F2 · 单击条目直接进编辑器 | `SheetMode` 新增 `.entryEditor(Entry)` 分支,时间轴条目 + 照片墙 `onSelectEntry` 全部跳 `EntryEditorView`,跳过详情页二跳 | `21ff12f` | ✅ |
+| 模块 | 文件 | 改动内容 |
+|------|------|----------|
+| 富文本转换器 | `RichTextMarkdownParser.swift` (新增) | 实现 `ImageTextAttachment` 自适应等比缩放，区分文本/附件段落样式（紧凑 attachment 行：lineSpacing/paragraphSpacing=0、lineHeightMultiple=1.0），并吸收图片后紧随的换行符走紧凑样式，消除附件上下大段空白 |
+| 富文本编辑器 | `SelectableTextEditor.swift` | 接入 `RichTextMarkdownParser`，支持内联附件渲染；新增 `isUpdatingFromSwiftUI` 重入守卫消除 view update 周期内反向回写；`onSelectionChange` / `onHeightChange` 改为异步派发；`textViewDidChange` 增加 `markdown != parent.text` 短路 |
+| 编辑 ViewModel | `EntryEditorViewModel.swift` | 维护 `imagesMap: [String: UIImage]`，持久化保存时同步正文出现的图片顺序与持久化文件名替换，支持取消回滚 |
+| 编辑主视图 | `EntryEditorView.swift` | 移除独立的 `imageFlow` VStack，消除多余空白占位，文字可在图片前后任意位置自由穿插编辑 |
+| 详情与导出 | `EntryDetailView.swift` / `EntryMarkdownExporter.swift` | 详情页支持图文混排流展示，Markdown 导出原生支持内联图片且文末附件自动去重 |
+| 选图器时序 | `PhotoLibraryPickerView.swift` | `finish()` 在 `await loadPickedPhotos` 后切回主线程再 `dismiss()` + `onDone()`，避免后台线程驱动 UIKit dismiss 卡死 |
 
-**当前 main HEAD**:`21ff12f`(领先 origin/main,本地未推)
+**验收**：
+- `xcodebuild -project dayfold.xcodeproj -scheme dayfold -destination 'platform=iOS Simulator,name=iPhone 16 Pro' build` 编译成功（`** BUILD SUCCEEDED **`）。
+- 模拟器应用成功启动运行（PID 存活）。
 
-**阶段 F 验收**(已通过):
-- ✅ `xcodebuild ... build` → `** BUILD SUCCEEDED **`
-- ✅ 录屏复测:首页 → 笔记本 → 点条目 → 直接弹起 `EntryEditorView`(顶部日期 + 右上"⋯" + "完毕")→ 修改 → 完毕 → 返回列表,`@FetchRequest` 自动刷新
+## 2. 已读/已改的文件路径
 
-**承上阶段未受影响**:E++ 导出菜单 / 阶段 A-E 笔记本持久化 / 阶段 B 编辑器接线全部不受本次改动波及。
-
-## 2. 已读/已改的文件路径(本阶段增量)
-
-- 改:`dayfold/dayfold/Views/NotebookDetailView.swift`
-  - `SheetMode` 枚举(行 5-14)新增 `.entryEditor(Entry)`,id = `"editor-\(objectID)"`
-  - 行 144 时间轴条目 `onTapGesture` → `sheetMode = .entryEditor(row.entry)`
-  - 行 187 照片墙 `onSelectEntry` → `sheetMode = .entryEditor(entry)`
-  - 行 204-209 新增 `case .entryEditor(let entry):` → `EntryEditorView(entry:, context:)`
-  - 行 208-210 `.entryDetail` 分支前一轮保留 `NavigationStack` 包裹 + `.environment(\.managedObjectContext, context)` —— 为未来长按/分享等走详情页的入口备路
-- 未改:`EntryDetailView` / `EntryEditorView` / `PhotoWallView` / `TimelineEntryRow` —— 路径切换是 sheet 调度层的事,不动业务视图
+- 新增：`dayfold/dayfold/Services/RichTextMarkdownParser.swift`
+- 改：`dayfold/dayfold/Views/Entry/Components/SelectableTextEditor.swift`
+- 改：`dayfold/dayfold/ViewModels/EntryEditorViewModel.swift`
+- 改：`dayfold/dayfold/Views/Entry/EntryEditorView.swift`
+- 改：`dayfold/dayfold/Views/Entry/EntryDetailView.swift`
+- 改：`dayfold/dayfold/Services/EntryMarkdownExporter.swift`
+- 改：`dayfold/dayfold/Views/Entry/Components/PhotoLibraryPickerView.swift`
 
 ## 3. 测试结果与构建状态
 
-最后一次构建(本阶段):
-```
-cd dayfold && xcodebuild -project dayfold.xcodeproj -scheme dayfold \
-  -destination 'platform=iOS Simulator,name=iPhone 16 Pro' build 2>&1 | tail -5
-→ ** BUILD SUCCEEDED **
-```
+- 构建结果：`** BUILD SUCCEEDED **`
+- 模拟器启动结果：成功启动 `com.Yuqi.dayfold`
 
-模拟器录屏验证:
-- ✅ F1 修复前:笔记本→条目→详情页,右上角收藏/分享/**编辑**/⋯ 菜单全部缺失,看似"无法编辑"
-- ✅ F1 + F2 修复后:笔记本→条目→**直接进入 `EntryEditorView`**(单跳),顶部日期 + 右上三件套(⋯ / 完毕)正常,保存后回到列表能立刻看到改动
-- ✅ 回归:笔记本左下 `+` 新建 / 照片墙 / 日历 sheet(相册) 三条路径均未受影响
-- ✅ 回归:`EntryListView` NavigationLink → 详情 → 编辑(两跳老路径)未改动,仍能用
+## 4. 手工验证清单（供用户在模拟器复测）
 
-## 4. 已做的决策及其理由
+1. **文字与图片上下间距**：在新建或编辑日记时输入一两行文字并插入图片，确认图片紧贴文字下方，不再有多余的大片空白。
+2. **图片前后连续编辑**：在图片下方点击，光标正常落在换行后，输入文字能够正常穿插排列。
+3. **删除图片**：点击图片后按键盘退格键（Backspace），确认图片能被直接删除。
+4. **保存与详情展示**：点击右上角「完毕」保存，在日记详情页中确认图文按照插入顺序正确混排渲染。
+5. **Markdown 导出**：在详情页菜单中选择「导出 Markdown」，确认导出的文档中图片标记位置与正文一致且无重复。
+6. **循环报错与卡死**：选图后确认不再触发 `Publishing changes from within view updates is not allowed`，照片选择器点击「完成」后能正常 dismiss 并回到编辑器。
 
-1. **F1 用 `NavigationStack` 包裹而非在 `NotebookDetailView` 顶部加 `NavigationView`**:`NotebookDetailView` 自身已被 `HomeView.fullScreenCover` 嵌套,顶部再加 `NavigationView` 会和 fullScreenCover 的退出手势冲突;最小破坏面是只在 `.entryDetail` 这个 sheet 子树里补 `NavigationStack`,让 toolbar 有可依附的 navigation bar。
-2. **F2 走单跳,跳过详情页**:用户明确诉求"不要二次点击"。`EntryEditorView` 本身已完整支持"完毕 → save() → 关闭" + "⋯ / 删除 → 取消编辑" + "空内容守卫",不需要经过只读 detail 中转。
-3. **`.entryDetail(Entry)` case 保留而非删除**:`EntryDetailView` 仍有"详情先于编辑"价值(未来长按/分享/菜单跳详情);既然不再主动触发,留着零成本,删了万一以后回滚要回写。
-4. **不动 `EntryCard` / `EntryListView` / `TimelineListView` 的 NavigationLink 路径**:那些路径默认两跳(列表→详情→编辑),用户也习惯了。只有"笔记本内"这个特殊场景用户明确要单跳,其他路径保持现状。
-5. **未拆 commit**:`8b845ca` 之后 F1 + F2 一次开发,但 F1 修复被 F2 单跳方案部分覆盖(sheet 入口改了),两者语义不可分,合成一个 commit。
+## 5. 关键修复细节（循环死锁 & 卡死）
 
-## 5. 失败过的尝试及原因(避免重复踩坑)
+### 根因
+1. `SelectableTextEditor.updateUIView` 重新生成 `attributedText` 时同步触发 `textViewDidChange` → 回写 `@Binding text` → SwiftUI 在 view update 中又发布变更 → 死循环。
+2. `reportHeight` 在 updateUIView 中同步调用 `onHeightChange` 写入外层 `@State textHeight`，同样会在 view update 周期触发渲染。
+3. `PhotoLibraryPickerView.finish()` 中 `await loadPickedPhotos` 可能在非主线程返回，下游 `dismiss()` 在后台线程触发，UIKit dismiss 卡死。
 
-1. **误判根因为"漏注 managedObjectContext"**:第一轮排查时盯 `.sheet` 没注入 context 这一项,核对源码发现其实已注入。**下次先按"页面表现缺失"倒推:详情页内容都能渲染 + 用户报的"不能编辑" → 第一怀疑应是 toolbar 不显示,而非数据写入链**。
-2. **`NavigationView` 加顶部会被 `fullScreenCover` 退出手势吃掉**:**被 fullScreenCover 推入的子视图,顶部新增 NavigationView 容易冲突,优先用 `NavigationStack` 包需要 toolbar 的子树,而不要在父级加**。
-3. **`SheetMode` 的 `id` 必须随新 case 更新**:switch 的 `id` 用 `objectID` 拼接同一类后缀(`detail-` vs `editor-`),否则 SwiftUI 切 case 时会因为 id 撞车复用同一 sheet 实例。
+### 修复
+- `Coordinator` 新增 `isUpdatingFromSwiftUI: Bool`，`updateUIView` 重排 attributedText 前后置位，delegate 在该标志位为 true 时跳过回写。
+- `textViewDidChange` 比较 `markdown != parent.text`，序列化结果未变时不写回。
+- `textViewDidChangeSelection` 与 `reportHeight` 改为 `DispatchQueue.main.async` 派发，且仅在值变化时（`cachedSelectionLength` / `cachedHeight` 阈值）触发，避免重复 @State 写入。
+- `finish()` 用 `await MainActor.run { ... }` 包裹 dismiss 与 onDone，确保 UIKit 调用在主线程。
 
-## 6. 待办(给后续接手者)
+## 6. 图片附件上下大段空白修复
 
-1. **`git push origin main`**(本阶段 21ff12f + 之前未推 commits)— **等用户明确指令再推**,详见 `~/.claude/projects/.../memory/feedback_no-auto-push.md`
-2. **可选增强(待用户决定)**:
-   - 进入单跳编辑器后,**长按**仍走 `EntryDetailView`(只读预览)?当前已具备该能力(预留 `.entryDetail` 分支),只差一个 `.onLongPressGesture` 添加
-   - 照片墙里点击照片是否仍走单跳,还是回到"详情只读"模式?目前复用了 `entryEditor` 分支
-3. **阶段 F 残余 Minor(0)**:无
-4. **阶段 E++ 运行时验证**(未动,沿用上阶段 TODO):模拟器打开任意 Entry → Toolbar 三点 Menu → 导出 PDF/Markdown 走通
-5. **阶段 E++ 残余 Minor(3 项,沿用上阶段 TODO)**:filenameSlug 重复 / 多余 `import PDFKit` / 非 ASCII 标题 slug 兼容
-6. **阶段 D 残余 deferred minor(5 项,沿用上阶段 TODO)**:时区边缘 / GeometryReader / TagStat stale id / Info.plist 显式字段 / defaultNotebookName
-7. **阶段 E 残余 Minor**:`warmPaper` token 统一
-8. **后续候选**(沿用上阶段):E++2 视频附件 / E++5 私密条目 / E++4 深色模式 / E++6 年视图
+### 根因
+`RichTextMarkdownParser` 早期版本所有字符统一用 lineSpacing=4 的文本段落样式。NSTextAttachment 自身占据图片高度，但附件所在行的换行符仍走文本段落样式 + 字体 lineHeight（~30pt for body），导致图片后明显下沉一整行 line height。`attachmentBounds` 返回的 `y = 0` 也使图片顶端没有与上一行文字基线贴齐。
 
----
-(承上阶段 E++ 完成态备份保留于 git 历史 `eeecb00 / 56da4bb / ce9489c / 563e7e7 / 8b845ca`,详见先前 HANDOFF 描述)
+### 修复
+- 新增 `makeAttachmentParagraphStyle()`：lineSpacing/paragraphSpacing/paragraphSpacingBefore 全为 0、lineHeightMultiple=1.0，紧凑附件行。
+- 解析循环在追加 attachment 字符后探测紧随的 `\n`，将 `\n` 也归入 attachment 段（紧贴图片），再统一覆盖该段属性。
+- 文本段落仍保留 4pt lineSpacing 提升正文可读性，仅图片所在行收紧。
+
+## 7. 图片撑爆整屏 + 重开图片降级为 Markdown 原文
+
+### 根因
+1. **图片撑爆**：`ImageTextAttachment.attachmentBounds` 在 `isScrollEnabled=false` 的 UITextView 下 `lineFrag.width` 经常返回 0，fallback `UIScreen.main.bounds.width - 32 ≈ 343` 远小于原图 4032px 长边，scale 算成 1/12 仍撑出 4800pt 高度，撑爆 ScrollView。
+2. **重开图片丢失**：`addPickedPhotos` 旧实现把图片写入 `imagesMap` 时使用 `UUID().uuidString` 作为 temp filename，并 append `![](temp)` 到 content；auto-save 路径不重建 MediaAsset 与持久化文件名，导致 Core Data 里保存的是 temp filename，图片物理文件根本没写入；下次打开 `loadExistingImages` 用 temp filename 查 MediaService 找不到 → `imagesMap[temp] = nil` → 富文本解析降级为 markdown 原文。
+
+### 修复
+- `attachmentBounds` 优先用 `textContainer.size.width` 兜底（UITextView 已正确设置该值），并限制最大高度为 `availableWidth * 1.8`，防极长竖图撑爆。
+- `EntryEditorViewModel.addPickedPhotos` 改为先 `await MediaService.shared.saveImage(image)` 拿到真实 filename，再插入 `imagesMap` 与 `![](realFilename)`；删除 save 中的 temp 替换逻辑。
+- 新增 `pendingSaveTasks: [Task<Void, Never>]` 跟踪在途持久化，`save()` 入口先 `await task.value` 全部任务，杜绝 race 导致 temp 漏写。
+- `save()` 中图片重建改为按正文顺序 reconcile MediaAsset（保留现有、更新顺序、删除残留），由 `MediaService.shared.generateThumbnail(from:)` 生成缩略图。
+
+## 8. 图片完全不显示（Image #8）终极修复 — 走对 UIKit 渲染路径
+
+### 根因（多次返工后定位）
+连续 4 轮反复改 `attachmentBounds` 高度上限、`image(forBounds:)` 现绘等都是**走错路径**。NSTextAttachment 渲染真相：
+
+1. UIKit 渲染 attachment **优先用 `self.image`**（带解码缓存、异步解码、性能最佳）
+2. 只有 `self.image == nil` 才 fallback 到 `image(forBounds:textContainer:characterIndex:)`
+3. **`image(forBounds:)` 返回 nil 不崩溃，但 UIKit 直接放弃绘制**
+4. 在 `image(forBounds:)` 里现绘 4032×3024 原图到目标尺寸会生成 ~30MB 中间位图，触发 iOS 内存压力 → **静默失败（图片不显示）**
+
+之前几轮用 `image(forBounds:)` 现绘 + `self.image == nil` 的组合，**两条路径同时失败**：imageBounds 偶发为 0 时 guard 返回 nil → UIKit 放弃绘制；正常路径又现绘大位图触发内存压力。
+
+### 修复方案
+**`ImageTextAttachment` 在 init 期立即按 `containerWidth` 等比预渲染图片到 `self.image`，attachmentBounds 直接返回该尺寸**。这是 petehare.com、RichTextKit、canopas/rich-editor-swiftui 等成熟实现的共识做法。
+
+### 实施细节
+- `RichTextMarkdownParser.swift`：`ImageTextAttachment.init(image:filename:containerWidth:)` 立即用 `UIGraphicsImageRenderer` 预渲染到 `displaySize`，把结果赋给 `self.image`；`attachmentBounds` 直接返回 `displaySize`；**不再 override** `image(forBounds:)`，让 UIKit 走 `self.image` 标准路径。`attributedString` API 新增 `containerWidth` 参数透传给 attachment。
+- `SelectableTextEditor.swift`：
+  - 自定义 `EditorTextView: UITextView`，override `layoutSubviews` 在 bounds.width 真实就绪时触发 Coordinator 构建 attributedText（首次 make 时 `tv.bounds.width == 0`，不应立即构建，否则图片用兜底宽度预渲染后真实宽度变化时无法自适应）。
+  - Coordinator 用 `cachedText` + `cachedImagesCount` + `cachedImagesKeys` + `lastUsedContainerWidth` 多维度比对决定是否重建。
+  - 保留 `isUpdatingFromSwiftUI` 重入守卫、`async onHeightChange/onSelectionChange` 派发、`markdown != parent.text` 短路等所有防环逻辑（这些已验证有效）。
+
+### 第三方库评估（已与用户确认不引入）
+- `gonzalezreal/swift-markdown-ui`：纯只读渲染，不支持编辑器
+- `LiYanan2004/MarkdownView`：纯只读渲染，不支持编辑器
+- `danielsaidi/RichTextKit`：底层仍是 NSTextAttachment，且有 **Backspace 删图已知 bug（Issue #1494）**、作者因 iOS 26 SwiftUI 新 API 考虑停止维护
+- `fatbobman` 文章的 RichText 方案（Platform Text View + SwiftUI View overlay）可行但工作量大，与"最小修图片不显示"目标不符
