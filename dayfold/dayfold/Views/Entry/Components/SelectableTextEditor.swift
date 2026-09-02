@@ -133,6 +133,23 @@ struct SelectableTextEditor: UIViewRepresentable {
                 return
             }
 
+            // UITextView 内 attachment 的实际可用宽度 = textContainer.size.width
+            // （已被减去 textContainerInset 左右 + lineFragmentPadding*2）。
+            // 之前直接用 bounds.width 算 attachment，导致 attachment.bounds.width > textContainer.lineFragmentWidth
+            // → textContainer 被 attachment 撑宽，attachment 渲染尺寸跟随扩大（实测 393×294 被拉成 393×700+）
+            // textContainer.size.width 在首次 layout 前可能是 0，兜底用 bounds.width - inset - padding
+            let insetH = textView.textContainerInset.left + textView.textContainerInset.right
+            let padding = textView.textContainer.lineFragmentPadding * 2
+            let containerAvailable = textView.textContainer.size.width
+            let effectiveWidth: CGFloat
+            if containerAvailable > 1 {
+                effectiveWidth = containerAvailable
+            } else if width > insetH + padding {
+                effectiveWidth = width - insetH - padding
+            } else {
+                effectiveWidth = max(1, width - insetH - padding)
+            }
+
             let keys = pendingImages.keys.sorted().joined()
             let needsRebuild = cachedText != pendingText
                 || cachedImagesCount != pendingImages.count
@@ -146,7 +163,7 @@ struct SelectableTextEditor: UIViewRepresentable {
                 images: pendingImages,
                 font: UIFont.preferredFont(forTextStyle: .body),
                 textColor: .label,
-                containerWidth: width
+                containerWidth: effectiveWidth
             )
 
             let selectedRange = textView.selectedRange
