@@ -177,54 +177,48 @@ struct EntryEditorView: View {
 
     // MARK: - 编辑区（外层 ScrollView：正文自适应高度 + 图文混排内嵌）
 
+    /// 图文混排编辑器：标题 + SelectableTextEditor + 标签 + 键盘占位，外层 ScrollView 让超长内容自然滚动。
+    /// 插入图片时由 UITextView 内部管理 caret 可见性，外层 ScrollView 不再做"textHeight 增大即滚到底"
+    /// 否则会把标题和已插入的历史图片推出屏幕顶部（图 1 之后插图 2 时整段塌陷）。
     private var editorArea: some View {
-        ScrollViewReader { proxy in
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 0) {
-                    // 标题
-                    TextField("标题", text: $viewModel.title, axis: .vertical)
-                        .font(.system(size: 26, weight: .bold))
-                        .foregroundColor(.warmDark)
-                        .focused($titleFocused)
-                        .submitLabel(.next)
-                        .padding(.horizontal, 16)
-                        .padding(.top, 20)
-                        .padding(.bottom, 12)
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 0) {
+                // 标题
+                TextField("标题", text: $viewModel.title, axis: .vertical)
+                    .font(.system(size: 26, weight: .bold))
+                    .foregroundColor(.warmDark)
+                    .focused($titleFocused)
+                    .submitLabel(.next)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 20)
+                    .padding(.bottom, 12)
 
-                    // 正文 SelectableTextEditor（不自身滚动，随内容撑高，内嵌图片附件）
-                    SelectableTextEditor(
-                        text: $viewModel.content,
-                        images: viewModel.imagesMap,
-                        onSelectionChange: { len in
-                            selectionLength = len
-                        },
-                        isScrollEnabled: false,
-                        onHeightChange: { textHeight = $0 }
-                    )
-                    .frame(height: max(120, textHeight))
-                    .id("editorAnchor")
+                // 正文 SelectableTextEditor（不自身滚动，随内容撑高，内嵌图片附件）
+                SelectableTextEditor(
+                    text: $viewModel.content,
+                    images: viewModel.imagesMap,
+                    onSelectionChange: { len in
+                        selectionLength = len
+                    },
+                    isScrollEnabled: false,
+                    onHeightChange: { textHeight = $0 }
+                )
+                .frame(height: max(120, textHeight))
 
-                    // 已选标签 chip 行
-                    if !viewModel.selectedTags.isEmpty {
-                        SelectedTagsRow(tags: viewModel.selectedTags) { tag in
-                            viewModel.removeTag(tag)
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.top, 12)
+                // 已选标签 chip 行
+                if !viewModel.selectedTags.isEmpty {
+                    SelectedTagsRow(tags: viewModel.selectedTags) { tag in
+                        viewModel.removeTag(tag)
                     }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+                }
 
-                    // 键盘工具栏高度占位
-                    Spacer().frame(height: 56)
-                }
-            }
-            .scrollDismissesKeyboard(.interactively)
-            .onChange(of: textHeight) { oldValue, newValue in
-                // 正文长高（新增行/插入图片）时滚到正文底，保证光标可见
-                if newValue > oldValue {
-                    withAnimation { proxy.scrollTo("editorAnchor", anchor: .bottom) }
-                }
+                // 键盘工具栏高度占位
+                Spacer().frame(height: 56)
             }
         }
+        .scrollDismissesKeyboard(.interactively)
         .background(Color.warmPaper)
     }
 
