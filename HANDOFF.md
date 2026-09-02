@@ -1,5 +1,38 @@
 # Dayfold HANDOFF — 阶段 H · 图文混排改造（2026-09-02）
 
+## 0. 新增遗留问题（2026-09-02 后续轮次）
+
+**未提交、未 push**。当前 session 处于卡顿状态，需要用户手动验证后决定下一步。
+
+### 现象 A：插入第 2 张图时整段被推出屏幕顶部
+
+- 视频：`Simulator Screen Recording - iPhone 16 Pro - 2026-09-02 at 17.28.21.mp4`
+- 表现：选完第 1 张图后编辑器正常；选第 2 张图的过程中，标题/正文/第 1 张图全部被 ScrollView 推出屏幕顶部，只能看到第 2 张图占满下方空间
+- 已修复（未提交）：`EntryEditorView.swift` 移除 `ScrollViewReader` + `onChange(of: textHeight) { proxy.scrollTo("editorAnchor", anchor: .bottom) }` 逻辑
+- 修复理由：图文混排下每插图触发 textHeight 增大 → scrollTo 把整个 VStack 滚到底，标题/历史图片被推出顶部
+
+### 现象 B：插入第 1 张图时图片被撑爆整屏（图持续变大）
+
+- 视频：`Simulator Screen Recording - iPhone 16 Pro - 2026-09-02 at 17.41.41.mp4`
+- 表现：图片渲染成 ≈393×710pt 的纵向拉伸版本，标题 TextField 不可见，图片占据 metaBar 之下到键盘工具栏之上的全部空间
+- 已尝试修复（未提交，构建成功）：`SelectableTextEditor.swift` 的 `rebuildAttributedTextIfNeeded` 把 attachment 的 `containerWidth` 从 `bounds.width` 改为 `textContainer.size.width`（即 `bounds.width - textContainerInset 横向 - lineFragmentPadding*2`），避免 attachment.bounds.width 超过 textContainer.lineFragmentWidth
+- **未实测验证**（Mac 上无法 UI 自动化复现，模拟器 click 需要辅助功能权限）
+- 修复可能不足的原因：
+  - iOS UIKit 的 `NSTextAttachment` 没有 `imageBounds(for:ContentModeType:...)` override 入口（**已查 SDK 头文件确认**：UIKit NSTextAttachment 仅有 `imageForBounds:textContainer:characterIndex:` API，且 imageBounds 默认 = attachmentBounds，没有 ContentModeType 参数化 override）
+  - 因此无法阻止 image 被绘制到比 attachmentBounds 更大的 rect
+  - 真根因可能是 UIKit layoutManager 在 attachment.bounds.width 超过 lineFragmentWidth 时把 attachment 渲染区域扩展，需要进一步实测确认
+
+### 当前提交状态
+
+- 未提交，未 push
+- `git status` 工作区有改动（EntryEditorView.swift 移除 scrollTo，SelectableTextEditor.swift effectiveWidth 计算）
+
+### 下一步建议
+
+1. **用户在模拟器手动复测**：当前 build 已部署到 booted iPhone 16 Pro 模拟器，PID 38771。手动点一遍"插入第 1 张图"，确认是否仍撑爆
+2. 若仍撑爆 → 真根因在 UIKit 内部 layoutManager 行为，需要换架构（如彻底弃用 attachment，改用 SwiftUI View overlay 在 UITextView 上画图）
+3. 若不再撑爆 → 提交当前修复，关闭本轮
+
 ## 1. 当前任务目标与验收标准
 
 **阶段 H 全部完成**：日记编辑与展示从「正文区 + 底部独立图片流（且最小撑高 320pt 导致大片空白）」改造为对标 Day One / Apple Notes 的 **图文混排（Inline Rich Text）**，并解决图文混排架构下的 view updates 死循环与选择器卡死问题。
