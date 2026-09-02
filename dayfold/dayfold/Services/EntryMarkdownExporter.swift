@@ -3,7 +3,7 @@ import Foundation
 
 @MainActor
 enum EntryMarkdownExporter {
-    /// 将 entry 渲染为 Obsidian 风格 Markdown (front-matter + 正文 + 图片文件名)
+    /// 将 entry 渲染为 Obsidian 风格 Markdown (front-matter + 正文 + 未内联图片附件)
     static func renderMarkdown(entry: Entry) -> String {
         var md = ""
 
@@ -49,18 +49,19 @@ enum EntryMarkdownExporter {
             }
         }
 
-        // 正文
+        // 正文 (天然已包含 ![](filename))
         md += entry.wrappedContent
         if !entry.wrappedContent.isEmpty && !entry.wrappedContent.hasSuffix("\n") {
             md += "\n"
         }
         md += "\n"
 
-        // 图片文件名列表(仅图片类型,过滤视频)
+        // 仅对于正文中尚未包含 ![] 标记的额外图片附件（如老数据），在文末以附件形式列出
         let photoAssets = entry.mediaAssetsArray.filter { $0.mediaType == .photo }
-        if !photoAssets.isEmpty {
+        let unreferencedPhotos = photoAssets.filter { !entry.wrappedContent.contains($0.wrappedFilename) }
+        if !unreferencedPhotos.isEmpty {
             md += "## 附件\n\n"
-            for asset in photoAssets {
+            for asset in unreferencedPhotos {
                 md += "- ![](\(asset.wrappedFilename))\n"
             }
         }

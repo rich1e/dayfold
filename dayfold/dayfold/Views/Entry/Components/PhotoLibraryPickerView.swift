@@ -191,15 +191,19 @@ struct PhotoLibraryPickerView: View {
         }
     }
 
-    /// 完成后先在 picker 内解码 ≤2048px 版本，避免回传后编辑器占位闪烁与原图内存爆炸
+    /// 完成后先在 picker 内解码 ≤2048px 版本，避免回传后编辑器占位闪烁与原图内存爆炸。
+    /// await loadPickedPhotos 可能在非主线程返回，必须切回主线程后再调用 dismiss() 与 onDone()，
+    /// 否则 UIKit dismiss 会在后台线程发起，引发卡死与界面无法关闭。
     private func finish() async {
         guard !selectedIDs.isEmpty, !isFinishing else { return }
         isFinishing = true
         let picked = await service.loadPickedPhotos(ids: selectedIDs)
-        isFinishing = false
-        guard !picked.isEmpty else { return }
-        dismiss()
-        onDone(picked)
+        await MainActor.run {
+            isFinishing = false
+            guard !picked.isEmpty else { return }
+            dismiss()
+            onDone(picked)
+        }
     }
 
     private func openSettings() {

@@ -10,10 +10,14 @@ struct EntryDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var entry: Entry
     @State private var activeSheet: DetailSheet?
-    @State private var loadedImages: [UIImage] = []
+    @State private var loadedImagesMap: [String: UIImage] = [:]
     @State private var pdfShareURL: TempFileURL?
     @State private var mdShareURL: TempFileURL?
     @State private var exportError: String?
+
+    var loadedImages: [UIImage] {
+        entry.mediaAssetsArray.compactMap { loadedImagesMap[$0.wrappedFilename] }
+    }
 
     var body: some View {
         ScrollView {
@@ -30,17 +34,8 @@ struct EntryDetailView: View {
 
                 Divider()
 
-                // 内容 (纯文本渲染，后续可替换为 MarkdownUI)
-                Text(entry.wrappedContent)
-                    .font(.warmBody)
-                    .foregroundColor(.warmDark)
-                    .textSelection(.enabled)
-
-                // 媒体网格
-                if !loadedImages.isEmpty {
-                    Divider()
-                    MediaGrid(images: loadedImages, onRemove: nil)
-                }
+                // 图文混排内容流
+                entryContentFlow
             }
             .padding()
         }
@@ -67,7 +62,7 @@ struct EntryDetailView: View {
                         Text("编辑")
                             .foregroundColor(.warmAccent)
                     }
-                    // 新增:导出 Menu
+                    // 导出 Menu
                     Menu {
                         Button("导出 PDF", systemImage: "doc.richtext") {
                             if let url = EntryPDFExporter.renderPDF(entry: entry, images: loadedImages) {
@@ -120,6 +115,76 @@ struct EntryDetailView: View {
         }
     }
 
+    // MARK: - 图文混排展示
+
+    private var entryContentFlow: some View {
+        let segments = parseContentSegments(entry.wrappedContent)
+        return VStack(alignment: .leading, spacing: 12) {
+            ForEach(segments.indices, id: \.self) { idx in
+                switch segments[idx] {
+                case .text(let str):
+                    if !str.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        Text(str)
+                            .font(.warmBody)
+                            .foregroundColor(.warmDark)
+                            .textSelection(.enabled)
+                    }
+                case .image(let filename):
+                    if let image = loadedImagesMap[filename] {
+                        Image(uiImage: image)
+                            .resizable()
+                            .aspectRatio(
+                                image.size.width > 0 ? image.size.width / image.size.height : 1,
+                                contentMode: .fit
+                            )
+                            .frame(maxWidth: .infinity)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                }
+            }
+        }
+    }
+
+    private enum ContentSegment {
+        case text(String)
+        case image(String)
+    }
+
+    private func parseContentSegments(_ content: String) -> [ContentSegment] {
+        guard !content.isEmpty else { return [] }
+        let regex = try! NSRegularExpression(pattern: #"!\[(.*?)\]\((.*?)\)"#, options: [])
+        let nsString = content as NSString
+        let matches = regex.matches(in: content, options: [], range: NSRange(location: 0, length: nsString.length))
+
+        var segments: [ContentSegment] = []
+        var lastLocation = 0
+
+        for match in matches {
+            let textRange = NSRange(location: lastLocation, length: match.range.location - lastLocation)
+            if textRange.length > 0 {
+                let text = nsString.substring(with: textRange)
+                segments.append(.text(text))
+            }
+            let filename = nsString.substring(with: match.range(at: 2))
+            segments.append(.image(filename))
+            lastLocation = match.range.location + match.range.length
+        }
+
+        if lastLocation < nsString.length {
+            let tail = nsString.substring(with: NSRange(location: lastLocation, length: nsString.length - lastLocation))
+            segments.append(.text(tail))
+        }
+
+        // 如果正文没有任何 ![] 标记，但存在关联的图片资产，兜底在文末渲染图片
+        if matches.isEmpty && !loadedImages.isEmpty {
+            for asset in entry.mediaAssetsArray {
+                segments.append(.image(asset.wrappedFilename))
+            }
+        }
+
+        return segments
+    }
+
     private func toggleFavorite() {
         let context = entry.managedObjectContext ?? CoreDataStack.shared.viewContext
         entry.isFavorite.toggle()
@@ -127,13 +192,14 @@ struct EntryDetailView: View {
     }
 
     private func loadImages() async {
-        var images: [UIImage] = []
+        var map: [String: UIImage] = [:]
         for asset in entry.mediaAssetsArray {
-            if let image = await MediaService.shared.loadImage(filename: asset.wrappedFilename) {
-                images.append(image)
+            let filename = asset.wrappedFilename
+            if let image = await MediaService.shared.loadImage(filename: filename) {
+                map[filename] = image
             }
         }
-        loadedImages = images
+        loadedImagesMap = map
     }
 }
 
