@@ -18,11 +18,17 @@ class EntryEditorViewModel: ObservableObject {
     @Published var title = ""
     @Published var content = ""
     @Published var selectedTags: [Tag] = []
-    @Published var images: [UIImage] = [] {
+    /// 内存中用于渲染内联富文本的图片字典 [filename: UIImage]
+    @Published var imagesMap: [String: UIImage] = [:] {
         didSet {
             if !isLoadingImages { imagesChanged = true }
         }
     }
+    /// 兼容已有逻辑的图片数组计算属性
+    var images: [UIImage] {
+        Array(imagesMap.values)
+    }
+
     @Published var location: CLLocation?
     @Published var placeName: String?
     @Published var weather: WeatherData?
@@ -49,6 +55,8 @@ class EntryEditorViewModel: ObservableObject {
     private var deferredOldFilenames: [String] = []
     /// 照片地名解析代际：pending 被替换/清除时递增，使在途请求结果作废
     private var placeResolveGeneration = 0
+    /// 图片持久化在途任务集合：save() 入口等待全部完成，避免 temp filename 漏写
+    private var pendingSaveTasks: [Task<Void, Never>] = []
 
     var isNewEntry: Bool {
         isNewEntryOnInit
@@ -144,22 +152,52 @@ class EntryEditorViewModel: ObservableObject {
         startAutoSave()
     }
 
-    // 编辑已有日记时，将已保存的图片按顺序加载到 images 供编辑器展示
+    // 编辑已有日记时，从正文的 ![](filename) 标记加载图片到 imagesMap 供编辑器展示。
+    // 优先按 content 解析（图文混排后图片位置以正文为准），fallback 才用 MediaAsset。
     private func loadExistingImages(from entry: Entry) {
-        let filenames = entry.mediaAssetsArray.map { $0.wrappedFilename }
+        let markdown = entry.wrappedContent
+        let assetFilenames = entry.mediaAssetsArray.map { $0.wrappedFilename }
         Task { [weak self] in
-            var loaded: [UIImage] = []
-            for filename in filenames {
+            var map: [String: UIImage] = [:]
+            var seen: Set<String> = []
+
+            // 1) 从正文解析的图片标记优先（图文混排权威位置）
+            let regex = try? NSRegularExpression(pattern: #"!\[(.*?)\]\((.*?)\)"#, options: [])
+            let nsMarkdown = markdown as NSString
+            let matches = regex?.matches(in: markdown, options: [], range: NSRange(location: 0, length: nsMarkdown.length)) ?? []
+            for match in matches {
+                let filename = nsMarkdown.substring(with: match.range(at: 2))
+                guard !seen.contains(filename) else { continue }
+                seen.insert(filename)
                 if let image = await MediaService.shared.loadImage(filename: filename) {
-                    loaded.append(image)
+                    map[filename] = image
                 }
             }
+
+            // 2) fallback：MediaAsset 中存在但正文没有的图（旧数据兼容）
+            for filename in assetFilenames where !seen.contains(filename) {
+                if let image = await MediaService.shared.loadImage(filename: filename) {
+                    map[filename] = image
+                    // 自动追加到文末
+                    await MainActor.run {
+                        guard let self = self else { return }
+                        guard !self.imagesChanged else { return }
+                        let tag = "![](\(filename))"
+                        if !self.content.contains(tag) {
+                            if !self.content.isEmpty && !self.content.hasSuffix("\n") {
+                                self.content += "\n"
+                            }
+                            self.content += "\(tag)\n"
+                        }
+                    }
+                }
+            }
+
             await MainActor.run {
                 guard let self = self else { return }
-                // 若用户在加载完成前已改动图片，不覆盖其操作结果
                 guard !self.imagesChanged else { return }
                 self.isLoadingImages = true
-                self.images = loaded
+                self.imagesMap = map
                 self.isLoadingImages = false
             }
         }
@@ -172,6 +210,13 @@ class EntryEditorViewModel: ObservableObject {
     func save(isAutoSave: Bool = false) async -> Bool {
         // 标题与正文都为空时不保存
         guard !title.isEmpty || !content.isEmpty else { return false }
+
+        // 先 await 在途的图片持久化任务，避免 race 导致正文写入 temp UUID
+        if !pendingSaveTasks.isEmpty {
+            let tasks = pendingSaveTasks
+            pendingSaveTasks.removeAll()
+            for task in tasks { await task.value }
+        }
 
         isSaving = true
 
@@ -195,7 +240,6 @@ class EntryEditorViewModel: ObservableObject {
         entryToSave.mood = mood.isEmpty ? nil : mood
         entryToSave.modifiedAt = Date()
         entryToSave.needsSync = true
-        // 用户确认采纳照片拍摄时间时覆盖 createdAt（新建/编辑统一，idempotent，auto-save 亦同步）
         if let attachedDate = attachedCreatedAt {
             entryToSave.createdAt = attachedDate
         }
@@ -211,7 +255,6 @@ class EntryEditorViewModel: ObservableObject {
                 in: viewContext
             )
             locationEntity.placeName = placeName
-            // 位置可能来自照片元数据（无天气数据），weather 为空时保留实体原值，避免清零
             if let weather = weather {
                 locationEntity.weatherTemperature = weather.temperature
                 locationEntity.weatherCondition = weather.condition
@@ -220,29 +263,57 @@ class EntryEditorViewModel: ObservableObject {
             entryToSave.location = locationEntity
         }
 
-        // 保存图片 (一对多关系)：仅在「完成」路径且图片有增删时全量重建。
-        // auto-save 跳过图片处理，避免在用户尚未决定完成/取消时就物理删除原图（防数据丢失）。
-        if !isAutoSave && imagesChanged {
-            // 延迟删除:仅记录旧文件名,真正删除推迟到 save() 成功之后
-            let oldFilenames = entryToSave.mediaAssetsArray.map { $0.wrappedFilename }
-            deferredOldFilenames.append(contentsOf: oldFilenames)
+        // 保存图片 (一对多关系)：
+        // - auto-save：仅增量补建缺失的 MediaAsset，不删除（避免回收进行中的图）。
+        // - 完成路径（isAutoSave=false）：按正文顺序全量 reconcile，删除不在正文里的旧图。
+        let imageRegex = try! NSRegularExpression(pattern: #"!\[(.*?)\]\((.*?)\)"#, options: [])
+        let nsContent = content as NSString
+        let matches = imageRegex.matches(in: content, options: [], range: NSRange(location: 0, length: nsContent.length))
+        let presentFilenames = matches.map { nsContent.substring(with: $0.range(at: 2)) }
+        let presentSet = Set(presentFilenames)
+        let existingFilenames = Set(entryToSave.mediaAssetsArray.map { $0.wrappedFilename })
 
-            // 删除旧 MediaAsset 记录(关系自动解绑),不删磁盘文件
-            for asset in entryToSave.mediaAssetsArray {
-                viewContext.delete(asset)
-            }
-            // 按当前 images 顺序重新保存
-            for (index, image) in images.enumerated() {
-                if let result = await MediaService.shared.saveImage(image) {
-                    let asset = MediaAsset.create(type: .photo, filename: result.filename, in: viewContext)
-                    asset.thumbnailData = result.thumbnail
+        if isAutoSave {
+            // auto-save：补建缺失的 MediaAsset，更新已有 order
+            for (index, filename) in presentFilenames.enumerated() {
+                if let existing = entryToSave.mediaAssetsArray.first(where: { $0.wrappedFilename == filename }) {
+                    existing.order = Int32(index)
+                } else if let image = imagesMap[filename] {
+                    let asset = MediaAsset.create(type: .photo, filename: filename, in: viewContext)
                     asset.order = Int32(index)
                     asset.width = Int32(image.size.width)
                     asset.height = Int32(image.size.height)
+                    asset.thumbnailData = MediaService.shared.generateThumbnail(from: image)
+                    asset.entry = entryToSave
+                }
+            }
+        } else if imagesChanged {
+            // 完成路径：删除旧 MediaAsset（不再出现在正文中的图片）
+            for asset in entryToSave.mediaAssetsArray where !presentSet.contains(asset.wrappedFilename) {
+                viewContext.delete(asset)
+            }
+            // 按正文出现顺序创建/同步 MediaAsset
+            for (index, filename) in presentFilenames.enumerated() {
+                if let existing = entryToSave.mediaAssetsArray.first(where: { $0.wrappedFilename == filename }) {
+                    existing.order = Int32(index)
+                } else if let image = imagesMap[filename] {
+                    let asset = MediaAsset.create(type: .photo, filename: filename, in: viewContext)
+                    asset.order = Int32(index)
+                    asset.width = Int32(image.size.width)
+                    asset.height = Int32(image.size.height)
+                    asset.thumbnailData = MediaService.shared.generateThumbnail(from: image)
                     asset.entry = entryToSave
                 }
             }
             imagesChanged = false
+        }
+
+        // 清理：imagesMap 里存在但 content 已经移除的图片，物理文件清理（仅完成路径）
+        if !isAutoSave {
+            let removed = imagesMap.keys.filter { !presentSet.contains($0) && existingFilenames.contains($0) }
+            for filename in removed {
+                Task { await MediaService.shared.deleteImage(filename: filename) }
+            }
         }
 
         do {
@@ -267,7 +338,6 @@ class EntryEditorViewModel: ObservableObject {
     func cancel() async {
         autoSaveTimer?.invalidate()
 
-        // 取消编辑:把 current VM 状态回滚到 snapshot 前的字段
         if let snapshot = originalSnapshot {
             guard let existing = entry else { return }
             existing.createdAt = snapshot.createdAt
@@ -279,7 +349,6 @@ class EntryEditorViewModel: ObservableObject {
             existing.modifiedAt = Date()
             existing.needsSync = true
 
-            // 还原 location/weather 字段
             if let location = existing.location {
                 location.placeName = snapshot.placeName
                 location.weatherTemperature = snapshot.weatherTemperature
@@ -287,17 +356,12 @@ class EntryEditorViewModel: ObservableObject {
                 location.weatherIcon = snapshot.weatherIcon
             }
 
-            // 图片无需回滚:auto-save 不参与图片重建,编辑期间数据库 MediaAsset 始终为原始集合,
-            // 用户内存中的图片改动(imagesChanged)从未落盘,取消即自然丢弃。
-
-            // 取消时不删 deferred 旧图(用户没点完成)
             deferredOldFilenames.removeAll()
-
             try? CoreDataStack.shared.save()
             return
         }
 
-        // 新建日记:entry 已 auto-save 创建 → 物理删除(不进回收站)
+        // 新建日记取消
         guard let draft = entry else { return }
         for asset in draft.mediaAssetsArray {
             let filename = asset.wrappedFilename
@@ -322,22 +386,30 @@ class EntryEditorViewModel: ObservableObject {
         selectedTags.removeAll { $0.id == tag.id }
     }
 
-    func addImage(_ image: UIImage) {
-        images.append(image)
-    }
-
-    func removeImage(at index: Int) {
-        guard index < images.count else { return }
-        images.remove(at: index)
-    }
-
-    /// 选择器回传：一次性追加，didSet 置脏 imagesChanged（单次 diff）；
-    /// 同时取带拍摄元数据照片中最早者为 anchor，弹出「使用附件时间和位置？」确认。
-    /// 连续多批选图时与旧 pending 合并：时间取更早者，坐标/地名保留旧值（可能仍在解析中）。
+    /// 选择器回传：先立即把每张图持久化到 MediaService 拿到真实 filename，
+    /// 再把 `![](realFilename)` 插入正文，避免 auto-save 写入 temp UUID 后重开
+    /// 编辑器找不到图片文件导致图片降级为 markdown 原文。
     func addPickedPhotos(_ photos: [PickedPhoto]) {
         guard !photos.isEmpty else { return }
-        images.append(contentsOf: photos.map(\.image))
 
+        let task = Task { [weak self] in
+            for photo in photos {
+                guard let saved = await MediaService.shared.saveImage(photo.image) else { continue }
+                let filename = saved.filename
+                await MainActor.run {
+                    guard let self = self else { return }
+                    self.imagesMap[filename] = photo.image
+                    let tag = "![](\(filename))"
+                    if !self.content.isEmpty && !self.content.hasSuffix("\n") {
+                        self.content += "\n"
+                    }
+                    self.content += "\(tag)\n"
+                }
+            }
+        }
+        pendingSaveTasks.append(task)
+
+        // 元数据确认沿用 anchor（最早一张有 EXIF 的图）
         guard let anchor = photos
             .compactMap({ photo -> (date: Date, coordinate: CLLocationCoordinate2D?)? in
                 guard let date = photo.creationDate else { return nil }
@@ -348,7 +420,7 @@ class EntryEditorViewModel: ObservableObject {
 
         if let existing = pendingMetadata, let existingDate = existing.createdAt,
            existingDate <= anchor.date {
-            return  // 已有待确认的更早 anchor，保持不变
+            return
         }
 
         pendingMetadata = PendingPhotoMetadata(
@@ -362,7 +434,6 @@ class EntryEditorViewModel: ObservableObject {
         }
     }
 
-    /// 弹窗「是，使用」：日记时间改用照片拍摄时间，位置/地名改用照片坐标
     func confirmApplyPhotoMetadata() {
         guard let meta = pendingMetadata else { return }
         attachedCreatedAt = meta.createdAt
@@ -371,16 +442,13 @@ class EntryEditorViewModel: ObservableObject {
             placeName = meta.placeName
         }
         pendingMetadata = nil
-        // 地名仍在解析时，让在途请求完成后补写 placeName（见 resolvePhotoPlaceName）
     }
 
-    /// 弹窗「否，保持不变」：丢弃待确认元数据
     func declineApplyPhotoMetadata() {
         pendingMetadata = nil
-        placeResolveGeneration += 1  // 作废在途地名解析
+        placeResolveGeneration += 1
     }
 
-    /// 照片坐标反向地理编码，结果写回 pendingMetadata；弹窗已确认则补写 placeName
     private func resolvePhotoPlaceName(for coordinate: CLLocationCoordinate2D) {
         placeResolveGeneration += 1
         let generation = placeResolveGeneration
@@ -397,7 +465,6 @@ class EntryEditorViewModel: ObservableObject {
         }
     }
 
-    /// 编辑器顶部展示用的条目日期：优先用户确认的照片时间，其次已存日期/预填日期
     var effectiveDate: Date {
         attachedCreatedAt ?? entry?.createdAt ?? prefillDate ?? Date()
     }
