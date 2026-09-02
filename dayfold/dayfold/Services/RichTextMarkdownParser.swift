@@ -38,15 +38,19 @@ final class ImageTextAttachment: NSTextAttachment {
         if !height.isFinite || height <= 0 { height = safeWidth }
         if !width.isFinite || width <= 0 { width = safeWidth }
 
-        // 硬性兜底：最大高度不超过容器宽度（避免极长竖图撑爆）
-        if height > safeWidth {
-            height = safeWidth
+        // 高度兜底：竖图允许高于宽度（否则 1668×2500 会被压成 282×422 严重变形），
+        // 但限制为容器宽度的 1.6 倍，避免极端长图（如长截图）占满整屏还要滚很久。
+        let maxHeight = safeWidth * 1.6
+        if height > maxHeight {
+            height = maxHeight
             width = imgSize.width * (height / max(imgSize.height, 1))
             if !width.isFinite || width <= 0 { width = safeWidth }
         }
 
-        // 最终兜底：尺寸必须在 (0, 10000) 区间
-        width = min(max(width, 1), 10000)
+        // 最终兜底：尺寸必须在 (0, 10000) 区间，且宽度绝不允许超过容器可用宽度。
+        // 超宽 attachment 会反向撑宽非滚动 UITextView 的 textContainer，
+        // 进而把整个 SwiftUI 层级横向推出屏幕，必须在这里硬性钳住。
+        width = min(max(width, 1), safeWidth)
         height = min(max(height, 1), 10000)
         let displaySize = CGSize(width: width, height: height)
 

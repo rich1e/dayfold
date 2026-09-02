@@ -46,13 +46,15 @@ struct SelectableTextEditor: UIViewRepresentable {
         context.coordinator.pendingText = text
         context.coordinator.pendingImages = images
 
-        // 同时检查当前已构建的 attributedText 是否与外部数据源同步；不同步立即重建
+        // 同时检查当前已构建的 attributedText 是否与外部数据源同步；不同步立即重建。
+        // 注意：只在 bounds.width 已就绪时重建。首帧 / 重开编辑时 updateUIView 早于 layoutSubviews，
+        // 此时 bounds.width == 0，若用 UIScreen 宽度兜底会按错误宽度预渲染图片，
+        // 并把 lastUsedContainerWidth 写成假值。layoutSubviews 随后必然带真实宽度回来触发重建，
+        // 所以这里直接跳过即可。
         let needsRebuild = context.coordinator.cachedImagesCount != images.count
             || context.coordinator.cachedText != text
-            || (context.coordinator.cachedContainerWidth > 0 && abs(context.coordinator.lastUsedContainerWidth - context.coordinator.cachedContainerWidth) > 0.5)
-        if needsRebuild {
-            let width = uiView.bounds.width > 0 ? uiView.bounds.width : UIScreen.main.bounds.width - 32
-            context.coordinator.rebuildAttributedTextIfNeeded(textView: uiView, forceContainerWidth: width)
+        if needsRebuild, uiView.bounds.width > 0 {
+            context.coordinator.rebuildAttributedTextIfNeeded(textView: uiView)
         }
 
         if uiView.isScrollEnabled != isScrollEnabled {
@@ -68,6 +70,15 @@ struct SelectableTextEditor: UIViewRepresentable {
     /// 自定义 UITextView 子类，在 layout 阶段触发 Coordinator 首次/重新构建 attributedText
     final class EditorTextView: UITextView {
         weak var coordinator: Coordinator?
+
+        /// SwiftUI 分配给本视图的宽度。非滚动 UITextView 的 contentSize.width 会被
+        /// 超宽内容（attachment / 长英文单词）撑大，而 UITextView 又把它报成 intrinsicContentSize.width，
+        /// SwiftUI 采纳后整个 VStack 被横向撑宽 → 标题、日期、右上「完毕」被推出屏幕两侧。
+        /// 因此这里锁死横向 intrinsic，只让高度参与自适应。
+        override var intrinsicContentSize: CGSize {
+            let sup = super.intrinsicContentSize
+            return CGSize(width: UIView.noIntrinsicMetric, height: sup.height)
+        }
 
         override func layoutSubviews() {
             super.layoutSubviews()
@@ -119,36 +130,24 @@ struct SelectableTextEditor: UIViewRepresentable {
         }
 
         /// 根据 pendingText/pendingImages 与 cachedContainerWidth 判断是否需要重建 attributedText。
-        /// - Parameters:
-        ///   - textView: 要更新的 UITextView
-        ///   - forceContainerWidth: 当 cachedContainerWidth 还未就绪时使用的兜底宽度
-        func rebuildAttributedTextIfNeeded(textView: UITextView, forceContainerWidth: CGFloat? = nil) {
-            let width: CGFloat
-            if cachedContainerWidth > 0 {
-                width = cachedContainerWidth
-            } else if let forced = forceContainerWidth, forced > 0 {
-                width = forced
-            } else {
-                // 还没 layout 完，留待 viewDidLayoutSubviews 触发
+        /// 只在 layoutSubviews 拿到真实 bounds.width 后调用，不接受兜底宽度：
+        /// 用假宽度预渲染图片会让 lastUsedContainerWidth 记下假值，后续真实宽度到位时反而可能被判定为「无需重建」。
+        /// - Parameter textView: 要更新的 UITextView
+        func rebuildAttributedTextIfNeeded(textView: UITextView) {
+            guard cachedContainerWidth > 0 else {
+                // 还没 layout 完，留待 layoutSubviews 触发
                 return
             }
+            let width = cachedContainerWidth
 
-            // UITextView 内 attachment 的实际可用宽度 = textContainer.size.width
-            // （已被减去 textContainerInset 左右 + lineFragmentPadding*2）。
-            // 之前直接用 bounds.width 算 attachment，导致 attachment.bounds.width > textContainer.lineFragmentWidth
-            // → textContainer 被 attachment 撑宽，attachment 渲染尺寸跟随扩大（实测 393×294 被拉成 393×700+）
-            // textContainer.size.width 在首次 layout 前可能是 0，兜底用 bounds.width - inset - padding
+            // attachment 可用宽度只能由 bounds.width 减去「我们自己设定的」inset 与 padding 推导，
+            // 绝不能回读 textContainer.size.width：
+            // 非滚动 UITextView 的 textContainer 会被超宽 attachment 反向撑宽，
+            // 回读到的是「已被上一次超宽图污染」的值，再拿去渲染下一张图 → 每次 layout 宽度递增，
+            // 表现为图片撑爆整屏 / 整个界面被横向推出屏幕（左侧标题、右侧「完毕」被裁）。
             let insetH = textView.textContainerInset.left + textView.textContainerInset.right
             let padding = textView.textContainer.lineFragmentPadding * 2
-            let containerAvailable = textView.textContainer.size.width
-            let effectiveWidth: CGFloat
-            if containerAvailable > 1 {
-                effectiveWidth = containerAvailable
-            } else if width > insetH + padding {
-                effectiveWidth = width - insetH - padding
-            } else {
-                effectiveWidth = max(1, width - insetH - padding)
-            }
+            let effectiveWidth = max(1, width - insetH - padding)
 
             let keys = pendingImages.keys.sorted().joined()
             let needsRebuild = cachedText != pendingText
@@ -209,7 +208,10 @@ struct SelectableTextEditor: UIViewRepresentable {
         /// 回报当前内容实高，变化时异步派发避免在 view update 周期同步写入 @State
         func reportHeight(_ textView: UITextView) {
             guard !textView.isScrollEnabled else { return }
-            let width = textView.bounds.width > 0 ? textView.bounds.width : UIScreen.main.bounds.width
+            // 只用真实 bounds.width 测量；宽度未就绪时不回报（layoutSubviews 会再触发一次）。
+            // 早期用 UIScreen 宽度兜底会把高度按错误宽度算出来，外层 frame 随即被写成错值。
+            let width = textView.bounds.width
+            guard width > 0 else { return }
             let targetSize = CGSize(width: width, height: .greatestFiniteMagnitude)
             let height = max(textView.sizeThatFits(targetSize).height, 120)
             guard abs(height - cachedHeight) > 0.5 else { return }
