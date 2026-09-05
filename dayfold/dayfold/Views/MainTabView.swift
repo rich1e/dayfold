@@ -6,15 +6,8 @@ struct MainTabView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @State private var selectedTab: SidebarTab = .list
     @State private var showingNewEntry = false
-    @State private var showingTrash = false
     @State private var drawerOpen = false
     @State private var homeListMode = false
-
-    private var topInset: CGFloat {
-        (UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .first?.windows.first?.safeAreaInsets.top) ?? 0
-    }
 
     private var defaultNotebook: Notebook? {
         let request: NSFetchRequest<Notebook> = Notebook.fetchRequest()
@@ -49,22 +42,6 @@ struct MainTabView: View {
                             onNewEntry: { showingNewEntry = true }
                         )
                         .transition(.paperDrop)
-                    }
-                    if selectedTab == .photos {
-                        EntryListView(context: viewContext)
-                            .transition(.paperDrop)
-                    }
-                    if selectedTab == .tags {
-                        TagsView(context: viewContext)
-                            .transition(.paperDrop)
-                    }
-                    if selectedTab == .map {
-                        MapView(showingNewEntry: $showingNewEntry)
-                            .transition(.paperDrop)
-                    }
-                    if selectedTab == .settings {
-                        SettingsView()
-                            .transition(.paperDrop)
                     }
                 }
                 .animation(.easeOut(duration: 0.38), value: selectedTab)
@@ -136,17 +113,6 @@ struct MainTabView: View {
         .sheet(isPresented: $showingNewEntry) {
             EntryEditorView(context: viewContext, notebook: defaultNotebook)
                 .environment(\.managedObjectContext, viewContext)
-        }
-        .sheet(isPresented: $showingTrash, onDismiss: {
-            // 关闭后恢复到 list，避免 drawer 仍高亮 trash
-            if selectedTab == .trash { selectedTab = .list }
-        }) {
-            TrashView()
-        }
-        .onChange(of: selectedTab) { tab in
-            if tab == .trash {
-                showingTrash = true
-            }
         }
     }
 }

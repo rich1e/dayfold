@@ -1,7 +1,6 @@
 // Views/SidebarView+Detail.swift
 // 抽屉内二级页面容器与路由分发。
-// 取代原先"点击抽屉行 → 关闭抽屉 + selectedTab 切换 + 整页 paperDrop 转场"的旧交互，
-// 改为"点击抽屉行 → 在抽屉内部从右侧滑入二级页，左侧抽屉列表保留窄条作为返回锚点"。
+// 点击抽屉行 → 在抽屉内部从右侧滑入二级页，左侧抽屉列表保留窄条作为返回锚点。
 
 import SwiftUI
 import CoreData
@@ -61,32 +60,88 @@ struct DrawerDetailContainer<Content: View>: View {
 
 /// 抽屉二级页路由分发：根据 `SidebarTab` 返回对应 View。
 ///
-/// 所有二级页统一传入 `viewContext`，与 `MainTabView` 内容区保持一致。
-/// `MapView` 需要 `Binding<Bool>` 用于"新建条目"sheet；这里用本地 state，
-/// 避免与 `MainTabView` 的 `showingNewEntry` 状态耦合。
+/// - `list/trash/stats` 路由到真实页面
+/// - 其他装饰类入口（icloud/memories/notifications/hiddenAlbum/about）渲染占位详情
+/// - `privacy` 复用现有 `SettingsView`（包含 Face ID 开关）
 struct DrawerDetailRouter: View {
     let tab: SidebarTab
     let context: NSManagedObjectContext
-
-    @State private var drawerMapShowingNewEntry = false
+    let securityManager: SecurityManager
 
     var body: some View {
         switch tab {
         case .list:
             EntryListView(context: context)
-        case .photos:
-            // 相册：当前复用 EntryListView，后续可加"仅图片"筛选
-            EntryListView(context: context)
-        case .tags:
-            TagsView(context: context)
-        case .map:
-            MapView(showingNewEntry: $drawerMapShowingNewEntry)
-        case .trash:
-            TrashView()
+
+        case .icloud:
+            DrawerPlaceholderDetail(
+                icon: "icloud",
+                title: "iCloud Sync",
+                subtitle: "On · 12.4 GB of 50 GB"
+            )
+        case .memories:
+            DrawerPlaceholderDetail(
+                icon: "sparkles",
+                title: "Memories",
+                subtitle: "Curated weekly"
+            )
+        case .notifications:
+            DrawerPlaceholderDetail(
+                icon: "bell",
+                title: "Notifications",
+                subtitle: "Memories · Shared albums"
+            )
+        case .privacy:
+            SettingsView()
+        case .hiddenAlbum:
+            DrawerPlaceholderDetail(
+                icon: "eye.slash",
+                title: "Hidden Album",
+                subtitle: "Off"
+            )
+
         case .stats:
             StatsView(context: context)
-        case .settings:
-            SettingsView()
+        case .trash:
+            TrashView()
+        case .about:
+            DrawerPlaceholderDetail(
+                icon: "info.circle",
+                title: "About Photos",
+                subtitle: aboutSubtitle
+            )
         }
+    }
+
+    private var aboutSubtitle: String {
+        let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
+        let b = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—"
+        return "Version \(v) · Build \(b)"
+    }
+}
+
+/// 装饰类入口的占位详情页（与抽屉配色对齐）
+private struct DrawerPlaceholderDetail: View {
+    let icon: String
+    let title: String
+    let subtitle: String
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Spacer()
+            Image(systemName: icon)
+                .font(.system(size: 56))
+                .foregroundColor(drawerGroupLabel.opacity(0.7))
+            Text(title)
+                .font(.warmHeadline)
+                .foregroundColor(drawerText)
+            Text(subtitle)
+                .font(.warmCaption)
+                .foregroundColor(drawerBrown)
+                .multilineTextAlignment(.center)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(drawerBg.ignoresSafeArea())
     }
 }
