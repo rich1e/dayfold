@@ -2,14 +2,20 @@
 import SwiftUI
 
 extension Color {
-    // 深色主题色系（参考 Hardcover 配色）
-    static let warmPaper = Color(hex: "3C3C44")   // 主背景（蓝灰深色）
-    static let warmCream = Color(hex: "4A4A58")   // 分割线/边框
-    static let warmBrown = Color(hex: "9090A0")   // 次要文字/禁用
-    static let warmAccent = Color(hex: "E05A3A")  // 主强调色（橙红）
-    static let warmGray  = Color(hex: "52525F")   // 卡片阴影层/禁用背景
-    static let warmDark  = Color(hex: "E8E8EC")   // 主文字（近白偏蓝灰）
-    static let warmLight = Color(hex: "434350")   // 卡片/面板/行背景
+    @available(*, deprecated, message: "请改用 theme.backgroundPrimary")
+    static let warmPaper = Color(hex: "3C3C44")
+    @available(*, deprecated, message: "请改用 theme.dividerPrimary")
+    static let warmCream = Color(hex: "4A4A58")
+    @available(*, deprecated, message: "请改用 theme.textSecondary")
+    static let warmBrown = Color(hex: "9090A0")
+    @available(*, deprecated, message: "请改用 theme.accentPrimary")
+    static let warmAccent = Color(hex: "E05A3A")
+    @available(*, deprecated, message: "请改用 theme.backgroundPressed")
+    static let warmGray  = Color(hex: "52525F")
+    @available(*, deprecated, message: "请改用 theme.textPrimary")
+    static let warmDark  = Color(hex: "E8E8EC")
+    @available(*, deprecated, message: "请改用 theme.backgroundSecondary")
+    static let warmLight = Color(hex: "434350")
 
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
