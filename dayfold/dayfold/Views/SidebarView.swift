@@ -76,6 +76,12 @@ struct DrawerSettingsRowModel: Identifiable {
     }
 }
 
+/// 设置入口行（占位，外观主题切换改为在 SettingsView 顶部加 Section）
+private struct SettingsEntryModel {
+    let icon: String
+    let label: String
+}
+
 struct DrawerView: View {
     @Binding var selectedTab: SidebarTab
     @Binding var isOpen: Bool
@@ -345,6 +351,8 @@ private struct DrawerSettingsRow: View {
         )
     }
 }
+
+// MARK: - 设置入口行（已停用，外观主题切换改为在 SettingsView 顶部加 Section）
 
 #Preview {
     DrawerView(
