@@ -36,14 +36,14 @@ struct MarkdownEditor: View {
                     HStack {
                         Text("\(wordCount) 字")
                             .font(.warmCaption)
-                            .foregroundColor(.warmBrown)
+                            .foregroundColor(theme.textSecondary)
 
                         Text("·")
-                            .foregroundColor(.warmGray)
+                            .foregroundColor(theme.backgroundPressed)
 
                         Text("约 \(readingTime) 分钟阅读")
                             .font(.warmCaption)
-                            .foregroundColor(.warmBrown)
+                            .foregroundColor(theme.textSecondary)
 
                         Spacer()
 
@@ -53,7 +53,7 @@ struct MarkdownEditor: View {
                             }
                         } label: {
                             Image(systemName: "arrow.up.left.and.arrow.down.right")
-                                .foregroundColor(.warmAccent)
+                                .foregroundColor(theme.accentPrimary)
                         }
                     }
                     .padding(.horizontal)
@@ -71,7 +71,7 @@ struct MarkdownEditor: View {
                 } label: {
                     Image(systemName: "arrow.down.right.and.arrow.up.left")
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.warmAccent)
+                        .foregroundColor(theme.accentPrimary)
                         .padding(10)
                         .background(theme.backgroundSecondary.opacity(0.9))
                         .clipShape(Circle())

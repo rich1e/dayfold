@@ -64,22 +64,22 @@ struct EntryBottomSheet: View {
             if let date = selectedDate {
                 Text(formatSelectedDate(date))
                     .font(.warmHeadline)
-                    .foregroundColor(.warmDark)
+                    .foregroundColor(theme.textPrimary)
                 if !entries.isEmpty {
                     Text("·")
-                        .foregroundColor(.warmBrown)
+                        .foregroundColor(theme.textSecondary)
                     Text("\(entries.count)条记录")
                         .font(.warmBody)
-                        .foregroundColor(.warmBrown)
+                        .foregroundColor(theme.textSecondary)
                 } else {
                     Text("这天还没有记录")
                         .font(.warmBody)
-                        .foregroundColor(.warmBrown)
+                        .foregroundColor(theme.textSecondary)
                 }
             } else {
                 Text("选择一天查看记录")
                     .font(.warmBody)
-                    .foregroundColor(.warmBrown)
+                    .foregroundColor(theme.textSecondary)
             }
             Spacer()
             if let date = selectedDate {
@@ -88,7 +88,7 @@ struct EntryBottomSheet: View {
                 } label: {
                     Image(systemName: "plus.circle.fill")
                         .font(.title2)
-                        .foregroundColor(.warmAccent)
+                        .foregroundColor(theme.accentPrimary)
                 }
             }
         }
@@ -124,17 +124,17 @@ struct EntryBottomSheet: View {
                 if !entry.wrappedTitle.isEmpty {
                     Text(entry.wrappedTitle)
                         .font(.warmHeadline)
-                        .foregroundColor(.warmDark)
+                        .foregroundColor(theme.textPrimary)
                         .lineLimit(1)
                 }
                 Text(entry.wrappedContent)
                     .font(.warmBody)
-                    .foregroundColor(.warmBrown)
+                    .foregroundColor(theme.textSecondary)
                     .lineLimit(2)
                 if let createdAt = entry.createdAt {
                     Text(createdAt, format: .dateTime.hour().minute())
                         .font(.warmCaption)
-                        .foregroundColor(.warmGray)
+                        .foregroundColor(theme.backgroundPressed)
                 }
             }
             Spacer()
@@ -144,7 +144,7 @@ struct EntryBottomSheet: View {
                     viewMode = .photoWall
                 } label: {
                     Image(systemName: "photo.on.rectangle")
-                        .foregroundColor(.warmAccent)
+                        .foregroundColor(theme.accentPrimary)
                 }
             }
         }

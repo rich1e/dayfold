@@ -10,7 +10,7 @@ struct OnThisDayYearRow: View {
                 VStack(spacing: 4) {
                     Text("\(group.yearDiff) 年前")
                         .font(.warmCaption)
-                        .foregroundColor(.warmBrown)
+                        .foregroundColor(theme.textSecondary)
                     Circle()
                         .fill(theme.accentPrimary)
                         .frame(width: 8, height: 8)
@@ -20,11 +20,11 @@ struct OnThisDayYearRow: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(displayTitle)
                         .font(.warmBody)
-                        .foregroundColor(.warmDark)
+                        .foregroundColor(theme.textPrimary)
                         .lineLimit(1)
                     Text(group.earliest.wrappedContent)
                         .font(.warmCaption)
-                        .foregroundColor(.warmBrown)
+                        .foregroundColor(theme.textSecondary)
                         .lineLimit(1)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -32,7 +32,7 @@ struct OnThisDayYearRow: View {
                 if group.count > 1 {
                     Text("+\(group.count) 篇同天")
                         .font(.warmFootnote)
-                        .foregroundColor(.warmGray)
+                        .foregroundColor(theme.backgroundPressed)
                 }
             }
             .padding(16)

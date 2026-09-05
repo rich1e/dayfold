@@ -61,7 +61,7 @@ struct EntryCardPreviewSheet: View {
                                 Text("分享")
                                     .font(.system(size: 16, weight: .medium))
                             }
-                            .foregroundColor(.warmAccent)
+                            .foregroundColor(theme.accentPrimary)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
                             .background(theme.accentPrimary.opacity(0.1))
@@ -77,7 +77,7 @@ struct EntryCardPreviewSheet: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("关闭") { dismiss() }
-                        .foregroundColor(.warmAccent)
+                        .foregroundColor(theme.accentPrimary)
                 }
             }
             .alert(alertTitle, isPresented: .constant(saveResult != nil)) {

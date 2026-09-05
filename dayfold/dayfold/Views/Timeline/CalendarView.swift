@@ -86,7 +86,7 @@ struct CalendarView: View {
                 viewModel.goToPreviousMonth()
             } label: {
                 Image(systemName: "chevron.left")
-                    .foregroundColor(.warmAccent)
+                    .foregroundColor(theme.accentPrimary)
                     .padding(8)
             }
 
@@ -94,7 +94,7 @@ struct CalendarView: View {
 
             Text(monthTitle)
                 .font(.warmHeadline)
-                .foregroundColor(.warmDark)
+                .foregroundColor(theme.textPrimary)
 
             Spacer()
 
@@ -102,7 +102,7 @@ struct CalendarView: View {
                 viewModel.goToNextMonth()
             } label: {
                 Image(systemName: "chevron.right")
-                    .foregroundColor(.warmAccent)
+                    .foregroundColor(theme.accentPrimary)
                     .padding(8)
             }
         }

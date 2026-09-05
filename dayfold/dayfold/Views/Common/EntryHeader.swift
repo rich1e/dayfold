@@ -17,7 +17,7 @@ struct EntryHeader: View {
             // 日期时间
             Text(entry.createdAt ?? Date(), formatter: dateFormatter)
                 .font(.warmCaption)
-                .foregroundColor(.warmBrown)
+                .foregroundColor(theme.textSecondary)
 
             // 位置和天气
             if let location = entry.location {
@@ -40,7 +40,7 @@ struct EntryHeader: View {
                         }
                     }
                 }
-                .foregroundColor(.warmAccent)
+                .foregroundColor(theme.accentPrimary)
             }
 
             // 标签

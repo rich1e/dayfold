@@ -29,14 +29,14 @@ struct OnThisDaySection: View {
         HStack(spacing: 12) {
             Image(systemName: "clock.arrow.circlepath")
                 .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.warmAccent)
+                .foregroundColor(theme.accentPrimary)
             VStack(alignment: .leading, spacing: 2) {
                 Text("历史上今天你写了 \(viewModel.totalCount) 篇日记")
                     .font(.warmHeadline)
-                    .foregroundColor(.warmDark)
+                    .foregroundColor(theme.textPrimary)
                 Text("最近一篇是 \(viewModel.recentYearDiff) 年前的今天")
                     .font(.warmCaption)
-                    .foregroundColor(.warmBrown)
+                    .foregroundColor(theme.textSecondary)
             }
             Spacer(minLength: 0)
         }

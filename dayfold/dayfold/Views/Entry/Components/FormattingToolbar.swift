@@ -68,7 +68,7 @@ struct ToolbarButton: View {
                         .font(.system(size: 10))
                 }
             }
-            .foregroundColor(.warmBrown)
+            .foregroundColor(theme.textSecondary)
             .frame(width: compact ? 36 : 50)
         }
     }

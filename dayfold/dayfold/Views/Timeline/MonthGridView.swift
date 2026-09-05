@@ -17,7 +17,7 @@ struct MonthGridView: View {
                 ForEach(weekdaySymbols, id: \.self) { symbol in
                     Text(symbol)
                         .font(.warmCaption)
-                        .foregroundColor(.warmBrown)
+                        .foregroundColor(theme.textSecondary)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
                 }
@@ -88,7 +88,7 @@ struct DayCell: View {
                 }
                 Text("\(Calendar.current.component(.day, from: date))")
                     .font(.warmBody)
-                    .foregroundColor(isToday ? .warmAccent : .warmDark)
+                    .foregroundColor(isToday ? theme.accentPrimary : theme.textPrimary)
                     .fontWeight(isToday ? .bold : .regular)
             }
             .frame(width: 36, height: 36)
@@ -116,7 +116,7 @@ struct DayCell: View {
         } else {
             Text("\(dots.count)+")
                 .font(.system(size: 8))
-                .foregroundColor(.warmBrown)
+                .foregroundColor(theme.textSecondary)
         }
     }
 }

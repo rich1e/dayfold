@@ -30,7 +30,7 @@ struct TagPicker: View {
                     Text("添加标签")
                         .font(.warmBody)
                 }
-                .foregroundColor(.warmAccent)
+                .foregroundColor(theme.accentPrimary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
                 .background(theme.backgroundSecondary)
@@ -108,7 +108,7 @@ struct TagSelectorSheet: View {
 
                                 Text(tag.wrappedName)
                                     .font(.warmBody)
-                                    .foregroundColor(.warmDark)
+                                    .foregroundColor(theme.textPrimary)
 
                                 Spacer()
 
@@ -133,7 +133,7 @@ struct TagSelectorSheet: View {
                     Button("完成") {
                         dismiss()
                     }
-                    .foregroundColor(.warmAccent)
+                    .foregroundColor(theme.accentPrimary)
                 }
             }
         }

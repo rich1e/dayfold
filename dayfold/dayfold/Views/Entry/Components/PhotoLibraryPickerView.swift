@@ -140,7 +140,7 @@ struct PhotoLibraryPickerView: View {
 
     private var loadingState: some View {
         ProgressView()
-            .tint(.warmDark)
+            .tint(theme.textPrimary)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
@@ -171,10 +171,10 @@ struct PhotoLibraryPickerView: View {
         VStack(spacing: 12) {
             Image(systemName: "photo.on.rectangle.angled")
                 .font(.system(size: 40))
-                .foregroundColor(.warmBrown)
+                .foregroundColor(theme.textSecondary)
             Text("没有照片")
                 .font(.system(size: 15))
-                .foregroundColor(.warmBrown)
+                .foregroundColor(theme.textSecondary)
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 120)
@@ -374,16 +374,16 @@ private struct PermissionDeniedView: View {
         VStack(spacing: 20) {
             Image(systemName: "photo.on.rectangle.angled")
                 .font(.system(size: 44))
-                .foregroundColor(.warmBrown)
+                .foregroundColor(theme.textSecondary)
                 .padding(.top, 80)
 
             Text(title)
                 .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.warmDark)
+                .foregroundColor(theme.textPrimary)
 
             Text(message)
                 .font(.system(size: 14))
-                .foregroundColor(.warmBrown)
+                .foregroundColor(theme.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
 
@@ -403,7 +403,7 @@ private struct PermissionDeniedView: View {
                 Button(action: onUseSystemPicker) {
                     Text("从系统相册选择")
                         .font(.system(size: 15))
-                        .foregroundColor(.warmAccent)
+                        .foregroundColor(theme.accentPrimary)
                 }
             }
 

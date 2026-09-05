@@ -60,10 +60,10 @@ struct TagsView: View {
                         } label: {
                             Image(systemName: "plus")
                         }
-                        .foregroundColor(.warmAccent)
+                        .foregroundColor(theme.accentPrimary)
 
                         EditButton()
-                            .foregroundColor(.warmAccent)
+                            .foregroundColor(theme.accentPrimary)
                     }
                 }
             }
@@ -87,11 +87,11 @@ struct TagsView: View {
         VStack(spacing: 24) {
             Image(systemName: "tag")
                 .font(.system(size: 80))
-                .foregroundColor(.warmGray)
+                .foregroundColor(theme.backgroundPressed)
 
             Text("还没有标签")
                 .font(.warmHeadline)
-                .foregroundColor(.warmBrown)
+                .foregroundColor(theme.textSecondary)
         }
     }
 
@@ -129,17 +129,17 @@ struct TagRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(tag.wrappedName)
                     .font(.warmBody)
-                    .foregroundColor(.warmDark)
+                    .foregroundColor(theme.textPrimary)
 
                 Text("\(tag.entriesArray.count) 篇日记")
                     .font(.warmCaption)
-                    .foregroundColor(.warmBrown.opacity(0.7))
+                    .foregroundColor(theme.textSecondary.opacity(0.7))
             }
 
             Spacer()
 
             Image(systemName: "chevron.right")
-                .foregroundColor(.warmGray)
+                .foregroundColor(theme.backgroundPressed)
                 .font(.caption)
         }
         .padding()

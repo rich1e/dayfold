@@ -40,7 +40,7 @@ struct TimelineListView: View {
                     } header: {
                         Text(date)
                             .font(.warmHeadline)
-                            .foregroundColor(.warmDark)
+                            .foregroundColor(theme.textPrimary)
                             .padding(.horizontal)
                             .padding(.vertical, 12)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -79,7 +79,7 @@ struct TimelineEntryCard: View {
                 let time = entry.createdAt ?? Date()
                 Text(time, format: .dateTime.hour().minute())
                     .font(.warmCaption)
-                    .foregroundColor(.warmBrown)
+                    .foregroundColor(theme.textSecondary)
 
                 Circle()
                     .fill(theme.accentPrimary)
@@ -92,12 +92,12 @@ struct TimelineEntryCard: View {
                 if !entry.wrappedTitle.isEmpty {
                     Text(entry.wrappedTitle)
                         .font(.warmHeadline)
-                        .foregroundColor(.warmDark)
+                        .foregroundColor(theme.textPrimary)
                 }
 
                 Text(entry.wrappedContent)
                     .font(.warmBody)
-                    .foregroundColor(.warmBrown)
+                    .foregroundColor(theme.textSecondary)
                     .lineLimit(2)
 
                 // 缩略图
@@ -118,7 +118,7 @@ struct TimelineEntryCard: View {
                             Text(location.wrappedPlaceName)
                         }
                         .font(.warmFootnote)
-                        .foregroundColor(.warmAccent)
+                        .foregroundColor(theme.accentPrimary)
                     }
 
                     if !entry.tagsArray.isEmpty {

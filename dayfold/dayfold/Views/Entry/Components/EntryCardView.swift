@@ -66,12 +66,12 @@ struct EntryCardView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(dateText)
                 .font(.system(size: 13, weight: .regular, design: .rounded))
-                .foregroundColor(.warmBrown)
+                .foregroundColor(theme.textSecondary)
 
             HStack(spacing: 12) {
                 Text(timeText)
                     .font(.system(size: 11, design: .rounded))
-                    .foregroundColor(.warmGray)
+                    .foregroundColor(theme.backgroundPressed)
 
                 if let location = entry.location {
                     if location.weatherCondition != nil {
@@ -81,7 +81,7 @@ struct EntryCardView: View {
                             Text("\(Int(location.weatherTemperature))°C")
                                 .font(.system(size: 11, design: .rounded))
                         }
-                        .foregroundColor(.warmAccent)
+                        .foregroundColor(theme.accentPrimary)
                     }
 
                     if !location.wrappedPlaceName.isEmpty {
@@ -92,7 +92,7 @@ struct EntryCardView: View {
                                 .font(.system(size: 11, design: .rounded))
                                 .lineLimit(1)
                         }
-                        .foregroundColor(.warmAccent)
+                        .foregroundColor(theme.accentPrimary)
                     }
                 }
             }
@@ -104,7 +104,7 @@ struct EntryCardView: View {
             if !entry.wrappedTitle.isEmpty {
                 Text(entry.wrappedTitle)
                     .font(Font.custom("STSongti-SC-Bold", size: 17))
-                    .foregroundColor(.warmDark)
+                    .foregroundColor(theme.textPrimary)
                     .lineLimit(2)
             }
 
@@ -112,7 +112,7 @@ struct EntryCardView: View {
             if !preview.isEmpty {
                 Text(preview)
                     .font(.system(size: 14, weight: .regular, design: .serif))
-                    .foregroundColor(.warmDark.opacity(0.85))
+                    .foregroundColor(theme.textPrimary.opacity(0.85))
                     .lineLimit(6)
                     .lineSpacing(4)
             }
@@ -155,7 +155,7 @@ struct EntryCardView: View {
                 Text("Dayfold")
                     .font(.system(size: 11, weight: .medium, design: .rounded))
             }
-            .foregroundColor(.warmAccent.opacity(0.6))
+            .foregroundColor(theme.accentPrimary.opacity(0.6))
         }
     }
 
