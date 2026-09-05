@@ -30,9 +30,13 @@ struct MainTabView: View {
 
             ZStack(alignment: .leading) {
                 // 底层：抽屉面板（固定左侧，不做动画）
-                DrawerView(selectedTab: $selectedTab, isOpen: $drawerOpen)
-                    .frame(width: drawerWidth)
-                    .ignoresSafeArea()
+                DrawerView(
+                    selectedTab: $selectedTab,
+                    isOpen: $drawerOpen,
+                    context: viewContext
+                )
+                .frame(width: drawerWidth)
+                .ignoresSafeArea()
 
                 // 上层：内容区（整体向右滑动）
                 ZStack {
@@ -56,10 +60,6 @@ struct MainTabView: View {
                     }
                     if selectedTab == .map {
                         MapView(showingNewEntry: $showingNewEntry)
-                            .transition(.paperDrop)
-                    }
-                    if selectedTab == .stats {
-                        StatsView(context: viewContext)
                             .transition(.paperDrop)
                     }
                     if selectedTab == .settings {

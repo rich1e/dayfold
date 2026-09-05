@@ -1,5 +1,6 @@
 // Views/SidebarView.swift
 import SwiftUI
+import CoreData
 
 enum SidebarTab: String, CaseIterable, Hashable {
     case list, photos, tags, map
@@ -30,12 +31,13 @@ enum SidebarTab: String, CaseIterable, Hashable {
     }
 }
 
-private let drawerBg      = Color(red: 0.18, green: 0.18, blue: 0.20)
-private let drawerRowBg   = Color(red: 0.22, green: 0.22, blue: 0.24)
-private let drawerDivider = Color(red: 0.28, green: 0.28, blue: 0.30)
-private let drawerAccent  = Color(red: 0.95, green: 0.45, blue: 0.35)
-private let drawerText    = Color(red: 0.92, green: 0.92, blue: 0.92)
-private let drawerGroupLabel = Color(hex: "5BC8D8")
+// 文件内跨文件共享（SidebarView+Detail.swift 引用）
+let drawerBg      = Color(red: 0.18, green: 0.18, blue: 0.20)
+let drawerRowBg   = Color(red: 0.22, green: 0.22, blue: 0.24)
+let drawerDivider = Color(red: 0.28, green: 0.28, blue: 0.30)
+let drawerAccent  = Color(red: 0.95, green: 0.45, blue: 0.35)
+let drawerText    = Color(red: 0.92, green: 0.92, blue: 0.92)
+let drawerGroupLabel = Color(hex: "5BC8D8")
 
 private let group1: [SidebarTab] = [.list, .photos, .tags, .map]
 private let group2: [SidebarTab] = [.trash, .stats, .settings]
@@ -43,8 +45,41 @@ private let group2: [SidebarTab] = [.trash, .stats, .settings]
 struct DrawerView: View {
     @Binding var selectedTab: SidebarTab
     @Binding var isOpen: Bool
+    let context: NSManagedObjectContext
+
+    @State private var presentedTab: SidebarTab?
 
     var body: some View {
+        GeometryReader { geo in
+            let width = geo.size.width
+
+            ZStack(alignment: .leading) {
+                drawerList(width: width)
+
+                if let tab = presentedTab {
+                    DrawerDetailContainer(
+                        title: tab.label,
+                        drawerWidth: width,
+                        onBack: {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+                                presentedTab = nil
+                            }
+                        }
+                    ) {
+                        DrawerDetailRouter(tab: tab, context: context)
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(drawerBg.ignoresSafeArea())
+        .onChange(of: isOpen) { open in
+            // 抽屉关闭时清空二级页状态，保证下次打开是干净列表
+            if !open { presentedTab = nil }
+        }
+    }
+
+    private func drawerList(width: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             // 顶部标题
             HStack {
@@ -59,7 +94,11 @@ struct DrawerView: View {
             .padding(.bottom, 24)
 
             // 第一组
-            DrawerGroup(title: "日记", tabs: group1, selectedTab: $selectedTab, isOpen: $isOpen)
+            DrawerGroup(
+                title: "日记",
+                tabs: group1,
+                presentedTab: $presentedTab
+            )
 
             Spacer()
 
@@ -71,10 +110,15 @@ struct DrawerView: View {
                 .padding(.bottom, 12)
 
             // 第二组（固定底部）
-            DrawerGroup(title: "更多", tabs: group2, selectedTab: $selectedTab, isOpen: $isOpen)
-                .padding(.bottom, 32)
+            DrawerGroup(
+                title: "更多",
+                tabs: group2,
+                presentedTab: $presentedTab
+            )
+            .padding(.bottom, 32)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(width: width)
+        .frame(maxHeight: .infinity)
         .background(drawerBg.ignoresSafeArea())
     }
 }
@@ -82,8 +126,7 @@ struct DrawerView: View {
 private struct DrawerGroup: View {
     let title: String
     let tabs: [SidebarTab]
-    @Binding var selectedTab: SidebarTab
-    @Binding var isOpen: Bool
+    @Binding var presentedTab: SidebarTab?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -98,13 +141,9 @@ private struct DrawerGroup: View {
             // 行列表
             VStack(spacing: 0) {
                 ForEach(tabs, id: \.self) { tab in
-                    DrawerRow(
-                        tab: tab,
-                        isActive: selectedTab == tab
-                    ) {
-                        selectedTab = tab
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                            isOpen = false
+                    DrawerRow(tab: tab) {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+                            presentedTab = tab
                         }
                     }
 
@@ -121,7 +160,6 @@ private struct DrawerGroup: View {
 
 private struct DrawerRow: View {
     let tab: SidebarTab
-    let isActive: Bool
     let action: () -> Void
 
     @State private var isPressed = false
@@ -131,18 +169,18 @@ private struct DrawerRow: View {
             HStack(spacing: 16) {
                 Image(systemName: tab.icon)
                     .font(.system(size: 17, weight: .regular))
-                    .foregroundColor(isActive ? drawerAccent : drawerText)
+                    .foregroundColor(drawerText)
                     .frame(width: 22)
 
                 Text(tab.label)
                     .font(.system(size: 16, weight: .regular))
-                    .foregroundColor(isActive ? drawerAccent : drawerText)
+                    .foregroundColor(drawerText)
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 13, weight: .regular))
-                    .foregroundColor(isActive ? drawerAccent : drawerDivider)
+                    .foregroundColor(drawerDivider)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 15)
@@ -158,6 +196,10 @@ private struct DrawerRow: View {
 }
 
 #Preview {
-    DrawerView(selectedTab: .constant(.list), isOpen: .constant(true))
-        .frame(width: 300)
+    DrawerView(
+        selectedTab: .constant(.list),
+        isOpen: .constant(true),
+        context: CoreDataStack.shared.viewContext
+    )
+    .frame(width: 300)
 }
