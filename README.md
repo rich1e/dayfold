@@ -69,6 +69,42 @@ dayfold/
 └── Extensions/                 # 颜色 / 字体 / View 扩展
 ```
 
+## 📑 UI 页面清单
+
+### 根入口（App 启动层）
+
+| 页面 | 文件路径 |
+| ---- | -------- |
+| `dayfoldApp` | `dayfold/dayfold/dayfoldApp.swift` |
+| `LockScreenView` | `dayfold/dayfold/Views/LockScreenView.swift` |
+| `MainTabView` | `dayfold/dayfold/Views/MainTabView.swift` |
+| `SidebarView` | `dayfold/dayfold/Views/SidebarView.swift` |
+
+### 顶层 Tab 页面
+
+| 页面 | 文件路径 | 说明 |
+| ---- | -------- | ---- |
+| `HomeView` | `dayfold/dayfold/Views/HomeView.swift` | 笔记本封面墙 |
+| `EntryListView` | `dayfold/dayfold/Views/Entry/EntryListView.swift` | 所有条目列表 |
+| `TagsView` | `dayfold/dayfold/Views/Tags/TagsView.swift` | 标签浏览/管理 |
+| `MapView` | `dayfold/dayfold/Views/Map/MapView.swift` | MapKit 地图视图 |
+| `StatsView` | `dayfold/dayfold/Views/StatsView.swift` | 写作统计仪表盘 |
+| `SettingsView` | `dayfold/dayfold/Views/SettingsView.swift` | 应用设置 |
+| `TrashView` | `dayfold/dayfold/Views/Entry/TrashView.swift` | 抽屉 sheet 弹出 |
+
+### 二级页面（sheet / fullScreenCover）
+
+| 页面 | 文件路径 | 说明 |
+| ---- | -------- | ---- |
+| `NotebookDetailView` | `dayfold/dayfold/Views/NotebookDetailView.swift` | fullScreenCover 弹出 |
+| `EntryEditorView` | `dayfold/dayfold/Views/Entry/EntryEditorView.swift` | 全屏表单 |
+| `EntryDetailView` | `dayfold/dayfold/Views/Entry/EntryDetailView.swift` | 单条查看 |
+| `EntryCardPreviewSheet` | `dayfold/dayfold/Views/Entry/EntryCardPreviewSheet.swift` | 导出卡片预览 |
+| `TagEditorView` | `dayfold/dayfold/Views/Tags/TagEditorView.swift` | 单标签表单 |
+| `TimelineView` | `dayfold/dayfold/Views/Timeline/TimelineView.swift` | 时间线视图 |
+
+> `ContentView.swift` 是 Xcode 模板遗留文件，未被 `dayfoldApp` 引用。其余 `Views/Entry/Components/`、`Views/Common/`、`Views/Home/`、`Views/Map/`、`Views/Timeline/` 下的均为可复用子组件，不算独立页面。
+
 ## 🚀 快速开始
 
 ### 环境要求
