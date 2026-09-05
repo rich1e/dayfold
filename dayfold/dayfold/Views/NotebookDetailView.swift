@@ -3,11 +3,12 @@ import SwiftUI
 import CoreData
 
 private enum SheetMode: Identifiable {
-    case photos, calendar, newEntry, entryEditor(Entry), entryDetail(Entry)
+    case photos, calendar, map, newEntry, entryEditor(Entry), entryDetail(Entry)
     var id: String {
         switch self {
         case .photos: return "photos"
         case .calendar: return "calendar"
+        case .map: return "map"
         case .newEntry: return "newEntry"
         case .entryEditor(let e): return "editor-\(e.objectID)"
         case .entryDetail(let e): return "detail-\(e.objectID)"
@@ -77,6 +78,14 @@ struct NotebookDetailView: View {
                         Image(systemName: "calendar")
                             .font(.system(size: 18, weight: .regular))
                             .foregroundColor({ if case .calendar = sheetMode { return Color(hex: "5BC8D8") }; return Color(hex: "9090A0") }())
+                            .frame(width: 44, height: 44)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+
+                    Button { sheetMode = .map } label: {
+                        Image(systemName: "map")
+                            .font(.system(size: 18, weight: .regular))
+                            .foregroundColor({ if case .map = sheetMode { return Color(hex: "5BC8D8") }; return Color(hex: "9090A0") }())
                             .frame(width: 44, height: 44)
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -195,6 +204,18 @@ struct NotebookDetailView: View {
                 ZStack {
                     Color(hex: "2A2A30").ignoresSafeArea()
                     CalendarView(viewModel: timelineVM, notebook: notebook)
+                }
+                .environment(\.managedObjectContext, context)
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+            case .map:
+                ZStack {
+                    Color(hex: "2A2A30").ignoresSafeArea()
+                    MapView(
+                        showingNewEntry: .constant(false),
+                        context: context,
+                        notebook: notebook
+                    )
                 }
                 .environment(\.managedObjectContext, context)
                 .presentationDetents([.large])

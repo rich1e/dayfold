@@ -10,10 +10,12 @@ final class MapViewModel: ObservableObject {
     @Published var query: String = ""
 
     private let context: NSManagedObjectContext
+    private let notebookFilter: Notebook?
     private var cancellables = Set<AnyCancellable>()
 
-    init(context: NSManagedObjectContext) {
+    init(context: NSManagedObjectContext, notebook: Notebook? = nil) {
         self.context = context
+        self.notebookFilter = notebook
         reload()
 
         // 监听数据库变更，自动刷新 entries
@@ -40,7 +42,14 @@ final class MapViewModel: ObservableObject {
 
     func reload() {
         let request: NSFetchRequest<Entry> = Entry.fetchRequest()
-        request.predicate = NSPredicate(format: "deletedAt == nil AND location != nil")
+        if let notebookFilter {
+            request.predicate = NSPredicate(
+                format: "deletedAt == nil AND location != nil AND notebook == %@",
+                notebookFilter
+            )
+        } else {
+            request.predicate = NSPredicate(format: "deletedAt == nil AND location != nil")
+        }
         request.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
         entries = (try? context.fetch(request)) ?? []
     }

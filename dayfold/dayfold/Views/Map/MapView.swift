@@ -16,9 +16,10 @@ struct MapView: View {
     }
 
     init(showingNewEntry: Binding<Bool>,
-         context: NSManagedObjectContext = CoreDataStack.shared.viewContext) {
+         context: NSManagedObjectContext = CoreDataStack.shared.viewContext,
+         notebook: Notebook? = nil) {
         self._showingNewEntry = showingNewEntry
-        self._viewModel = StateObject(wrappedValue: MapViewModel(context: context))
+        self._viewModel = StateObject(wrappedValue: MapViewModel(context: context, notebook: notebook))
     }
 
     var body: some View {
