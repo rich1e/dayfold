@@ -18,6 +18,8 @@ struct SelectableTextEditor: UIViewRepresentable {
     var isScrollEnabled: Bool = true
     /// isScrollEnabled = false 时回报内容实高（sizeThatFits），供外层撑开 frame
     var onHeightChange: ((CGFloat) -> Void)? = nil
+    /// 默认 .label 保持向后兼容；Theme 化时由调用方传入 theme.textPrimary.asUIColor
+    var textColor: UIColor = .label
 
     func makeUIView(context: Context) -> UITextView {
         let tv = EditorTextView()
@@ -25,7 +27,7 @@ struct SelectableTextEditor: UIViewRepresentable {
         tv.backgroundColor = .clear
         tv.font = UIFont.preferredFont(forTextStyle: .body)
         tv.adjustsFontForContentSizeCategory = true
-        tv.textColor = .label
+        tv.textColor = textColor
         tv.isScrollEnabled = isScrollEnabled
         tv.alwaysBounceVertical = isScrollEnabled
         tv.keyboardDismissMode = .interactive
@@ -161,7 +163,7 @@ struct SelectableTextEditor: UIViewRepresentable {
                 from: pendingText,
                 images: pendingImages,
                 font: UIFont.preferredFont(forTextStyle: .body),
-                textColor: .label,
+                textColor: parent.textColor,
                 containerWidth: effectiveWidth
             )
 

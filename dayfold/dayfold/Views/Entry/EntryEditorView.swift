@@ -5,6 +5,7 @@ import UIKit
 
 struct EntryEditorView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.theme) private var theme
     @StateObject private var viewModel: EntryEditorViewModel
     @FocusState private var titleFocused: Bool
     @State private var showingImagePicker = false
@@ -22,7 +23,7 @@ struct EntryEditorView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            Color.warmPaper.ignoresSafeArea()
+            theme.backgroundPrimary.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 topBar
@@ -86,7 +87,7 @@ struct EntryEditorView: View {
             // 日期时间
             Text(dateString)
                 .font(.system(size: 15, weight: .medium))
-                .foregroundColor(.warmDark)
+                .foregroundColor(theme.textPrimary)
 
             Spacer()
 
@@ -109,7 +110,7 @@ struct EntryEditorView: View {
             } label: {
                 Image(systemName: "ellipsis.circle")
                     .font(.system(size: 20))
-                    .foregroundColor(.warmBrown)
+                    .foregroundColor(theme.textSecondary)
                     .frame(width: 36, height: 36)
             }
 
@@ -119,13 +120,13 @@ struct EntryEditorView: View {
             } label: {
                 if viewModel.isSaving {
                     ProgressView()
-                        .tint(.warmAccent)
+                        .tint(theme.accentPrimary)
                         .scaleEffect(0.8)
                         .frame(width: 44, height: 32)
                 } else {
                     Text("完毕")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.warmAccent)
+                        .foregroundColor(theme.accentPrimary)
                         .frame(height: 32)
                 }
             }
@@ -133,7 +134,7 @@ struct EntryEditorView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(Color.warmPaper)
+        .background(theme.backgroundPrimary)
     }
 
     // MARK: - 元信息栏（只读）
@@ -142,28 +143,28 @@ struct EntryEditorView: View {
         HStack(spacing: 6) {
             Text(viewModel.notebookDisplayName)
                 .font(.system(size: 12))
-                .foregroundColor(.warmBrown)
+                .foregroundColor(theme.textSecondary)
 
             if let place = viewModel.placeName, !place.isEmpty {
                 Text("·")
-                    .foregroundColor(.warmBrown)
+                    .foregroundColor(theme.textSecondary)
                     .font(.system(size: 12))
                 Text(place)
                     .font(.system(size: 12))
-                    .foregroundColor(.warmBrown)
+                    .foregroundColor(theme.textSecondary)
                     .lineLimit(1)
             }
 
             if let weather = viewModel.weather {
                 Text("·")
-                    .foregroundColor(.warmBrown)
+                    .foregroundColor(theme.textSecondary)
                     .font(.system(size: 12))
                 Image(systemName: weather.symbolName)
                     .font(.system(size: 11))
-                    .foregroundColor(.warmBrown)
+                    .foregroundColor(theme.textSecondary)
                 Text("\(Int(weather.temperature))°C")
                     .font(.system(size: 12))
-                    .foregroundColor(.warmBrown)
+                    .foregroundColor(theme.textSecondary)
             }
 
             MoodSelector(mood: $viewModel.mood)
@@ -172,7 +173,7 @@ struct EntryEditorView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
-        .background(Color.warmPaper)
+        .background(theme.backgroundPrimary)
     }
 
     // MARK: - 编辑区（外层 ScrollView：正文自适应高度 + 图文混排内嵌）
@@ -186,7 +187,7 @@ struct EntryEditorView: View {
                 // 标题
                 TextField("标题", text: $viewModel.title, axis: .vertical)
                     .font(.system(size: 26, weight: .bold))
-                    .foregroundColor(.warmDark)
+                    .foregroundColor(theme.textPrimary)
                     .focused($titleFocused)
                     .submitLabel(.next)
                     .padding(.horizontal, 16)
@@ -201,7 +202,8 @@ struct EntryEditorView: View {
                         selectionLength = len
                     },
                     isScrollEnabled: false,
-                    onHeightChange: { textHeight = $0 }
+                    onHeightChange: { textHeight = $0 },
+                    textColor: theme.textPrimary.asUIColor
                 )
                 .frame(height: max(120, textHeight))
 
@@ -219,7 +221,7 @@ struct EntryEditorView: View {
             }
         }
         .scrollDismissesKeyboard(.interactively)
-        .background(Color.warmPaper)
+        .background(theme.backgroundPrimary)
     }
 
     // MARK: - 键盘工具栏（随键盘浮动）
@@ -268,7 +270,7 @@ struct EntryEditorView: View {
                 }
                 .padding(.horizontal, 8)
                 .frame(height: 44)
-                .background(Color.warmLight)
+                .background(theme.backgroundSecondary)
             }
         }
         .keyboardAdaptive()
@@ -280,7 +282,7 @@ struct EntryEditorView: View {
         Button(action: action) {
             Image(systemName: icon)
                 .font(.system(size: 18, weight: .regular))
-                .foregroundColor(disabled ? Color.warmBrown.opacity(0.4) : Color.warmDark.opacity(0.85))
+                .foregroundColor(disabled ? Color(theme.textSecondary).opacity(0.4) : Color(theme.textPrimary).opacity(0.85))
                 .frame(width: 44, height: 44)
         }
         .buttonStyle(PlainButtonStyle())
@@ -354,6 +356,7 @@ private extension View {
 
 private struct MoodSelector: View {
     @Binding var mood: String
+    @Environment(\.theme) private var theme
     private let options: [(symbol: String, value: String)] = [
         ("face.dashed", "blank"),
         ("cloud", "cloudy"),
@@ -370,7 +373,7 @@ private struct MoodSelector: View {
                 } label: {
                     Image(systemName: option.symbol)
                         .font(.system(size: 14, weight: mood == option.value ? .semibold : .regular))
-                        .foregroundColor(mood == option.value ? .warmAccent : .warmBrown)
+                        .foregroundColor(mood == option.value ? theme.accentPrimary : theme.textSecondary)
                         .frame(width: 24, height: 24)
                 }
             }

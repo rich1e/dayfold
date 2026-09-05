@@ -4,6 +4,7 @@ import CoreData
 
 struct MainTabView: View {
     @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.theme) private var theme
     @State private var selectedTab: SidebarTab = .list
     @State private var showingNewEntry = false
     @State private var drawerOpen = false
@@ -33,7 +34,7 @@ struct MainTabView: View {
 
                 // 上层：内容区（整体向右滑动）
                 ZStack {
-                    Color.warmPaper.ignoresSafeArea()
+                    theme.backgroundPrimary.ignoresSafeArea()
 
                     if selectedTab == .list {
                         HomeView(
@@ -61,7 +62,7 @@ struct MainTabView: View {
                 .offset(x: offset)
                 .animation(.spring(response: 0.38, dampingFraction: 0.82), value: drawerOpen)
                 .shadow(
-                    color: drawerOpen ? Color.black.opacity(0.4) : Color.clear,
+                    color: drawerOpen ? theme.shadowOverlay : Color.clear,
                     radius: drawerOpen ? 20 : 0,
                     x: drawerOpen ? -6 : 0,
                     y: 0
@@ -77,7 +78,7 @@ struct MainTabView: View {
                     } label: {
                         Image(systemName: "gearshape")
                             .font(.system(size: 22, weight: .medium))
-                            .foregroundColor(Color(hex: "5BC8D8"))
+                            .foregroundColor(theme.controlInactive)
                             .frame(width: 48, height: 48)
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -93,7 +94,7 @@ struct MainTabView: View {
                         } label: {
                             Image(systemName: homeListMode ? "square.grid.2x2" : "list.bullet")
                                 .font(.system(size: 22, weight: .medium))
-                                .foregroundColor(Color(hex: "5BC8D8"))
+                                .foregroundColor(theme.controlInactive)
                                 .frame(width: 48, height: 48)
                                 .contentTransition(.symbolEffect(.replace))
                         }
@@ -122,20 +123,22 @@ private struct PlaceholderView: View {
     let title: String
     let subtitle: String
 
+    @Environment(\.theme) private var theme
+
     var body: some View {
         VStack(spacing: 16) {
             Image(systemName: icon)
                 .font(.system(size: 56))
-                .foregroundColor(Color(hex: "4A4A58"))
+                .foregroundColor(theme.dividerPrimary)
             Text(title)
                 .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(Color(hex: "9090A0"))
+                .foregroundColor(theme.textSecondary)
             Text(subtitle)
                 .font(.system(size: 14))
-                .foregroundColor(Color(hex: "6A6A78"))
+                .foregroundColor(theme.textTertiary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.warmPaper.ignoresSafeArea())
+        .background(theme.backgroundPrimary.ignoresSafeArea())
     }
 }
 
