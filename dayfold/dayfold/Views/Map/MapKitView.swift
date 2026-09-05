@@ -4,6 +4,7 @@ import MapKit
 import CoreData
 
 struct MapKitView: UIViewRepresentable {
+    @Environment(\.theme) private var theme
     let entries: [Entry]
     var onSelect: ([Entry]) -> Void
     var onDeselect: () -> Void

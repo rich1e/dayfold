@@ -2,6 +2,7 @@
 import SwiftUI
 
 struct MediaGrid: View {
+    @Environment(\.theme) private var theme
     let images: [UIImage]
     let onRemove: ((Int) -> Void)?
 
@@ -23,6 +24,7 @@ struct MediaGrid: View {
 }
 
 struct MediaGridItem: View {
+    @Environment(\.theme) private var theme
     let image: UIImage
     let onRemove: (() -> Void)?
     @State private var showFullscreen = false
@@ -64,6 +66,7 @@ struct MediaGridItem: View {
 }
 
 struct FullscreenImageView: View {
+    @Environment(\.theme) private var theme
     let image: UIImage
     @Binding var isPresented: Bool
 

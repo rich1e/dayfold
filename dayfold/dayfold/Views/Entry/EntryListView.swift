@@ -3,6 +3,7 @@ import SwiftUI
 import CoreData
 
 struct EntryListView: View {
+    @Environment(\.theme) private var theme
     @Environment(\.managedObjectContext) private var viewContext
     @StateObject private var viewModel: EntryListViewModel
     @State private var isPresentingTagPicker = false
@@ -32,7 +33,7 @@ struct EntryListView: View {
             VStack(spacing: 0) {
                 filterBar
                 ZStack {
-                    Color.warmPaper.ignoresSafeArea()
+                    theme.backgroundPrimary.ignoresSafeArea()
 
                     if filteredEntries.isEmpty {
                         emptyState
@@ -79,7 +80,7 @@ struct EntryListView: View {
             } label: {
                 Image(systemName: viewModel.showFavoritesOnly ? "heart.fill" : "heart")
                     .font(.system(size: 16))
-                    .foregroundColor(viewModel.showFavoritesOnly ? .warmAccent : .warmBrown)
+                    .foregroundColor(viewModel.showFavoritesOnly ? theme.accentPrimary : theme.textSecondary)
                     .frame(width: 32, height: 32)
             }
             Button {
@@ -91,7 +92,7 @@ struct EntryListView: View {
                     Text(viewModel.selectedTags.isEmpty
                          ? "筛选标签"
                          : "\(viewModel.selectedTags.count) 个标签")
-                        .foregroundColor(viewModel.selectedTags.isEmpty ? .warmBrown : .warmAccent)
+                        .foregroundColor(viewModel.selectedTags.isEmpty ? theme.textSecondary : theme.accentPrimary)
                 }
                 .font(.system(size: 14))
             }
@@ -99,27 +100,28 @@ struct EntryListView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
-        .background(Color.warmLight)
+        .background(theme.backgroundSecondary)
     }
 
     private var emptyState: some View {
         VStack(spacing: 24) {
             Image(systemName: "book.closed")
                 .font(.system(size: 80))
-                .foregroundColor(.warmGray)
+                .foregroundColor(theme.backgroundPressed)
 
             Text("还没有日记")
                 .font(.warmHeadline)
-                .foregroundColor(.warmBrown)
+                .foregroundColor(theme.textSecondary)
 
             Text("点击右下角的 + 开始记录")
                 .font(.warmBody)
-                .foregroundColor(.warmBrown.opacity(0.7))
+                .foregroundColor(theme.textSecondary.opacity(0.7))
         }
     }
 }
 
 struct EntryCard: View {
+    @Environment(\.theme) private var theme
     @ObservedObject var entry: Entry
     let viewModel: EntryListViewModel
     @State private var thumbnails: [UIImage] = []
@@ -131,14 +133,14 @@ struct EntryCard: View {
             if !entry.wrappedTitle.isEmpty {
                 Text(entry.wrappedTitle)
                     .font(.warmHeadline)
-                    .foregroundColor(.warmDark)
+                    .foregroundColor(theme.textPrimary)
                     .lineLimit(2)
             }
 
             // 内容预览
             Text(entry.wrappedContent)
                 .font(.warmBody)
-                .foregroundColor(.warmBrown)
+                .foregroundColor(theme.textSecondary)
                 .lineLimit(3)
 
             // 头部信息
@@ -212,6 +214,7 @@ struct EntryCard: View {
 }
 
 private struct TagFilterSheet: View {
+    @Environment(\.theme) private var theme
     @Binding var selection: Set<Tag>
     let allTags: [Tag]
 
@@ -224,11 +227,11 @@ private struct TagFilterSheet: View {
                 } label: {
                     HStack {
                         Text(tag.wrappedName)
-                            .foregroundColor(.warmDark)
+                            .foregroundColor(theme.textPrimary)
                         Spacer()
                         if selection.contains(tag) {
                             Image(systemName: "checkmark")
-                                .foregroundColor(.warmAccent)
+                                .foregroundColor(theme.accentPrimary)
                         }
                     }
                 }

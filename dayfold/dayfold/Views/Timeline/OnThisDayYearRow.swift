@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct OnThisDayYearRow: View {
+    @Environment(\.theme) private var theme
     let group: OnThisDayViewModel.OnThisDayYearGroup
 
     var body: some View {
@@ -11,7 +12,7 @@ struct OnThisDayYearRow: View {
                         .font(.warmCaption)
                         .foregroundColor(.warmBrown)
                     Circle()
-                        .fill(Color.warmAccent)
+                        .fill(theme.accentPrimary)
                         .frame(width: 8, height: 8)
                 }
                 .frame(width: 60)

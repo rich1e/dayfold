@@ -2,6 +2,7 @@ import SwiftUI
 import CoreData
 
 struct OnThisDaySection: View {
+    @Environment(\.theme) private var theme
     @StateObject private var viewModel: OnThisDayViewModel
 
     init(context: NSManagedObjectContext) {

@@ -2,6 +2,7 @@
 import SwiftUI
 
 struct WarmCardView<Content: View>: View {
+    @Environment(\.theme) private var theme
     let content: Content
 
     init(@ViewBuilder content: () -> Content) {

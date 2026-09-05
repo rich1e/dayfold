@@ -2,6 +2,7 @@
 import SwiftUI
 
 struct MarkdownEditor: View {
+    @Environment(\.theme) private var theme
     @Binding var text: String
     @FocusState private var isFocused: Bool
     @State private var isFullscreen = false
@@ -15,7 +16,7 @@ struct MarkdownEditor: View {
                 if !isFullscreen {
                     // 工具栏
                     FormattingToolbar(text: $text, isFocused: $isFocused)
-                        .background(Color.warmLight)
+                        .background(theme.backgroundSecondary)
 
                     Divider()
                 }
@@ -25,7 +26,7 @@ struct MarkdownEditor: View {
                     .focused($isFocused)
                     .font(.warmBody)
                     .scrollContentBackground(.hidden)
-                    .background(Color.warmPaper)
+                    .background(theme.backgroundPrimary)
                     .padding(.horizontal, isFullscreen ? 20 : 16)
 
                 if !isFullscreen {
@@ -57,7 +58,7 @@ struct MarkdownEditor: View {
                     }
                     .padding(.horizontal)
                     .padding(.vertical, 8)
-                    .background(Color.warmLight)
+                    .background(theme.backgroundSecondary)
                 }
             }
 
@@ -72,7 +73,7 @@ struct MarkdownEditor: View {
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(.warmAccent)
                         .padding(10)
-                        .background(Color.warmLight.opacity(0.9))
+                        .background(theme.backgroundSecondary.opacity(0.9))
                         .clipShape(Circle())
                         .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
                 }

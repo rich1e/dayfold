@@ -3,8 +3,8 @@ import SwiftUI
 import CoreData
 
 struct MainTabView: View {
-    @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.theme) private var theme
+    @Environment(\.managedObjectContext) private var viewContext
     @State private var selectedTab: SidebarTab = .list
     @State private var showingNewEntry = false
     @State private var drawerOpen = false
@@ -119,11 +119,11 @@ struct MainTabView: View {
 }
 
 private struct PlaceholderView: View {
+    @Environment(\.theme) private var theme
     let icon: String
     let title: String
     let subtitle: String
 
-    @Environment(\.theme) private var theme
 
     var body: some View {
         VStack(spacing: 16) {

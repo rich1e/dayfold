@@ -52,7 +52,7 @@ let drawerDivider = Color(red: 0.28, green: 0.28, blue: 0.30)
 let drawerAccent  = Color(red: 0.95, green: 0.45, blue: 0.35)
 let drawerText    = Color(red: 0.92, green: 0.92, blue: 0.92)
 let drawerBrown   = Color(red: 0.65, green: 0.62, blue: 0.68)
-let drawerGroupLabel = Color(hex: "5BC8D8")
+let drawerGroupLabelColor = Color(red: 0.36, green: 0.78, blue: 0.85)
 
 /// 单行数据：抽屉中一行菜单项的渲染参数
 struct DrawerSettingsRowModel: Identifiable {
@@ -83,6 +83,7 @@ private struct SettingsEntryModel {
 }
 
 struct DrawerView: View {
+    @Environment(\.theme) private var theme
     @Binding var selectedTab: SidebarTab
     @Binding var isOpen: Bool
     let context: NSManagedObjectContext
@@ -248,6 +249,7 @@ struct DrawerView: View {
 // MARK: - 组标题（大写小字）
 
 private struct DrawerGroup<Content: View>: View {
+    @Environment(\.theme) private var theme
     let title: String
     @ViewBuilder let content: () -> Content
 
@@ -255,7 +257,7 @@ private struct DrawerGroup<Content: View>: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(drawerGroupLabel)
+                .foregroundColor(drawerGroupLabelColor)
                 .tracking(1.5)
                 .padding(.horizontal, 8)
             content()
@@ -266,6 +268,7 @@ private struct DrawerGroup<Content: View>: View {
 // MARK: - 分组卡（一组内多行 + 行间细线分隔）
 
 private struct DrawerSettingsGroupCard: View {
+    @Environment(\.theme) private var theme
     let rows: [DrawerSettingsRowModel]
     @Binding var presentedTab: SidebarTab?
 
@@ -292,6 +295,7 @@ private struct DrawerSettingsGroupCard: View {
 // MARK: - 单行（双行布局：图标 + [标题/徽章 + 副值] + chevron）
 
 private struct DrawerSettingsRow: View {
+    @Environment(\.theme) private var theme
     let model: DrawerSettingsRowModel
     let action: () -> Void
 
@@ -320,7 +324,7 @@ private struct DrawerSettingsRow: View {
                                 .padding(.vertical, 2)
                                 .background(
                                     RoundedRectangle(cornerRadius: 4, style: .continuous)
-                                        .fill(model.leadingBadgeColor ?? Color(hex: "5BC8D8"))
+                                        .fill(model.leadingBadgeColor ?? theme.controlInactive)
                                 )
                         }
                     }

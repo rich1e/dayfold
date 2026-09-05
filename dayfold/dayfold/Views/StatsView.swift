@@ -3,6 +3,7 @@ import SwiftUI
 import CoreData
 
 struct StatsView: View {
+    @Environment(\.theme) private var theme
     @StateObject private var viewModel: StatsViewModel
 
     init(context: NSManagedObjectContext) {
@@ -19,7 +20,7 @@ struct StatsView: View {
             }
             .padding()
         }
-        .background(Color.warmPaper.ignoresSafeArea())
+        .background(theme.backgroundPrimary.ignoresSafeArea())
         .onAppear { viewModel.refresh() }
     }
 
@@ -29,13 +30,13 @@ struct StatsView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("总览")
                 .font(.warmCaption)
-                .foregroundColor(Color.warmBrown)
+                .foregroundColor(theme.textSecondary)
 
             HStack(spacing: 0) {
                 statColumn(value: viewModel.totalEntries, label: "全部")
-                Divider().background(Color.warmCream).frame(height: 40)
+                Divider().background(theme.dividerPrimary).frame(height: 40)
                 statColumn(value: viewModel.monthEntries, label: "本月")
-                Divider().background(Color.warmCream).frame(height: 40)
+                Divider().background(theme.dividerPrimary).frame(height: 40)
                 statColumn(value: viewModel.yearEntries, label: "今年")
             }
         }
@@ -46,21 +47,21 @@ struct StatsView: View {
         HStack(spacing: 16) {
             Image(systemName: "flame.fill")
                 .font(.system(size: 36))
-                .foregroundColor(Color.warmAccent)
+                .foregroundColor(theme.accentPrimary)
                 .frame(width: 56, height: 56)
 
             VStack(alignment: .leading, spacing: 4) {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text("\(viewModel.currentStreak)")
                         .font(.warmTitle)
-                        .foregroundColor(Color.warmDark)
+                        .foregroundColor(theme.textPrimary)
                     Text("天")
                         .font(.warmHeadline)
-                        .foregroundColor(Color.warmBrown)
+                        .foregroundColor(theme.textSecondary)
                 }
                 Text("连续记录")
                     .font(.warmCaption)
-                    .foregroundColor(Color.warmBrown)
+                    .foregroundColor(theme.textSecondary)
             }
 
             Spacer()
@@ -72,11 +73,11 @@ struct StatsView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("内容比例")
                 .font(.warmCaption)
-                .foregroundColor(Color.warmBrown)
+                .foregroundColor(theme.textSecondary)
 
             HStack(spacing: 0) {
                 ratioColumn(value: viewModel.mediaRatio, label: "带图片", icon: "photo")
-                Divider().background(Color.warmCream).frame(height: 40)
+                Divider().background(theme.dividerPrimary).frame(height: 40)
                 ratioColumn(value: viewModel.locationRatio, label: "带位置", icon: "mappin")
             }
         }
@@ -87,12 +88,12 @@ struct StatsView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("标签分布")
                 .font(.warmCaption)
-                .foregroundColor(Color.warmBrown)
+                .foregroundColor(theme.textSecondary)
 
             if viewModel.tagDistribution.isEmpty {
                 Text("暂无标签")
                     .font(.warmFootnote)
-                    .foregroundColor(Color.warmBrown)
+                    .foregroundColor(theme.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 8)
             } else {
@@ -112,10 +113,10 @@ struct StatsView: View {
         VStack(spacing: 4) {
             Text("\(value)")
                 .font(.warmTitle)
-                .foregroundColor(Color.warmDark)
+                .foregroundColor(theme.textPrimary)
             Text(label)
                 .font(.warmFootnote)
-                .foregroundColor(Color.warmBrown)
+                .foregroundColor(theme.textSecondary)
         }
         .frame(maxWidth: .infinity)
     }
@@ -124,13 +125,13 @@ struct StatsView: View {
         VStack(spacing: 6) {
             Image(systemName: icon)
                 .font(.system(size: 14))
-                .foregroundColor(Color.warmAccent)
+                .foregroundColor(theme.accentPrimary)
             Text("\(Int(value * 100))%")
                 .font(.warmHeadline)
-                .foregroundColor(Color.warmDark)
+                .foregroundColor(theme.textPrimary)
             Text(label)
                 .font(.warmFootnote)
-                .foregroundColor(Color.warmBrown)
+                .foregroundColor(theme.textSecondary)
         }
         .frame(maxWidth: .infinity)
     }
@@ -145,7 +146,7 @@ struct StatsView: View {
                     .foregroundColor(stat.tag.displayColor)
                 Text(stat.tag.wrappedName)
                     .font(.warmCaption)
-                    .foregroundColor(Color.warmDark)
+                    .foregroundColor(theme.textPrimary)
                     .lineLimit(1)
             }
             .frame(minWidth: 80, alignment: .leading)
@@ -153,7 +154,7 @@ struct StatsView: View {
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     RoundedRectangle(cornerRadius: 3)
-                        .fill(Color.warmGray)
+                        .fill(theme.backgroundPressed)
                         .frame(height: 6)
                     RoundedRectangle(cornerRadius: 3)
                         .fill(stat.tag.displayColor)
@@ -164,7 +165,7 @@ struct StatsView: View {
 
             Text("\(stat.count)")
                 .font(.warmCaption)
-                .foregroundColor(Color.warmBrown)
+                .foregroundColor(theme.textSecondary)
                 .frame(minWidth: 24, alignment: .trailing)
         }
     }

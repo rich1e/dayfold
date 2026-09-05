@@ -2,6 +2,7 @@
 import SwiftUI
 
 struct TimelineListView: View {
+    @Environment(\.theme) private var theme
     @Environment(\.managedObjectContext) private var viewContext
 
     @FetchRequest(
@@ -43,12 +44,12 @@ struct TimelineListView: View {
                             .padding(.horizontal)
                             .padding(.vertical, 12)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color.warmCream)
+                            .background(theme.dividerPrimary)
                     }
                 }
             }
         }
-        .background(Color.warmPaper)
+        .background(theme.backgroundPrimary)
     }
 
     private func formatDate(_ date: Date) -> String {
@@ -66,6 +67,7 @@ struct TimelineListView: View {
 }
 
 struct TimelineEntryCard: View {
+    @Environment(\.theme) private var theme
     let entry: Entry
     @State private var thumbnail: UIImage?
     @State private var isPressed = false
@@ -80,7 +82,7 @@ struct TimelineEntryCard: View {
                     .foregroundColor(.warmBrown)
 
                 Circle()
-                    .fill(Color.warmAccent)
+                    .fill(theme.accentPrimary)
                     .frame(width: 8, height: 8)
             }
             .frame(width: 60)

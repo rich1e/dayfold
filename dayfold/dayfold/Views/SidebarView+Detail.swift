@@ -10,6 +10,7 @@ import CoreData
 /// 视觉上占据整个抽屉宽度（85% 屏宽），顶部带返回箭头 + 标题。
 /// 动画：从抽屉宽度右侧外滑入；从抽屉宽度向右侧外滑出。
 struct DrawerDetailContainer<Content: View>: View {
+    @Environment(\.theme) private var theme
     let title: String
     let drawerWidth: CGFloat
     let onBack: () -> Void
@@ -24,7 +25,7 @@ struct DrawerDetailContainer<Content: View>: View {
                 Button(action: onBack) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(drawerGroupLabel)
+                        .foregroundColor(drawerGroupLabelColor)
                         .frame(width: 32, height: 32)
                         .contentShape(Rectangle())
                 }
@@ -64,6 +65,7 @@ struct DrawerDetailContainer<Content: View>: View {
 /// - 其他装饰类入口（icloud/memories/notifications/hiddenAlbum/about）渲染占位详情
 /// - `privacy` 复用现有 `SettingsView`（包含 Face ID 开关）
 struct DrawerDetailRouter: View {
+    @Environment(\.theme) private var theme
     let tab: SidebarTab
     let context: NSManagedObjectContext
     let securityManager: SecurityManager
@@ -122,6 +124,7 @@ struct DrawerDetailRouter: View {
 
 /// 装饰类入口的占位详情页（与抽屉配色对齐）
 private struct DrawerPlaceholderDetail: View {
+    @Environment(\.theme) private var theme
     let icon: String
     let title: String
     let subtitle: String
@@ -131,7 +134,7 @@ private struct DrawerPlaceholderDetail: View {
             Spacer()
             Image(systemName: icon)
                 .font(.system(size: 56))
-                .foregroundColor(drawerGroupLabel.opacity(0.7))
+                .foregroundColor(drawerGroupLabelColor.opacity(0.7))
             Text(title)
                 .font(.warmHeadline)
                 .foregroundColor(drawerText)

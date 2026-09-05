@@ -2,6 +2,7 @@
 import SwiftUI
 
 struct FormattingToolbar: View {
+    @Environment(\.theme) private var theme
     @Binding var text: String
 
     /// 可选焦点绑定：传入时调用 `isFocused = true` 把焦点回写文本框；不传入则跳过（适用于选中态/外置键盘 accessory 等不依赖 FocusState 的场景）
@@ -40,7 +41,7 @@ struct FormattingToolbar: View {
             .padding(.horizontal)
             .padding(.vertical, compact ? 4 : 8)
         }
-        .background(Color.warmLight)
+        .background(theme.backgroundSecondary)
     }
 
     private func insertMarkdown(_ prefix: String, _ suffix: String) {
@@ -51,6 +52,7 @@ struct FormattingToolbar: View {
 }
 
 struct ToolbarButton: View {
+    @Environment(\.theme) private var theme
     let icon: String
     let title: String
     var compact: Bool = false

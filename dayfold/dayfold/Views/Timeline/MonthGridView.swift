@@ -2,6 +2,7 @@
 import SwiftUI
 
 struct MonthGridView: View {
+    @Environment(\.theme) private var theme
     let month: Date
     let dotMap: [Date: [EntryDotType]]
     @Binding var selectedDate: Date?
@@ -21,7 +22,7 @@ struct MonthGridView: View {
                         .padding(.vertical, 8)
                 }
             }
-            .background(Color.warmCream)
+            .background(theme.dividerPrimary)
 
             // 日期网格
             LazyVGrid(columns: columns, spacing: 0) {
@@ -66,6 +67,7 @@ struct MonthGridView: View {
 }
 
 struct DayCell: View {
+    @Environment(\.theme) private var theme
     let date: Date
     let dots: [EntryDotType]
     let isSelected: Bool
@@ -76,12 +78,12 @@ struct DayCell: View {
             ZStack {
                 if isToday {
                     Circle()
-                        .fill(Color.warmAccent.opacity(0.25))
+                        .fill(theme.accentPrimary.opacity(0.25))
                         .frame(width: 32, height: 32)
                 }
                 if isSelected {
                     Circle()
-                        .stroke(Color.warmDark, lineWidth: 2)
+                        .stroke(theme.textPrimary, lineWidth: 2)
                         .frame(width: 32, height: 32)
                 }
                 Text("\(Calendar.current.component(.day, from: date))")
@@ -107,7 +109,7 @@ struct DayCell: View {
             HStack(spacing: 2) {
                 ForEach(Array(dots.prefix(3).enumerated()), id: \.offset) { _, dot in
                     Circle()
-                        .fill(dot == .photo ? Color.warmAccent : Color.warmBrown)
+                        .fill(dot == .photo ? theme.accentPrimary : theme.textSecondary)
                         .frame(width: 5, height: 5)
                 }
             }

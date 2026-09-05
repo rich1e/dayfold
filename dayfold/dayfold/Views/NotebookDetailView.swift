@@ -17,12 +17,12 @@ private enum SheetMode: Identifiable {
 }
 
 struct NotebookDetailView: View {
+    @Environment(\.theme) private var theme
     @ObservedObject var notebook: Notebook
     var onNewEntry: () -> Void
     @Binding var isPresented: Bool
 
     @Environment(\.managedObjectContext) private var context
-    @Environment(\.theme) private var theme
     @StateObject private var timelineVM: TimelineViewModel
     @FetchRequest private var entries: FetchedResults<Entry>
     @State private var sheetMode: SheetMode?
@@ -291,9 +291,9 @@ extension NotebookDetailView {
 // MARK: - 时间轴行
 
 private struct TimelineEntryRow: View {
+    @Environment(\.theme) private var theme
     @ObservedObject var entry: Entry
     let showDate: Bool
-    @Environment(\.theme) private var theme
     @State private var thumbnails: [UIImage] = []
 
     private var weekdayString: String {
@@ -435,10 +435,10 @@ private struct TimelineEntryRow: View {
 // MARK: - 左滑删除容器
 
 private struct SwipeToDeleteRow<Content: View>: View {
+    @Environment(\.theme) private var theme
     let content: Content
     let onDelete: () -> Void
     let corners: UIRectCorner
-    @Environment(\.theme) private var theme
 
     @State private var offset: CGFloat = 0
 

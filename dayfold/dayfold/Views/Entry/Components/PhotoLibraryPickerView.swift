@@ -159,12 +159,12 @@ struct PhotoLibraryPickerView: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
-                    .background(Capsule().fill(Color.warmAccent))
+                    .background(Capsule().fill(theme.accentPrimary))
             }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
-        .background(Color.warmLight)
+        .background(theme.backgroundSecondary)
     }
 
     private var emptyState: some View {
@@ -256,7 +256,7 @@ private struct PickerTopBar: View {
                         .foregroundColor(.white)
                         .padding(.horizontal, 14)
                         .frame(height: 34)
-                        .background(Capsule().fill(Color.warmAccent))
+                        .background(Capsule().fill(theme.accentPrimary))
                 } else {
                     Text("完成")
                         .font(.system(size: 15, weight: .semibold))
@@ -312,7 +312,7 @@ private struct ThumbnailCell: View {
         .frame(width: side, height: side)
         .overlay(
             Rectangle()
-                .stroke(isSelected ? Color.warmAccent : .clear, lineWidth: 1.5)
+                .stroke(isSelected ? theme.accentPrimary : .clear, lineWidth: 1.5)
                 .frame(width: side, height: side)
         )
         .contentShape(Rectangle())
@@ -341,7 +341,7 @@ private struct ThumbnailCell: View {
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(.white)
                     .frame(width: 24, height: 24)
-                    .background(Circle().fill(Color.warmAccent))
+                    .background(Circle().fill(theme.accentPrimary))
             } else {
                 Circle()
                     .stroke(Color.white.opacity(0.85), lineWidth: 1.5)
@@ -394,7 +394,7 @@ private struct PermissionDeniedView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 44)
-                        .background(RoundedRectangle(cornerRadius: 12).fill(Color.warmAccent))
+                        .background(RoundedRectangle(cornerRadius: 12).fill(theme.accentPrimary))
                 }
                 .padding(.horizontal, 60)
             }

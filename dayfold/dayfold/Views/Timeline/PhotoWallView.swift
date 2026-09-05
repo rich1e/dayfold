@@ -2,6 +2,7 @@
 import SwiftUI
 
 struct PhotoWallView: View {
+    @Environment(\.theme) private var theme
     @ObservedObject var viewModel: TimelineViewModel
     var scrollTarget: UUID?
     var onSelectEntry: ((Entry) -> Void)?
@@ -27,7 +28,7 @@ struct PhotoWallView: View {
                     .padding(2)
                 }
             }
-            .background(Color.warmPaper)
+            .background(theme.backgroundPrimary)
             .onChange(of: scrollTarget) { target in
                 if let target = target {
                     withAnimation {
@@ -58,6 +59,7 @@ struct PhotoWallView: View {
 }
 
 struct PhotoWallGrid: View {
+    @Environment(\.theme) private var theme
     let entries: [Entry]
     var onNavigate: (Entry) -> Void
     var onEdit: (Entry) -> Void
@@ -129,6 +131,7 @@ struct PhotoWallGrid: View {
 }
 
 struct PhotoWallCell: View {
+    @Environment(\.theme) private var theme
     let entry: Entry
     let size: CGSize
     let isLarge: Bool
@@ -148,7 +151,7 @@ struct PhotoWallCell: View {
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                     } else {
-                        Color.warmCream
+                        theme.dividerPrimary
                         ProgressView()
                     }
                 }

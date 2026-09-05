@@ -3,6 +3,7 @@ import SwiftUI
 import CoreData
 
 struct TimelineView: View {
+    @Environment(\.theme) private var theme
     @StateObject private var viewModel: TimelineViewModel
     @State private var photoWallScrollTarget: UUID?
     @Environment(\.managedObjectContext) private var viewContext
@@ -34,7 +35,7 @@ struct TimelineView: View {
                 }
                 .pickerStyle(.segmented)
                 .padding()
-                .background(Color.warmLight)
+                .background(theme.backgroundSecondary)
 
                 // 内容区域
                 ZStack {
@@ -59,7 +60,7 @@ struct TimelineView: View {
                 .animation(.easeOut(duration: 0.38), value: viewModel.viewMode)
             }
             .navigationTitle("时间轴")
-            .background(Color.warmPaper)
+            .background(theme.backgroundPrimary)
             .sheet(item: $activeSheet) { mode in
                 switch mode {
                 case .detail(let entry):

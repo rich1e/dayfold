@@ -3,6 +3,7 @@ import SwiftUI
 import CoreData
 
 struct SettingsView: View {
+    @Environment(\.theme) private var theme
     @EnvironmentObject private var securityManager: SecurityManager
     @EnvironmentObject private var coreDataStack: CoreDataStack
     @Environment(\.managedObjectContext) private var viewContext
@@ -30,7 +31,7 @@ struct SettingsView: View {
             }
             .padding()
         }
-        .background(Color.warmPaper.ignoresSafeArea())
+        .background(theme.backgroundPrimary.ignoresSafeArea())
         .sheet(isPresented: $showNotebookPicker) {
             NotebookPickerSheet(title: "选择默认笔记本") { notebook in
                 SettingsStore.saveDefaultNotebookID(notebook.id)
@@ -45,10 +46,10 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
                 Image(systemName: "paintbrush")
-                    .foregroundColor(Color.warmAccent)
+                    .foregroundColor(theme.accentPrimary)
                 Text("外观")
                     .font(.warmBody)
-                    .foregroundColor(Color.warmDark)
+                    .foregroundColor(theme.textPrimary)
             }
 
             ForEach(ThemeID.allCases) { tid in
@@ -62,13 +63,13 @@ struct SettingsView: View {
 
                         Text(tid.displayName)
                             .font(.warmBody)
-                            .foregroundColor(Color.warmDark)
+                            .foregroundColor(theme.textPrimary)
 
                         Spacer()
 
                         if tid == ThemeManager.shared.id {
                             Image(systemName: "checkmark")
-                                .foregroundColor(Color.warmAccent)
+                                .foregroundColor(theme.accentPrimary)
                         }
                     }
                 }
@@ -93,10 +94,10 @@ struct SettingsView: View {
     private var securityCard: some View {
         HStack(spacing: 12) {
             Image(systemName: "faceid")
-                .foregroundColor(Color.warmAccent)
+                .foregroundColor(theme.accentPrimary)
             Text("Face ID 锁定")
                 .font(.warmBody)
-                .foregroundColor(Color.warmDark)
+                .foregroundColor(theme.textPrimary)
             Spacer()
             Toggle(
                 "",
@@ -106,7 +107,7 @@ struct SettingsView: View {
                 )
             )
             .labelsHidden()
-            .tint(Color.warmAccent)
+            .tint(theme.accentPrimary)
         }
         .padding()
         .warmCard()
@@ -118,18 +119,18 @@ struct SettingsView: View {
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: "book.closed")
-                    .foregroundColor(Color.warmAccent)
+                    .foregroundColor(theme.accentPrimary)
                 VStack(alignment: .leading, spacing: 4) {
                     Text("默认笔记本")
                         .font(.warmBody)
-                        .foregroundColor(Color.warmDark)
+                        .foregroundColor(theme.textPrimary)
                     Text(defaultNotebookName)
                         .font(.warmCaption)
-                        .foregroundColor(Color.warmGray)
+                        .foregroundColor(theme.backgroundPressed)
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .foregroundColor(Color.warmGray)
+                    .foregroundColor(theme.backgroundPressed)
             }
             .padding()
             .warmCard()
@@ -140,15 +141,15 @@ struct SettingsView: View {
     private var icloudCard: some View {
         HStack(spacing: 12) {
             Circle()
-                .fill(coreDataStack.isCloudKitAvailable ? Color.warmAccent : Color.warmGray)
+                .fill(coreDataStack.isCloudKitAvailable ? theme.accentPrimary : theme.backgroundPressed)
                 .frame(width: 10, height: 10)
             VStack(alignment: .leading, spacing: 4) {
                 Text("iCloud 同步")
                     .font(.warmBody)
-                    .foregroundColor(Color.warmDark)
+                    .foregroundColor(theme.textPrimary)
                 Text(coreDataStack.isCloudKitAvailable ? "已连接" : "不可用，数据将保存在本地")
                     .font(.warmCaption)
-                    .foregroundColor(Color.warmGray)
+                    .foregroundColor(theme.backgroundPressed)
             }
             Spacer()
         }
@@ -160,10 +161,10 @@ struct SettingsView: View {
         VStack(spacing: 8) {
             Text(appName)
                 .font(.warmHeadline)
-                .foregroundColor(Color.warmDark)
+                .foregroundColor(theme.textPrimary)
             Text("v\(shortVersionString) (\(versionNumber))")
                 .font(.warmCaption)
-                .foregroundColor(Color.warmGray)
+                .foregroundColor(theme.backgroundPressed)
         }
         .frame(maxWidth: .infinity)
         .padding()

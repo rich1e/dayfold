@@ -8,6 +8,7 @@ private enum SheetHeight {
 }
 
 struct EntryBottomSheet: View {
+    @Environment(\.theme) private var theme
     let selectedDate: Date?
     let entries: [Entry]
     @Binding var viewMode: TimelineViewMode
@@ -25,7 +26,7 @@ struct EntryBottomSheet: View {
         VStack(spacing: 0) {
             // 拖拽把手
             RoundedRectangle(cornerRadius: 3)
-                .fill(Color.warmGray)
+                .fill(theme.backgroundPressed)
                 .frame(width: 36, height: 5)
                 .padding(.top, 10)
                 .padding(.bottom, 6)
@@ -43,8 +44,8 @@ struct EntryBottomSheet: View {
         .frame(height: currentHeight)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color.warmLight)
-                .shadow(color: Color.warmGray.opacity(0.4), radius: 12, x: 0, y: -4)
+                .fill(theme.backgroundSecondary)
+                .shadow(color: theme.backgroundPressed.opacity(0.4), radius: 12, x: 0, y: -4)
         )
         .gesture(
             DragGesture()
@@ -148,7 +149,7 @@ struct EntryBottomSheet: View {
             }
         }
         .padding(12)
-        .background(Color.warmPaper)
+        .background(theme.backgroundPrimary)
         .cornerRadius(12)
     }
 

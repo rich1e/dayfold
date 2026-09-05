@@ -3,6 +3,7 @@ import SwiftUI
 import CoreData
 
 struct TagsView: View {
+    @Environment(\.theme) private var theme
     @Environment(\.managedObjectContext) private var viewContext
     @StateObject private var viewModel: TagManagerViewModel
     @State private var activeSheet: TagSheet?
@@ -20,7 +21,7 @@ struct TagsView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Color.warmPaper.ignoresSafeArea()
+                theme.backgroundPrimary.ignoresSafeArea()
 
                 if tags.isEmpty {
                     emptyState
@@ -115,6 +116,7 @@ private enum TagSheet: Identifiable {
 }
 
 struct TagRow: View {
+    @Environment(\.theme) private var theme
     @ObservedObject var tag: Tag
 
     var body: some View {

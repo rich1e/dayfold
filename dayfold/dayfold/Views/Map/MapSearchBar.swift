@@ -2,6 +2,7 @@
 import SwiftUI
 
 struct MapSearchBar: View {
+    @Environment(\.theme) private var theme
     @Binding var query: String
     var placeholder: String = "搜索地点或日记内容"
 
@@ -9,14 +10,14 @@ struct MapSearchBar: View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 16, weight: .medium))
-                .foregroundColor(Color.warmBrown)
+                .foregroundColor(theme.textSecondary)
 
             TextField("", text: $query, prompt:
-                Text(placeholder).foregroundColor(Color.warmBrown)
+                Text(placeholder).foregroundColor(theme.textSecondary)
             )
             .textInputAutocapitalization(.never)
             .disableAutocorrection(true)
-            .foregroundColor(Color.warmDark)
+            .foregroundColor(theme.textPrimary)
             .submitLabel(.search)
 
             if !query.isEmpty {
@@ -25,7 +26,7 @@ struct MapSearchBar: View {
                 } label: {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 16))
-                        .foregroundColor(Color.warmBrown)
+                        .foregroundColor(theme.textSecondary)
                 }
                 .buttonStyle(.plain)
             }
@@ -34,8 +35,8 @@ struct MapSearchBar: View {
         .padding(.vertical, 10)
         .background(
             Capsule()
-                .fill(Color.warmLight)
-                .overlay(Capsule().stroke(Color.warmCream, lineWidth: 1))
+                .fill(theme.backgroundSecondary)
+                .overlay(Capsule().stroke(theme.dividerPrimary, lineWidth: 1))
                 .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 2)
         )
     }

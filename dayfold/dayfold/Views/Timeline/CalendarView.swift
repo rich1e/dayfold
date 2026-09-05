@@ -7,6 +7,7 @@ private struct NewEntryDate: Identifiable {
 }
 
 struct CalendarView: View {
+    @Environment(\.theme) private var theme
     @ObservedObject var viewModel: TimelineViewModel
     var notebook: Notebook? = nil
     @Environment(\.managedObjectContext) private var viewContext
@@ -55,7 +56,7 @@ struct CalendarView: View {
 
                 Spacer()
             }
-            .background(Color.warmPaper)
+            .background(theme.backgroundPrimary)
 
             // 底部抽屉覆盖层
             EntryBottomSheet(
@@ -107,7 +108,7 @@ struct CalendarView: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
-        .background(Color.warmCream)
+        .background(theme.dividerPrimary)
     }
 
     private var monthTitle: String {

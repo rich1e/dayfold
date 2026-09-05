@@ -7,6 +7,7 @@ private enum DetailSheet: Identifiable {
 }
 
 struct EntryDetailView: View {
+    @Environment(\.theme) private var theme
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var entry: Entry
     @State private var activeSheet: DetailSheet?
@@ -26,7 +27,7 @@ struct EntryDetailView: View {
                 if !entry.wrappedTitle.isEmpty {
                     Text(entry.wrappedTitle)
                         .font(.warmTitle)
-                        .foregroundColor(.warmDark)
+                        .foregroundColor(theme.textPrimary)
                 }
 
                 // 头部信息
@@ -39,7 +40,7 @@ struct EntryDetailView: View {
             }
             .padding()
         }
-        .background(Color.warmPaper)
+        .background(theme.backgroundPrimary)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -48,19 +49,19 @@ struct EntryDetailView: View {
                         toggleFavorite()
                     } label: {
                         Image(systemName: entry.isFavorite ? "star.fill" : "star")
-                            .foregroundColor(.warmAccent)
+                            .foregroundColor(theme.accentPrimary)
                     }
                     Button {
                         activeSheet = .card
                     } label: {
                         Image(systemName: "square.and.arrow.up.on.square")
-                            .foregroundColor(.warmAccent)
+                            .foregroundColor(theme.accentPrimary)
                     }
                     Button {
                         activeSheet = .edit
                     } label: {
                         Text("编辑")
-                            .foregroundColor(.warmAccent)
+                            .foregroundColor(theme.accentPrimary)
                     }
                     // 导出 Menu
                     Menu {
@@ -81,7 +82,7 @@ struct EntryDetailView: View {
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
-                            .foregroundColor(.warmAccent)
+                            .foregroundColor(theme.accentPrimary)
                     }
                 }
             }
@@ -126,7 +127,7 @@ struct EntryDetailView: View {
                     if !str.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         Text(str)
                             .font(.warmBody)
-                            .foregroundColor(.warmDark)
+                            .foregroundColor(theme.textPrimary)
                             .textSelection(.enabled)
                     }
                 case .image(let filename):

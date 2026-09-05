@@ -11,6 +11,7 @@ import UIKit
 /// - 现有 `isUpdatingFromSwiftUI` / `cachedText` / `cachedImagesCount` / 异步 `onHeightChange`
 ///   防环机制全部保留。
 struct SelectableTextEditor: UIViewRepresentable {
+    @Environment(\.theme) private var theme
     @Binding var text: String
     var images: [String: UIImage] = [:]
     let onSelectionChange: (Int) -> Void

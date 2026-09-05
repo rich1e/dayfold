@@ -2,6 +2,7 @@
 import SwiftUI
 
 struct EntryHeader: View {
+    @Environment(\.theme) private var theme
     @ObservedObject var entry: Entry
 
     private var dateFormatter: DateFormatter {

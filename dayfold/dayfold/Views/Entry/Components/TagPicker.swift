@@ -2,6 +2,7 @@
 import SwiftUI
 
 struct TagPicker: View {
+    @Environment(\.theme) private var theme
     @Binding var selectedTags: [Tag]
     @State private var showingTagSelector = false
 
@@ -32,7 +33,7 @@ struct TagPicker: View {
                 .foregroundColor(.warmAccent)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
-                .background(Color.warmLight)
+                .background(theme.backgroundSecondary)
                 .cornerRadius(12)
             }
         }
@@ -47,6 +48,7 @@ struct TagPicker: View {
 }
 
 struct TagChip: View {
+    @Environment(\.theme) private var theme
     let tag: Tag
     let isSelected: Bool
     let onTap: () -> Void
@@ -79,6 +81,7 @@ struct TagChip: View {
 }
 
 struct TagSelectorSheet: View {
+    @Environment(\.theme) private var theme
     @Environment(\.dismiss) private var dismiss
     @Environment(\.managedObjectContext) private var viewContext
     @Binding var selectedTags: [Tag]
@@ -115,14 +118,14 @@ struct TagSelectorSheet: View {
                                 }
                             }
                             .padding()
-                            .background(Color.warmLight)
+                            .background(theme.backgroundSecondary)
                             .cornerRadius(12)
                         }
                     }
                 }
                 .padding()
             }
-            .background(Color.warmPaper)
+            .background(theme.backgroundPrimary)
             .navigationTitle("选择标签")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -148,6 +151,7 @@ struct TagSelectorSheet: View {
 // MARK: - 已选标签 chip 行（独立视图，复用 TagChip）
 
 struct SelectedTagsRow: View {
+    @Environment(\.theme) private var theme
     let tags: [Tag]
     let onRemove: (Tag) -> Void
 

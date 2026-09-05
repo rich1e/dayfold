@@ -2,6 +2,7 @@
 import SwiftUI
 
 struct EntryCardView: View {
+    @Environment(\.theme) private var theme
     let entry: Entry
     let images: [UIImage]
 
@@ -27,7 +28,7 @@ struct EntryCardView: View {
                 .padding(.bottom, 14)
 
             Divider()
-                .background(Color.warmGray.opacity(0.5))
+                .background(theme.backgroundPressed.opacity(0.5))
                 .padding(.horizontal, 20)
 
             // 正文区域
@@ -44,7 +45,7 @@ struct EntryCardView: View {
             }
 
             Divider()
-                .background(Color.warmGray.opacity(0.5))
+                .background(theme.backgroundPressed.opacity(0.5))
                 .padding(.horizontal, 20)
 
             // 底部：标签 + 水印
@@ -56,7 +57,7 @@ struct EntryCardView: View {
         .frame(width: 340)
         .background(cardBackground)
         .cornerRadius(16)
-        .shadow(color: Color.warmDark.opacity(0.12), radius: 12, x: 0, y: 4)
+        .shadow(color: theme.textPrimary.opacity(0.12), radius: 12, x: 0, y: 4)
     }
 
     // MARK: - Sections
@@ -182,13 +183,13 @@ struct EntryCardView: View {
 
     private var cardBackground: some View {
         ZStack {
-            Color.warmPaper
+            theme.backgroundPrimary
             // 轻微纸纹噪点感（渐变模拟）
             LinearGradient(
                 gradient: Gradient(colors: [
-                    Color.warmCream.opacity(0.3),
+                    theme.dividerPrimary.opacity(0.3),
                     Color.clear,
-                    Color.warmCream.opacity(0.15)
+                    theme.dividerPrimary.opacity(0.15)
                 ]),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing

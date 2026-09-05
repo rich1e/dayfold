@@ -2,6 +2,7 @@
 import SwiftUI
 
 struct EntryCardPreviewSheet: View {
+    @Environment(\.theme) private var theme
     @Environment(\.dismiss) private var dismiss
     let entry: Entry
     let images: [UIImage]
@@ -47,7 +48,7 @@ struct EntryCardPreviewSheet: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
-                            .background(Color.warmAccent)
+                            .background(theme.accentPrimary)
                             .cornerRadius(14)
                         }
                         .disabled(isSaving)
@@ -63,7 +64,7 @@ struct EntryCardPreviewSheet: View {
                             .foregroundColor(.warmAccent)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
-                            .background(Color.warmAccent.opacity(0.1))
+                            .background(theme.accentPrimary.opacity(0.1))
                             .cornerRadius(14)
                         }
                     }

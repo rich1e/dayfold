@@ -4,8 +4,8 @@ import CoreData
 import UIKit
 
 struct EntryEditorView: View {
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.theme) private var theme
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel: EntryEditorViewModel
     @FocusState private var titleFocused: Bool
     @State private var showingImagePicker = false
@@ -355,8 +355,8 @@ private extension View {
 }
 
 private struct MoodSelector: View {
-    @Binding var mood: String
     @Environment(\.theme) private var theme
+    @Binding var mood: String
     private let options: [(symbol: String, value: String)] = [
         ("face.dashed", "blank"),
         ("cloud", "cloudy"),

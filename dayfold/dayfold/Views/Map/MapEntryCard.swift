@@ -2,6 +2,7 @@
 import SwiftUI
 
 struct MapEntryCard: View {
+    @Environment(\.theme) private var theme
     let entries: [Entry]
     var onOpen: (Entry) -> Void
     var onDismiss: () -> Void
@@ -10,7 +11,7 @@ struct MapEntryCard: View {
         VStack(spacing: 0) {
             // 拖拽把手
             RoundedRectangle(cornerRadius: 3)
-                .fill(Color.warmGray)
+                .fill(theme.backgroundPressed)
                 .frame(width: 36, height: 5)
                 .padding(.top, 8)
                 .padding(.bottom, 6)
@@ -37,7 +38,7 @@ struct MapEntryCard: View {
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color.warmLight)
+                .fill(theme.backgroundSecondary)
                 .shadow(color: Color.black.opacity(0.25), radius: 14, x: 0, y: -4)
         )
         .gesture(
@@ -54,13 +55,13 @@ struct MapEntryCard: View {
             HStack(spacing: 8) {
                 Text(formatDate(entry.createdAt))
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(Color.warmAccent)
+                    .foregroundColor(theme.accentPrimary)
 
                 if let place = entry.location?.placeName, !place.isEmpty {
-                    Text("·").foregroundColor(Color.warmBrown)
+                    Text("·").foregroundColor(theme.textSecondary)
                     Text(place)
                         .font(.system(size: 13))
-                        .foregroundColor(Color.warmBrown)
+                        .foregroundColor(theme.textSecondary)
                         .lineLimit(1)
                 }
 
@@ -69,20 +70,20 @@ struct MapEntryCard: View {
                 if let icon = entry.location?.weatherIcon, !icon.isEmpty {
                     Image(systemName: icon)
                         .font(.system(size: 14))
-                        .foregroundColor(Color.warmBrown)
+                        .foregroundColor(theme.textSecondary)
                 }
             }
 
             if !entry.wrappedTitle.isEmpty {
                 Text(entry.wrappedTitle)
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(Color.warmDark)
+                    .foregroundColor(theme.textPrimary)
                     .lineLimit(1)
             }
 
             Text(entry.wrappedContent)
                 .font(.system(size: 14))
-                .foregroundColor(Color.warmDark.opacity(0.85))
+                .foregroundColor(theme.textPrimary.opacity(0.85))
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
 

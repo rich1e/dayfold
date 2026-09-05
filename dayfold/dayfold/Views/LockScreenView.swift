@@ -2,6 +2,7 @@
 import SwiftUI
 
 struct LockScreenView: View {
+    @Environment(\.theme) private var theme
     @EnvironmentObject var securityManager: SecurityManager
     @State private var isAuthenticating = false
 
@@ -9,7 +10,7 @@ struct LockScreenView: View {
         ZStack {
             // 背景
             LinearGradient(
-                colors: [Color.warmCream, Color.warmPaper],
+                colors: [theme.dividerPrimary, theme.backgroundPrimary],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -22,11 +23,11 @@ struct LockScreenView: View {
                 VStack(spacing: 16) {
                     Image(systemName: "book.closed.fill")
                         .font(.system(size: 80))
-                        .foregroundColor(.warmAccent)
+                        .foregroundColor(theme.accentPrimary)
 
                     Text("Dayfold")
                         .font(.warmTitle)
-                        .foregroundColor(.warmDark)
+                        .foregroundColor(theme.textPrimary)
                 }
 
                 Spacer()
@@ -50,7 +51,7 @@ struct LockScreenView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(Color.warmAccent)
+                    .background(theme.accentPrimary)
                     .cornerRadius(12)
                 }
                 .disabled(isAuthenticating)
