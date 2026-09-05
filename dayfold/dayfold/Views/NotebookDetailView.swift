@@ -22,6 +22,7 @@ struct NotebookDetailView: View {
     @Binding var isPresented: Bool
 
     @Environment(\.managedObjectContext) private var context
+    @Environment(\.theme) private var theme
     @StateObject private var timelineVM: TimelineViewModel
     @FetchRequest private var entries: FetchedResults<Entry>
     @State private var sheetMode: SheetMode?
@@ -47,7 +48,7 @@ struct NotebookDetailView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "2A2A30").ignoresSafeArea()
+            theme.backgroundTertiary.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 // 顶部导航栏
@@ -59,7 +60,7 @@ struct NotebookDetailView: View {
                     } label: {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 20, weight: .semibold))
-                            .foregroundColor(Color(hex: "5BC8D8"))
+                            .foregroundColor(theme.controlInactive)
                             .frame(width: 44, height: 44)
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -69,7 +70,7 @@ struct NotebookDetailView: View {
                     Button { sheetMode = .photos } label: {
                         Image(systemName: "photo.on.rectangle")
                             .font(.system(size: 18, weight: .regular))
-                            .foregroundColor({ if case .photos = sheetMode { return Color(hex: "5BC8D8") }; return Color(hex: "9090A0") }())
+                            .foregroundColor({ if case .photos = sheetMode { return theme.controlInactive }; return theme.textSecondary }())
                             .frame(width: 44, height: 44)
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -77,7 +78,7 @@ struct NotebookDetailView: View {
                     Button { sheetMode = .calendar } label: {
                         Image(systemName: "calendar")
                             .font(.system(size: 18, weight: .regular))
-                            .foregroundColor({ if case .calendar = sheetMode { return Color(hex: "5BC8D8") }; return Color(hex: "9090A0") }())
+                            .foregroundColor({ if case .calendar = sheetMode { return theme.controlInactive }; return theme.textSecondary }())
                             .frame(width: 44, height: 44)
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -85,7 +86,7 @@ struct NotebookDetailView: View {
                     Button { sheetMode = .map } label: {
                         Image(systemName: "map")
                             .font(.system(size: 18, weight: .regular))
-                            .foregroundColor({ if case .map = sheetMode { return Color(hex: "5BC8D8") }; return Color(hex: "9090A0") }())
+                            .foregroundColor({ if case .map = sheetMode { return theme.controlInactive }; return theme.textSecondary }())
                             .frame(width: 44, height: 44)
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -98,12 +99,12 @@ struct NotebookDetailView: View {
                 VStack(spacing: 4) {
                     Text(notebook.wrappedName)
                         .font(.system(size: 26, weight: .black))
-                        .foregroundColor(Color(hex: "D4A574"))
+                        .foregroundColor(theme.textPrimary)
                         .tracking(3)
 
                     Text("\(latestDate) / \(entries.count) PHOTOS")
                         .font(.system(size: 12, weight: .regular))
-                        .foregroundColor(Color(hex: "7A7A88"))
+                        .foregroundColor(theme.textTertiary)
                         .tracking(1)
                 }
                 .padding(.top, 8)
@@ -115,10 +116,10 @@ struct NotebookDetailView: View {
                     VStack(spacing: 16) {
                         Image(systemName: "book.closed")
                             .font(.system(size: 48))
-                            .foregroundColor(Color(hex: "4A4A58"))
+                            .foregroundColor(theme.dividerPrimary)
                         Text("还没有日记")
                             .font(.system(size: 16))
-                            .foregroundColor(Color(hex: "6A6A78"))
+                            .foregroundColor(theme.textTertiary)
                     }
                     Spacer()
                 } else {
@@ -128,7 +129,7 @@ struct NotebookDetailView: View {
                                 // 月份标题
                                 Text(group.month)
                                     .font(.system(size: 15, weight: .semibold))
-                                    .foregroundColor(Color(hex: "E07050"))
+                                    .foregroundColor(theme.accentPrimary)
                                     .padding(.horizontal, 16)
                                     .padding(.top, 20)
                                     .padding(.bottom, 8)
@@ -157,7 +158,7 @@ struct NotebookDetailView: View {
 
                                         if !isLast {
                                             Divider()
-                                                .background(Color(hex: "3A3A42"))
+                                                .background(theme.dividerSubtle)
                                                 .padding(.leading, 60)
                                         }
                                     }
@@ -176,12 +177,12 @@ struct NotebookDetailView: View {
                 Button { sheetMode = .newEntry } label: {
                     ZStack {
                         Circle()
-                            .fill(Color(hex: "4DB6AC"))
+                            .fill(theme.controlInactive)
                             .frame(width: 56, height: 56)
                             .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
                         Image(systemName: "plus")
                             .font(.system(size: 22, weight: .medium))
-                            .foregroundColor(Color(hex: "1A1A1B"))
+                            .foregroundColor(theme.backgroundTertiary)
                     }
                 }
                 .buttonStyle(PlainButtonStyle())
@@ -192,7 +193,7 @@ struct NotebookDetailView: View {
             switch mode {
             case .photos:
                 ZStack {
-                    Color(hex: "2A2A30").ignoresSafeArea()
+                    theme.backgroundTertiary.ignoresSafeArea()
                     PhotoWallView(viewModel: timelineVM, onSelectEntry: { entry in
                         sheetMode = .entryEditor(entry)
                     })
@@ -202,7 +203,7 @@ struct NotebookDetailView: View {
                 .presentationDragIndicator(.visible)
             case .calendar:
                 ZStack {
-                    Color(hex: "2A2A30").ignoresSafeArea()
+                    theme.backgroundTertiary.ignoresSafeArea()
                     CalendarView(viewModel: timelineVM, notebook: notebook)
                 }
                 .environment(\.managedObjectContext, context)
@@ -210,7 +211,7 @@ struct NotebookDetailView: View {
                 .presentationDragIndicator(.visible)
             case .map:
                 ZStack {
-                    Color(hex: "2A2A30").ignoresSafeArea()
+                    theme.backgroundTertiary.ignoresSafeArea()
                     MapView(
                         showingNewEntry: .constant(false),
                         context: context,
@@ -292,6 +293,7 @@ extension NotebookDetailView {
 private struct TimelineEntryRow: View {
     @ObservedObject var entry: Entry
     let showDate: Bool
+    @Environment(\.theme) private var theme
     @State private var thumbnails: [UIImage] = []
 
     private var weekdayString: String {
@@ -338,10 +340,10 @@ private struct TimelineEntryRow: View {
                 if showDate {
                     Text(weekdayString)
                         .font(.system(size: 11, weight: .regular))
-                        .foregroundColor(Color(hex: "9090A0"))
+                        .foregroundColor(theme.textSecondary)
                     Text(dayString)
                         .font(.system(size: 22, weight: .bold))
-                        .foregroundColor(Color(hex: "E8E8EE"))
+                        .foregroundColor(theme.textPrimary)
                 }
             }
             .frame(width: 36, alignment: .center)
@@ -352,12 +354,12 @@ private struct TimelineEntryRow: View {
                 if !entry.wrappedTitle.isEmpty {
                     Text(entry.wrappedTitle)
                         .font(.system(size: 16, weight: .regular))
-                        .foregroundColor(Color(hex: "E8E8EE"))
+                        .foregroundColor(theme.textPrimary)
                         .lineLimit(2)
                 } else {
                     Text(entry.wrappedContent)
                         .font(.system(size: 16, weight: .regular))
-                        .foregroundColor(Color(hex: "E8E8EE"))
+                        .foregroundColor(theme.textPrimary)
                         .lineLimit(2)
                 }
                 subtitleView
@@ -378,13 +380,13 @@ private struct TimelineEntryRow: View {
     }
 
     private var subtitleView: some View {
-        let sep = Text(" · ").foregroundColor(Color(hex: "5A5A68"))
-        var line = Text(timeString).foregroundColor(Color(hex: "8A8A98"))
+        let sep = Text(" · ").foregroundColor(theme.dividerSubtle)
+        var line = Text(timeString).foregroundColor(theme.textSecondary)
         if let coord = coordinateString {
-            line = line + sep + Text(coord).foregroundColor(Color(hex: "8A8A98"))
+            line = line + sep + Text(coord).foregroundColor(theme.textSecondary)
         }
         if let w = weatherString {
-            line = line + sep + Text(w).foregroundColor(Color(hex: "8A8A98"))
+            line = line + sep + Text(w).foregroundColor(theme.textSecondary)
         }
         return line
             .font(.system(size: 12))
@@ -436,6 +438,7 @@ private struct SwipeToDeleteRow<Content: View>: View {
     let content: Content
     let onDelete: () -> Void
     let corners: UIRectCorner
+    @Environment(\.theme) private var theme
 
     @State private var offset: CGFloat = 0
 
@@ -459,8 +462,8 @@ private struct SwipeToDeleteRow<Content: View>: View {
         content
             .background(
                 activeCorners == []
-                    ? AnyView(Color(hex: "32323A"))
-                    : AnyView(Color(hex: "32323A").cornerRadius(12, corners: activeCorners))
+                    ? AnyView(theme.backgroundSecondary)
+                    : AnyView(theme.backgroundSecondary.cornerRadius(12, corners: activeCorners))
             )
             // 红色删除按钮：固定在 content 右边缘之外，随 content offset 一起移动
             .overlay(alignment: .trailing) {
@@ -474,7 +477,7 @@ private struct SwipeToDeleteRow<Content: View>: View {
                     .foregroundColor(.white)
                     .frame(width: 72)
                     .frame(maxHeight: .infinity)
-                    .background(Color(hex: "C03828"))
+                    .background(theme.accentDestructive)
                     .cornerRadius(10)
                 }
                 .buttonStyle(PlainButtonStyle())
