@@ -82,6 +82,53 @@ private struct SettingsEntryModel {
     let label: String
 }
 
+// MARK: - 主题快速切换器
+
+/// 抽屈顶部 3 圆点主题切换：圆点本身即主题预览色（light=米色 / dark=深蓝灰 / 纯黑=黑）。
+/// 点击圆点直接切换主题，选中态用 ring 高亮。@Observable ThemeManager 触发全 App 重渲。
+private struct ThemeQuickSwitcher: View {
+    private let themes: [(id: ThemeID, label: String)] = [
+        (.warmLight, "Light"),
+        (.warmDark, "Dark"),
+        (.pureDark, "Pure")
+    ]
+
+    var body: some View {
+        HStack(spacing: 14) {
+            ForEach(themes, id: \.id) { item in
+                ThemeDot(
+                    previewColor: ThemeManager.theme(for: item.id).backgroundPrimary,
+                    isSelected: ThemeManager.shared.id == item.id
+                ) {
+                    ThemeManager.shared.id = item.id
+                }
+            }
+        }
+    }
+}
+
+private struct ThemeDot: View {
+    let previewColor: Color
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Circle()
+                .fill(previewColor)
+                .frame(width: 22, height: 22)
+                .overlay(
+                    Circle()
+                        .stroke(
+                            isSelected ? drawerAccent : drawerDivider,
+                            lineWidth: isSelected ? 2 : 1
+                        )
+                )
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
 struct DrawerView: View {
     @Environment(\.theme) private var theme
     @Binding var selectedTab: SidebarTab
@@ -150,7 +197,12 @@ struct DrawerView: View {
             }
             .padding(.horizontal, 20)
             .padding(.top, 60)
-            .padding(.bottom, 24)
+            .padding(.bottom, 16)
+
+            // 主题快速切换器：3 个圆点直接点切换，圆点本身即主题预览色
+            ThemeQuickSwitcher()
+                .padding(.horizontal, 20)
+                .padding(.bottom, 16)
 
             // 上半：ACCOUNT + PREFERENCES
             VStack(alignment: .leading, spacing: 20) {

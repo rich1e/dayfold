@@ -23,7 +23,6 @@ struct SettingsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                appearanceCard
                 securityCard
                 defaultNotebookCard
                 icloudCard
@@ -40,56 +39,7 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - 外观（主题切换）
-
-    private var appearanceCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 12) {
-                Image(systemName: "paintbrush")
-                    .foregroundColor(theme.accentPrimary)
-                Text("外观")
-                    .font(.warmBody)
-                    .foregroundColor(theme.textPrimary)
-            }
-
-            ForEach(ThemeID.allCases) { tid in
-                Button {
-                    ThemeManager.shared.id = tid
-                } label: {
-                    HStack(spacing: 12) {
-                        previewSwatch(for: tid)
-                            .frame(width: 32, height: 20)
-                            .clipShape(RoundedRectangle(cornerRadius: 4))
-
-                        Text(tid.displayName)
-                            .font(.warmBody)
-                            .foregroundColor(theme.textPrimary)
-
-                        Spacer()
-
-                        if tid == ThemeManager.shared.id {
-                            Image(systemName: "checkmark")
-                                .foregroundColor(theme.accentPrimary)
-                        }
-                    }
-                }
-            }
-        }
-        .padding()
-        .warmCard()
-    }
-
-    @ViewBuilder
-    private func previewSwatch(for id: ThemeID) -> some View {
-        let t = ThemeManager.theme(for: id)
-        ZStack(alignment: .bottomLeading) {
-            t.backgroundPrimary
-            RoundedRectangle(cornerRadius: 1.5)
-                .fill(t.accentPrimary)
-                .frame(width: 10, height: 10)
-                .padding(3)
-        }
-    }
+    // MARK: - 卡片
 
     private var securityCard: some View {
         HStack(spacing: 12) {
