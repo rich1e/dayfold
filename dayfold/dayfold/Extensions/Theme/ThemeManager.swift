@@ -63,3 +63,11 @@ final class ThemeManager {
         }
     }
 }
+
+// MARK: - 全局单例
+
+extension ThemeManager {
+    /// 全局单例。Settings 页等需要直接修改 id 的场景使用。
+    /// App 启动时已由 dayfoldApp 持有，所有视图共享同一份主题状态。
+    static let shared = ThemeManager()
+}
