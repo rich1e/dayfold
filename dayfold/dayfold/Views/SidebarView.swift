@@ -45,14 +45,18 @@ enum SidebarTab: String, CaseIterable, Hashable {
     }
 }
 
-// 文件内跨文件共享（SidebarView+Detail.swift 引用）
-let drawerBg      = Color(red: 0.18, green: 0.18, blue: 0.20)
-let drawerRowBg   = Color(red: 0.22, green: 0.22, blue: 0.24)
-let drawerDivider = Color(red: 0.28, green: 0.28, blue: 0.30)
-let drawerAccent  = Color(red: 0.95, green: 0.45, blue: 0.35)
-let drawerText    = Color(red: 0.92, green: 0.92, blue: 0.92)
-let drawerBrown   = Color(red: 0.65, green: 0.62, blue: 0.68)
-let drawerGroupLabelColor = Color(red: 0.36, green: 0.78, blue: 0.85)
+/// 抽屉色板映射助手：通过 ThemeManager 解析为对应 token。
+/// 保留旧名（DrawerPalette.bg / DrawerPalette.rowBg 等）以便 SidebarView+Detail.swift 引用；
+/// 实际值跟当前主题走（不再 hardcode 深色）。
+enum DrawerPalette {
+    static var bg: Color { ThemeManager.theme(for: ThemeManager.shared.id).backgroundTertiary }
+    static var rowBg: Color { ThemeManager.theme(for: ThemeManager.shared.id).backgroundSecondary }
+    static var divider: Color { ThemeManager.theme(for: ThemeManager.shared.id).dividerPrimary }
+    static var accent: Color { ThemeManager.theme(for: ThemeManager.shared.id).accentPrimary }
+    static var text: Color { ThemeManager.theme(for: ThemeManager.shared.id).textPrimary }
+    static var brown: Color { ThemeManager.theme(for: ThemeManager.shared.id).textSecondary }
+    static var groupLabel: Color { ThemeManager.theme(for: ThemeManager.shared.id).controlInactive }
+}
 
 /// 单行数据：抽屉中一行菜单项的渲染参数
 struct DrawerSettingsRowModel: Identifiable {
@@ -60,7 +64,7 @@ struct DrawerSettingsRowModel: Identifiable {
     let tab: SidebarTab
     let subtitle: String?
     let trailingBadge: String?     // 标题旁的小徽章（如 "PRO"）
-    let leadingBadgeColor: Color?  // 头像/徽章底色（默认 drawerAccent）
+    let leadingBadgeColor: Color?  // 头像/徽章底色（默认 DrawerPalette.accent）
 
     init(
         tab: SidebarTab,
@@ -127,7 +131,7 @@ struct DrawerView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(drawerBg.ignoresSafeArea())
+        .background(DrawerPalette.bg.ignoresSafeArea())
         .onAppear { statsVM.refresh() }
         .onChange(of: isOpen) { open in
             // 抽屉关闭时清空二级页状态，保证下次打开是干净列表
@@ -143,11 +147,11 @@ struct DrawerView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("DAYFOLD")
                     .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(drawerAccent)
+                    .foregroundColor(DrawerPalette.accent)
                     .tracking(2)
                 Text("Account · Preferences · About")
                     .font(.system(size: 12))
-                    .foregroundColor(drawerBrown)
+                    .foregroundColor(DrawerPalette.brown)
             }
             .padding(.horizontal, 20)
             .padding(.top, 60)
@@ -216,7 +220,7 @@ struct DrawerView: View {
         }
         .frame(width: width)
         .frame(maxHeight: .infinity)
-        .background(drawerBg.ignoresSafeArea())
+        .background(DrawerPalette.bg.ignoresSafeArea())
     }
 
     // MARK: - 副值
@@ -261,7 +265,7 @@ private struct DrawerGroup<Content: View>: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(drawerGroupLabelColor)
+                .foregroundColor(DrawerPalette.groupLabel)
                 .tracking(1.5)
                 .padding(.horizontal, 8)
             content()
@@ -286,12 +290,12 @@ private struct DrawerSettingsGroupCard: View {
                 }
                 if idx != rows.count - 1 {
                     Divider()
-                        .background(drawerDivider)
+                        .background(DrawerPalette.divider)
                         .padding(.leading, 52)
                 }
             }
         }
-        .background(drawerRowBg)
+        .background(DrawerPalette.rowBg)
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
@@ -310,7 +314,7 @@ private struct DrawerSettingsRow: View {
             HStack(alignment: .center, spacing: 12) {
                 Image(systemName: model.tab.icon)
                     .font(.system(size: 17))
-                    .foregroundColor(drawerText)
+                    .foregroundColor(DrawerPalette.text)
                     .frame(width: 22)
 
                 // 中间双行：标题（带可选徽章）+ 副值
@@ -318,7 +322,7 @@ private struct DrawerSettingsRow: View {
                     HStack(spacing: 6) {
                         Text(model.tab.label)
                             .font(.warmBody)
-                            .foregroundColor(drawerText)
+                            .foregroundColor(DrawerPalette.text)
                             .lineLimit(1)
                         if let badge = model.trailingBadge {
                             Text(badge)
@@ -335,7 +339,7 @@ private struct DrawerSettingsRow: View {
                     if let subtitle = model.subtitle {
                         Text(subtitle)
                             .font(.warmCaption)
-                            .foregroundColor(drawerBrown)
+                            .foregroundColor(DrawerPalette.brown)
                             .lineLimit(1)
                     }
                 }
@@ -344,11 +348,11 @@ private struct DrawerSettingsRow: View {
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 13))
-                    .foregroundColor(drawerDivider)
+                    .foregroundColor(DrawerPalette.divider)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(isPressed ? drawerBg.opacity(0.4) : Color.clear)
+            .background(isPressed ? DrawerPalette.bg.opacity(0.4) : Color.clear)
             .contentShape(Rectangle())
         }
         .buttonStyle(PlainButtonStyle())
@@ -363,7 +367,7 @@ private struct DrawerSettingsRow: View {
 // MARK: - Theme 快速切换卡（Preferences 内嵌）
 
 /// PREFERENCES 分组卡顶部的 Theme 行：左侧主题图标 + "Theme" 标题 + 右侧 3 圆点直接切换。
-/// 圆点本身即主题预览色，选中态用 drawerAccent ring 高亮。
+/// 圆点本身即主题预览色，选中态用 DrawerPalette.accent ring 高亮。
 private struct ThemeQuickCard: View {
     private let themes: [ThemeID] = [.warmLight, .warmDark, .pureDark]
 
@@ -371,12 +375,12 @@ private struct ThemeQuickCard: View {
         HStack(spacing: 12) {
             Image(systemName: "paintbrush")
                 .font(.system(size: 17))
-                .foregroundColor(drawerText)
+                .foregroundColor(DrawerPalette.text)
                 .frame(width: 22)
 
             Text("Theme")
                 .font(.warmBody)
-                .foregroundColor(drawerText)
+                .foregroundColor(DrawerPalette.text)
 
             Spacer(minLength: 8)
 
@@ -388,7 +392,7 @@ private struct ThemeQuickCard: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(drawerRowBg)
+        .background(DrawerPalette.rowBg)
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
@@ -413,7 +417,7 @@ private struct ThemeQuickDot: View {
                 .overlay(
                     Circle()
                         .stroke(
-                            isSelected ? drawerAccent : drawerDivider,
+                            isSelected ? DrawerPalette.accent : DrawerPalette.divider,
                             lineWidth: isSelected ? 2 : 1
                         )
                 )

@@ -25,7 +25,7 @@ struct DrawerDetailContainer<Content: View>: View {
                 Button(action: onBack) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(drawerGroupLabelColor)
+                        .foregroundColor(DrawerPalette.groupLabel)
                         .frame(width: 32, height: 32)
                         .contentShape(Rectangle())
                 }
@@ -33,23 +33,23 @@ struct DrawerDetailContainer<Content: View>: View {
 
                 Text(title)
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(drawerText)
+                    .foregroundColor(DrawerPalette.text)
 
                 Spacer()
             }
             .padding(.horizontal, 20)
             .padding(.top, 60)
             .padding(.bottom, 16)
-            .background(drawerBg)
+            .background(DrawerPalette.bg)
 
             // 二级页正文
             content()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(drawerBg)
+                .background(DrawerPalette.bg)
         }
         .frame(width: drawerWidth)
         .frame(maxHeight: .infinity)
-        .background(drawerBg.ignoresSafeArea())
+        .background(DrawerPalette.bg.ignoresSafeArea())
         .offset(x: appear ? 0 : drawerWidth)
         .onAppear {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
@@ -134,17 +134,17 @@ private struct DrawerPlaceholderDetail: View {
             Spacer()
             Image(systemName: icon)
                 .font(.system(size: 56))
-                .foregroundColor(drawerGroupLabelColor.opacity(0.7))
+                .foregroundColor(DrawerPalette.groupLabel.opacity(0.7))
             Text(title)
                 .font(.warmHeadline)
-                .foregroundColor(drawerText)
+                .foregroundColor(DrawerPalette.text)
             Text(subtitle)
                 .font(.warmCaption)
-                .foregroundColor(drawerBrown)
+                .foregroundColor(DrawerPalette.brown)
                 .multilineTextAlignment(.center)
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(drawerBg.ignoresSafeArea())
+        .background(DrawerPalette.bg.ignoresSafeArea())
     }
 }
