@@ -14,7 +14,7 @@ enum SidebarTab: String, CaseIterable, Hashable {
 
     // SidebarView 展示的入口
     case icloud, memories, notifications, privacy, hiddenAlbum
-    case theme, stats, trash, about
+    case stats, trash, about
 
     var icon: String {
         switch self {
@@ -24,7 +24,6 @@ enum SidebarTab: String, CaseIterable, Hashable {
         case .notifications: return "bell"
         case .privacy:      return "lock.shield"
         case .hiddenAlbum:  return "eye.slash"
-        case .theme:        return "paintbrush"
         case .stats:        return "chart.bar"
         case .trash:        return "trash"
         case .about:        return "info.circle"
@@ -39,7 +38,6 @@ enum SidebarTab: String, CaseIterable, Hashable {
         case .notifications: return "Notifications"
         case .privacy:       return "Privacy & Face ID"
         case .hiddenAlbum:   return "Hidden Album"
-        case .theme:         return "Theme"
         case .stats:         return "数据统计"
         case .trash:         return "回收箱"
         case .about:         return "About Photos"
@@ -172,11 +170,10 @@ struct DrawerView: View {
                 }
 
                 DrawerGroup(title: "PREFERENCES") {
+                    // Theme 行：内含 3 圆点直接切换主题，不进二级页
+                    ThemeQuickCard()
+                        .padding(.bottom, 8)
                     DrawerSettingsGroupCard(rows: [
-                        DrawerSettingsRowModel(
-                            tab: .theme,
-                            subtitle: themeSubtitle
-                        ),
                         DrawerSettingsRowModel(
                             tab: .notifications,
                             subtitle: "Memories · Shared albums"
@@ -228,10 +225,6 @@ struct DrawerView: View {
         securityManager.isEnabled
             ? "Require Face ID to unlock"
             : "Disabled"
-    }
-
-    private var themeSubtitle: String {
-        ThemeManager.shared.id.displayName
     }
 
     private var trashSubtitle: String? {
@@ -364,6 +357,68 @@ private struct DrawerSettingsRow: View {
                 .onChanged { _ in if !isPressed { isPressed = true } }
                 .onEnded { _ in isPressed = false }
         )
+    }
+}
+
+// MARK: - Theme 快速切换卡（Preferences 内嵌）
+
+/// PREFERENCES 分组卡顶部的 Theme 行：左侧主题图标 + "Theme" 标题 + 右侧 3 圆点直接切换。
+/// 圆点本身即主题预览色，选中态用 drawerAccent ring 高亮。
+private struct ThemeQuickCard: View {
+    private let themes: [ThemeID] = [.warmLight, .warmDark, .pureDark]
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "paintbrush")
+                .font(.system(size: 17))
+                .foregroundColor(drawerText)
+                .frame(width: 22)
+
+            Text("Theme")
+                .font(.warmBody)
+                .foregroundColor(drawerText)
+
+            Spacer(minLength: 8)
+
+            HStack(spacing: 10) {
+                ForEach(themes, id: \.self) { tid in
+                    ThemeQuickDot(tid: tid)
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(drawerRowBg)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+}
+
+private struct ThemeQuickDot: View {
+    let tid: ThemeID
+
+    private var previewColor: Color {
+        ThemeManager.theme(for: tid).backgroundPrimary
+    }
+    private var isSelected: Bool {
+        ThemeManager.shared.id == tid
+    }
+
+    var body: some View {
+        Button {
+            ThemeManager.shared.id = tid
+        } label: {
+            Circle()
+                .fill(previewColor)
+                .frame(width: 18, height: 18)
+                .overlay(
+                    Circle()
+                        .stroke(
+                            isSelected ? drawerAccent : drawerDivider,
+                            lineWidth: isSelected ? 2 : 1
+                        )
+                )
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 

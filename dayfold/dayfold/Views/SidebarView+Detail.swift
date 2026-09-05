@@ -101,8 +101,6 @@ struct DrawerDetailRouter: View {
                 title: "Hidden Album",
                 subtitle: "Off"
             )
-        case .theme:
-            ThemeView()
 
         case .stats:
             StatsView(context: context)
