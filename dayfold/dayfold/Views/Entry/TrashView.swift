@@ -3,6 +3,7 @@ import SwiftUI
 import CoreData
 
 struct TrashView: View {
+    @Environment(\.theme) private var theme
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) private var dismiss
 
@@ -65,7 +66,7 @@ struct TrashView: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 8)
-                    .background(Color(hex: "C03828"))
+                    .background(theme.accentDestructive)
                     .cornerRadius(20)
             }
             .disabled(trashedEntries.isEmpty)
@@ -236,6 +237,7 @@ struct TrashView: View {
 // MARK: - 条目行
 
 private struct TrashEntryRow: View {
+    @Environment(\.theme) private var theme
     @ObservedObject var entry: Entry
     var onRestore: () -> Void
     var onDelete: () -> Void
@@ -263,7 +265,7 @@ private struct TrashEntryRow: View {
                 HStack(spacing: 6) {
                     Text("日记本")
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(Color(hex: "5BC8D8"))
+                        .foregroundColor(theme.controlInactive)
                     Text(meta)
                         .font(.system(size: 13))
                         .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.65))
@@ -291,7 +293,7 @@ private struct TrashEntryRow: View {
             Button { onRestore() } label: {
                 Label("恢复", systemImage: "arrow.uturn.backward")
             }
-            .tint(Color(hex: "5BC8D8"))
+            .tint(theme.controlInactive)
         }
     }
 }

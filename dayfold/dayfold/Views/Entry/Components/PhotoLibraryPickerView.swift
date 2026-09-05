@@ -7,6 +7,7 @@ import PhotosUI
 /// 按拍摄日期分组的多选网格，完成后一次性回传 [PickedPhoto]。
 /// 只读照片库，不碰 Core Data —— fullScreenCover 呈现时无需注入 managedObjectContext。
 struct PhotoLibraryPickerView: View {
+    @Environment(\.theme) private var theme
     /// 点「完成」后回传（保序）；空选或取消不回调
     let onDone: ([PickedPhoto]) -> Void
 
@@ -215,6 +216,7 @@ struct PhotoLibraryPickerView: View {
 // MARK: - 顶部栏
 
 private struct PickerTopBar: View {
+    @Environment(\.theme) private var theme
     let count: Int
     let isFinishing: Bool
     let onClose: () -> Void
@@ -274,6 +276,7 @@ private struct PickerTopBar: View {
 // MARK: - 网格单元格
 
 private struct ThumbnailCell: View {
+    @Environment(\.theme) private var theme
     let photo: LibraryPhoto
     let side: CGFloat
     let isSelected: Bool
@@ -352,6 +355,7 @@ private struct ThumbnailCell: View {
 // MARK: - 权限引导页
 
 private struct PermissionDeniedView: View {
+    @Environment(\.theme) private var theme
     let status: PHAuthorizationStatus
     let onOpenSettings: (() -> Void)?
     let onUseSystemPicker: (() -> Void)?

@@ -2,6 +2,7 @@
 import SwiftUI
 
 struct TagEditorView: View {
+    @Environment(\.theme) private var theme
     @Environment(\.dismiss) private var dismiss
     let tag: Tag?
     let onSave: (String, String, String) -> Void
@@ -64,10 +65,10 @@ struct TagEditorView: View {
                                 .frame(width: 50, height: 50)
                                 .background(
                                     Circle()
-                                        .fill(Color.warmLight)
+                                        .fill(theme.backgroundSecondary)
                                         .overlay(
                                             Circle()
-                                                .strokeBorder(Color.warmAccent, lineWidth: selectedIcon == icon ? 2 : 0)
+                                                .strokeBorder(theme.accentPrimary, lineWidth: selectedIcon == icon ? 2 : 0)
                                         )
                                 )
                                 .onTapGesture {
@@ -88,7 +89,7 @@ struct TagEditorView: View {
 
                             Text(name.isEmpty ? "标签名称" : name)
                                 .font(.warmBody)
-                                .foregroundColor(.warmDark)
+                                .foregroundColor(theme.textPrimary)
                         }
                         Spacer()
                     }

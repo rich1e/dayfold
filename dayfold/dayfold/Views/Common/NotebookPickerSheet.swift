@@ -3,6 +3,7 @@ import SwiftUI
 import CoreData
 
 struct NotebookPickerSheet: View {
+    @Environment(\.theme) private var theme
     @Environment(\.managedObjectContext) private var context
     @Environment(\.dismiss) private var dismiss
 
@@ -17,23 +18,23 @@ struct NotebookPickerSheet: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "2A2A30").ignoresSafeArea()
+            theme.backgroundTertiary.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 // 顶栏
                 HStack {
                     Button("取消") { dismiss() }
-                        .foregroundColor(Color(hex: "9090A0"))
+                        .foregroundColor(theme.textSecondary)
                     Spacer()
                     Text(title)
                         .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(Color(hex: "E8E8EC"))
+                        .foregroundColor(theme.textPrimary)
                     Spacer()
                     Button {
                         createAndSelect()
                     } label: {
                         Image(systemName: "plus")
-                            .foregroundColor(Color(hex: "5BC8D8"))
+                            .foregroundColor(theme.controlInactive)
                     }
                 }
                 .padding(.horizontal, 16)
@@ -52,15 +53,15 @@ struct NotebookPickerSheet: View {
                                         .frame(width: 32, height: 32)
                                     Text(nb.wrappedName)
                                         .font(.system(size: 16, weight: .medium))
-                                        .foregroundColor(Color(hex: "E8E8EC"))
+                                        .foregroundColor(theme.textPrimary)
                                     Spacer()
                                     Text("\(nb.entriesArray.count)")
                                         .font(.system(size: 13))
-                                        .foregroundColor(Color(hex: "7A7A88"))
+                                        .foregroundColor(theme.textTertiary)
                                 }
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 14)
-                                .background(Color(hex: "32323A"))
+                                .background(theme.backgroundSecondary)
                                 .cornerRadius(12)
                             }
                             .buttonStyle(PlainButtonStyle())
