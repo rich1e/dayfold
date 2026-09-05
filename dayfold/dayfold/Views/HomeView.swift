@@ -5,6 +5,7 @@ import CoreData
 // MARK: - HomeView
 
 struct HomeView: View {
+    @Environment(\.theme) private var theme
     let context: NSManagedObjectContext
     @Binding var isListMode: Bool
     var onNewEntry: () -> Void
@@ -40,7 +41,7 @@ struct HomeView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "2A2A30").ignoresSafeArea()
+            theme.backgroundTertiary.ignoresSafeArea()
 
             if isListMode {
                 listModeView
@@ -76,13 +77,13 @@ struct HomeView: View {
             VStack(spacing: 6) {
                 Text(currentNotebook?.wrappedName ?? "DAYFOLD")
                     .font(.system(size: 26, weight: .black))
-                    .foregroundColor(Color(hex: "D4A574"))
+                    .foregroundColor(theme.textPrimary)
                     .tracking(3)
                     .animation(.easeOut(duration: 0.2), value: currentIndex)
 
                 Text("\(latestDate) / \(entryCount) entries")
                     .font(.system(size: 13, weight: .regular))
-                    .foregroundColor(Color(hex: "7A7A88"))
+                    .foregroundColor(theme.textTertiary)
             }
             .padding(.top, 100)
             .frame(height: 134)
@@ -123,10 +124,10 @@ struct HomeView: View {
             // 底部按钮
             if confirmDelete {
                 HStack(spacing: 20) {
-                    CircleActionButton(icon: "xmark", bgColor: Color(hex: "E8D5B8"), iconColor: Color(hex: "4A3828")) {
+                    CircleActionButton(icon: "xmark", bgColor: theme.surfacePaper, iconColor: theme.surfacePaperInk) {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { confirmDelete = false }
                     }
-                    CircleActionButton(icon: "checkmark", bgColor: Color(hex: "E05A3A"), iconColor: .white) {
+                    CircleActionButton(icon: "checkmark", bgColor: theme.accentPrimary, iconColor: .white) {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                             deleteCurrentNotebook()
                             confirmDelete = false
@@ -137,10 +138,10 @@ struct HomeView: View {
                 .transition(.scale(scale: 0.8).combined(with: .opacity))
             } else {
                 HStack(spacing: 20) {
-                    CircleActionButton(icon: "plus", bgColor: Color(hex: "E8D5B8"), iconColor: Color(hex: "4A3828")) {
+                    CircleActionButton(icon: "plus", bgColor: theme.surfacePaper, iconColor: theme.surfacePaperInk) {
                         withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) { addNotebook() }
                     }
-                    CircleActionButton(icon: "trash", bgColor: Color(hex: "D0C8BA"), iconColor: Color(hex: "4A3828")) {
+                    CircleActionButton(icon: "trash", bgColor: theme.surfacePaper, iconColor: theme.surfacePaperInk) {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { confirmDelete = true }
                     }
                 }
@@ -172,7 +173,7 @@ struct HomeView: View {
                             }
                             if idx < notebooks.count - 1 {
                                 Divider()
-                                    .background(Color(hex: "4A4A58"))
+                                    .background(theme.dividerPrimary)
                                     .padding(.leading, 80)
                             }
                         }
@@ -184,7 +185,7 @@ struct HomeView: View {
             Spacer()
 
             // 列表模式底部：只有 + 按钮，居中
-            CircleActionButton(icon: "plus", bgColor: Color(hex: "E8D5B8"), iconColor: Color(hex: "4A3828")) {
+            CircleActionButton(icon: "plus", bgColor: theme.surfacePaper, iconColor: theme.surfacePaperInk) {
                 withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) { addNotebook() }
             }
             .padding(.bottom, 48)
@@ -199,10 +200,10 @@ struct HomeView: View {
         VStack(spacing: 16) {
             Image(systemName: "book.closed")
                 .font(.system(size: 48))
-                .foregroundColor(Color(hex: "5A5A65"))
+                .foregroundColor(theme.textTertiary)
             Text("暂无笔记本")
                 .font(.system(size: 16))
-                .foregroundColor(Color(hex: "7A7A88"))
+                .foregroundColor(theme.textTertiary)
         }
         .frame(height: 380)
     }
@@ -233,6 +234,7 @@ struct HomeView: View {
 // MARK: - 笔记本封面视图
 
 struct NotebookCoverView: View {
+    @Environment(\.theme) private var theme
     @ObservedObject var notebook: Notebook
 
     var body: some View {
@@ -243,7 +245,7 @@ struct NotebookCoverView: View {
             ZStack(alignment: .leading) {
                 // 主封面
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(hex: "F0EDE5"))
+                    .fill(theme.surfacePaper)
                     .overlay(
                         CoverPatternView(style: notebook.coverStyle)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
@@ -294,13 +296,13 @@ struct NotebookCoverView: View {
                 // ℹ️ 徽章
                 ZStack {
                     Circle()
-                        .fill(Color(hex: "F0EAE0"))
+                        .fill(theme.surfacePaper)
                         .frame(width: 30, height: 30)
                         .shadow(color: .black.opacity(0.25), radius: 3, x: 0, y: 2)
                     Text("i")
                         .font(.system(size: 14, weight: .bold, design: .serif))
                         .italic()
-                        .foregroundColor(Color(hex: "4A3020"))
+                        .foregroundColor(theme.surfacePaperInk)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                 .padding(.top, 14)
@@ -313,6 +315,7 @@ struct NotebookCoverView: View {
 // MARK: - 封面图案
 
 private struct CoverPatternView: View {
+    @Environment(\.theme) private var theme
     let style: NotebookCoverStyle
 
     var body: some View {
@@ -327,9 +330,10 @@ private struct CoverPatternView: View {
 }
 
 private struct ChevronPattern: View {
+    @Environment(\.theme) private var theme
     var body: some View {
         ZStack {
-            Color(hex: "5BC8D0")
+            theme.controlInactive
             GeometryReader { geo in
                 let rows = 10
                 let h = geo.size.height / CGFloat(rows)
@@ -362,9 +366,10 @@ private struct ChevronShape: Shape {
 }
 
 private struct TrianglePattern: View {
+    @Environment(\.theme) private var theme
     var body: some View {
         ZStack {
-            Color(hex: "E8E0D0")
+            theme.surfacePaper
             GeometryReader { geo in
                 let cols = 5, rows = 8
                 let tw = geo.size.width / CGFloat(cols)
@@ -398,16 +403,17 @@ private struct TriangleShape: Shape {
 }
 
 private struct StripesPattern: View {
+    @Environment(\.theme) private var theme
     var body: some View {
         ZStack {
-            Color(hex: "E8E5E0")
+            theme.surfacePaper
             GeometryReader { geo in
                 let count = 8
                 let w = geo.size.width / CGFloat(count)
                 ForEach(0..<count, id: \.self) { i in
                     if i % 2 == 0 {
                         Rectangle()
-                            .fill(Color(hex: "1A1A20").opacity(0.85))
+                            .fill(theme.shadowOverlay.opacity(0.85))
                             .frame(width: w * 0.6)
                             .offset(x: CGFloat(i) * w + w * 0.2)
                     }
@@ -418,9 +424,10 @@ private struct StripesPattern: View {
 }
 
 private struct LeatherPattern: View {
+    @Environment(\.theme) private var theme
     var body: some View {
         LinearGradient(
-            colors: [Color(hex: "C17A3A"), Color(hex: "A85E20"), Color(hex: "C07030")],
+            colors: [theme.surfaceLeather, theme.surfaceLeather, theme.surfaceLeather],
             startPoint: .topLeading, endPoint: .bottomTrailing
         )
         .overlay(
@@ -433,9 +440,10 @@ private struct LeatherPattern: View {
 }
 
 private struct DiagonalPattern: View {
+    @Environment(\.theme) private var theme
     var body: some View {
         ZStack {
-            Color(hex: "E8E5E0")
+            theme.surfacePaper
             GeometryReader { geo in
                 let count = 6
                 let spacing = geo.size.width / CGFloat(count)
@@ -445,7 +453,7 @@ private struct DiagonalPattern: View {
                         p.move(to: CGPoint(x: x, y: 0))
                         p.addLine(to: CGPoint(x: x + geo.size.height, y: geo.size.height))
                     }
-                    .stroke(Color(hex: "1A1A20").opacity(0.75), lineWidth: i % 3 == 0 ? 3 : 1.2)
+                    .stroke(theme.shadowOverlay.opacity(0.75), lineWidth: i % 3 == 0 ? 3 : 1.2)
                 }
             }
         }
@@ -455,6 +463,7 @@ private struct DiagonalPattern: View {
 // MARK: - 页码指示器
 
 private struct PageIndicator: View {
+    @Environment(\.theme) private var theme
     let count: Int
     let current: Int
 
@@ -462,7 +471,7 @@ private struct PageIndicator: View {
         HStack(spacing: 6) {
             ForEach(0..<count, id: \.self) { i in
                 Capsule()
-                    .fill(i == current ? Color(hex: "E05A3A") : Color(hex: "5A5A65"))
+                    .fill(i == current ? theme.accentPrimary : theme.textTertiary)
                     .frame(width: i == current ? 24 : 14, height: 3)
                     .animation(.spring(response: 0.3, dampingFraction: 0.7), value: current)
             }
@@ -473,6 +482,7 @@ private struct PageIndicator: View {
 // MARK: - 圆形按钮
 
 private struct CircleActionButton: View {
+    @Environment(\.theme) private var theme
     let icon: String
     let bgColor: Color
     let iconColor: Color
@@ -515,6 +525,7 @@ private struct RoundedCornerShape: Shape {
 // MARK: - 笔记本列表行
 
 struct NotebookListRow: View {
+    @Environment(\.theme) private var theme
     @ObservedObject var notebook: Notebook
     let isSelected: Bool
     let action: () -> Void
@@ -526,7 +537,7 @@ struct NotebookListRow: View {
                 // 圆形封面缩略图
                 ZStack {
                     Circle()
-                        .fill(Color(hex: "2A2A30"))
+                        .fill(theme.backgroundTertiary)
                         .frame(width: 52, height: 52)
                     Circle()
                         .clipShape(Circle())
@@ -542,10 +553,10 @@ struct NotebookListRow: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(notebook.wrappedName)
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(isSelected ? Color(hex: "E05A3A") : Color(hex: "E8E8EC"))
+                        .foregroundColor(isSelected ? theme.accentPrimary : theme.textPrimary)
                     Text("0 PHOTOS")
                         .font(.system(size: 11, weight: .regular))
-                        .foregroundColor(Color(hex: "7A7A88"))
+                        .foregroundColor(theme.textTertiary)
                         .tracking(1)
                 }
 
@@ -554,12 +565,12 @@ struct NotebookListRow: View {
                 if isSelected {
                     Image(systemName: "checkmark")
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(Color(hex: "E05A3A"))
+                        .foregroundColor(theme.accentPrimary)
                 }
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
-            .background(isPressed ? Color(hex: "38383E") : Color.clear)
+            .background(isPressed ? theme.backgroundPressed : Color.clear)
         }
         .buttonStyle(PlainButtonStyle())
         .simultaneousGesture(
