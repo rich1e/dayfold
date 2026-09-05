@@ -30,11 +30,13 @@ private struct RoundedCorner: Shape {
 }
 
 struct WarmCardModifier: ViewModifier {
+    @Environment(\.theme) private var theme
+
     func body(content: Content) -> some View {
         content
             .padding(16)
-            .background(Color.warmLight)
+            .background(theme.backgroundSecondary)
             .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.35), radius: 8, x: 0, y: 4)
+            .shadow(color: theme.shadowOverlay, radius: 8, x: 0, y: 4)
     }
 }
