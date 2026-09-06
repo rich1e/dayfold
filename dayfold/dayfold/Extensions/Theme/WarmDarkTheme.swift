@@ -24,6 +24,7 @@ struct WarmDarkTheme: DayfoldTheme {
     // 强调
     var accentPrimary: Color { Color(hex: "E05A3A") }
     var accentDestructive: Color { Color(hex: "C03828") }
+    var accentSuccess: Color { Color(hex: "34C759") }
     var controlInactive: Color { Color(hex: "5BC8D8") }
 
     // 效果

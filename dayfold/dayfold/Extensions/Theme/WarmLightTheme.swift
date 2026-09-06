@@ -24,6 +24,7 @@ struct WarmLightTheme: DayfoldTheme {
     // 强调（沉香红 + 深海青）
     var accentPrimary: Color { Color(hex: "C04030") }
     var accentDestructive: Color { Color(hex: "A02818") }
+    var accentSuccess: Color { Color(hex: "2BA84B") }
     var controlInactive: Color { Color(hex: "3A8A98") }
 
     // 效果（浅色背景下 white overlay 应明显，black shadow 应弱）

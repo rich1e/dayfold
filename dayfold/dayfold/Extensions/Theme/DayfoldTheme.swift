@@ -24,9 +24,10 @@ protocol DayfoldTheme {
     var dividerPrimary: Color { get }
     var dividerSubtle: Color { get }
 
-    // MARK: - 强调色（3）
+    // MARK: - 强调色（4）
     var accentPrimary: Color { get }
     var accentDestructive: Color { get }
+    var accentSuccess: Color { get }
     var controlInactive: Color { get }
 
     // MARK: - 效果色（2，直接返回带 alpha 的 Color）

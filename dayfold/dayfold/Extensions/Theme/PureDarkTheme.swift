@@ -19,6 +19,7 @@ struct PureDarkTheme: DayfoldTheme {
 
     var accentPrimary: Color { Color(hex: "FF6B47") }
     var accentDestructive: Color { Color(hex: "E04838") }
+    var accentSuccess: Color { Color(hex: "34C759") }
     var controlInactive: Color { Color(hex: "6BD4E4") }
 
     var highlightOverlay: Color { Color.white.opacity(0.08) }
