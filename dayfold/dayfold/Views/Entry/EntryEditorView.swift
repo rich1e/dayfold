@@ -22,19 +22,12 @@ struct EntryEditorView: View {
     }
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            theme.backgroundPrimary.ignoresSafeArea()
-
-            VStack(spacing: 0) {
-                topBar
-                metaBar
-                editorArea
-            }
-
-            // 随键盘移动的工具栏
-            keyboardToolbar
-                .ignoresSafeArea(.keyboard, edges: .bottom)
+        VStack(spacing: 0) {
+            topBar
+            metaBar
+            editorArea
         }
+        .background(theme.backgroundPrimary.ignoresSafeArea())
         .fullScreenCover(isPresented: $showingImagePicker) {
             PhotoLibraryPickerView { picked in
                 viewModel.addPickedPhotos(picked)
@@ -215,12 +208,12 @@ struct EntryEditorView: View {
                     .padding(.horizontal, 16)
                     .padding(.top, 12)
                 }
-
-                // 键盘工具栏高度占位
-                Spacer().frame(height: 56)
             }
         }
         .scrollDismissesKeyboard(.interactively)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            keyboardToolbar
+        }
         .background(theme.backgroundPrimary)
     }
 
@@ -228,52 +221,47 @@ struct EntryEditorView: View {
 
     private var keyboardToolbar: some View {
         VStack(spacing: 0) {
-            Spacer()
-
-            VStack(spacing: 0) {
-                // 条件追加：选中字符时显示格式化行
-                if selectionLength > 0 {
-                    Divider()
-                    FormattingToolbar(text: $viewModel.content, compact: true)
-                }
-
-                // 基线行
-                HStack(spacing: 0) {
-                    // 收起键盘
-                    toolbarButton(icon: "chevron.down") {
-                        UIApplication.shared.sendAction(
-                            #selector(UIResponder.resignFirstResponder),
-                            to: nil, from: nil, for: nil
-                        )
-                    }
-
-                    Spacer()
-
-                    // AI 占位（disabled）
-                    toolbarButton(icon: "sparkles", disabled: true) {}
-
-                    // 图片
-                    toolbarButton(icon: "photo.on.rectangle") {
-                        showingImagePicker = true
-                    }
-
-                    // 附件（占位）
-                    toolbarButton(icon: "paperclip") {}
-
-                    // 切换输入法（系统 keyboard 图标）
-                    toolbarButton(icon: "keyboard") {
-                        UIApplication.shared.sendAction(
-                            #selector(UIResponder.becomeFirstResponder),
-                            to: nil, from: nil, for: nil
-                        )
-                    }
-                }
-                .padding(.horizontal, 8)
-                .frame(height: 44)
-                .background(theme.backgroundSecondary)
+            // 条件追加：选中字符时显示格式化行
+            if selectionLength > 0 {
+                Divider()
+                FormattingToolbar(text: $viewModel.content, compact: true)
             }
+
+            // 基线行
+            HStack(spacing: 0) {
+                // 收起键盘
+                toolbarButton(icon: "chevron.down") {
+                    UIApplication.shared.sendAction(
+                        #selector(UIResponder.resignFirstResponder),
+                        to: nil, from: nil, for: nil
+                    )
+                }
+
+                Spacer()
+
+                // AI 占位（disabled）
+                toolbarButton(icon: "sparkles", disabled: true) {}
+
+                // 图片
+                toolbarButton(icon: "photo.on.rectangle") {
+                    showingImagePicker = true
+                }
+
+                // 附件（占位）
+                toolbarButton(icon: "paperclip") {}
+
+                // 切换输入法（系统 keyboard 图标）
+                toolbarButton(icon: "keyboard") {
+                    UIApplication.shared.sendAction(
+                        #selector(UIResponder.becomeFirstResponder),
+                        to: nil, from: nil, for: nil
+                    )
+                }
+            }
+            .padding(.horizontal, 8)
+            .frame(height: 44)
+            .background(theme.backgroundPrimary)
         }
-        .keyboardAdaptive()
     }
 
     // MARK: - Helpers

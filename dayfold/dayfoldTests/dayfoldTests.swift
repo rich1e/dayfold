@@ -1,17 +1,16 @@
-//
-//  dayfoldTests.swift
-//  dayfoldTests
-//
-//  Created by rich1e on 2026/4/7.
-//
-
 import Testing
 @testable import dayfold
 
 struct dayfoldTests {
 
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+    @Test func editorAreaDoesNotReserveSeparateToolbarHeight() throws {
+        let sourceURL = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appendingPathComponent("dayfold/Views/Entry/EntryEditorView.swift")
+        let source = try String(contentsOf: sourceURL, encoding: .utf8)
+
+        #expect(!source.contains("Spacer().frame(height: 56)"))
     }
 
 }
