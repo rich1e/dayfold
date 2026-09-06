@@ -26,16 +26,36 @@ class EntryListViewModel: ObservableObject {
         try? CoreDataStack.shared.save()
     }
 
-    func permanentlyDelete(_ entry: Entry, context: NSManagedObjectContext) {
-        let assetsToDelete = entry.mediaAssetsArray
-        for asset in assetsToDelete {
-            if let filename = asset.filename {
-                Task { await MediaService.shared.deleteImage(filename: filename) }
+    /// 批量永久删除多条,异步清理 MediaService 上的图片文件。
+    /// 重复删除逻辑与单条版本一致,但一次性收集所有 filename 避免逐条起 Task。
+    func permanentlyDelete(_ entries: [Entry], context: NSManagedObjectContext) {
+        var filenames: [String] = []
+        for entry in entries {
+            for asset in entry.mediaAssetsArray {
+                if let filename = asset.filename {
+                    filenames.append(filename)
+                }
+                context.delete(asset)
             }
-            context.delete(asset)
+            if let location = entry.location { context.delete(location) }
+            context.delete(entry)
         }
-        if let location = entry.location { context.delete(location) }
-        context.delete(entry)
+        if !filenames.isEmpty {
+            Task { await MediaService.shared.deleteImages(filenames: filenames) }
+        }
+        try? CoreDataStack.shared.save()
+    }
+
+    /// 单条永久删除(批量版本的 wrapper,保留旧调用点兼容)。
+    func permanentlyDelete(_ entry: Entry, context: NSManagedObjectContext) {
+        permanentlyDelete([entry], context: context)
+    }
+
+    /// 批量恢复多条:直接清 deletedAt,每条回到 entry.notebook 原归属。
+    func restore(_ entries: [Entry]) {
+        for entry in entries {
+            entry.restore()
+        }
         try? CoreDataStack.shared.save()
     }
 
