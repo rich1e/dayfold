@@ -77,12 +77,13 @@ struct MainTabView: View {
                         }
                     } label: {
                         Image(systemName: "gearshape")
-                            .font(.system(size: 22, weight: .medium))
+                            .font(.system(size: 24, weight: .medium))
                             .foregroundColor(theme.controlInactive)
-                            .frame(width: 48, height: 48)
+                            .frame(width: 56, height: 56)
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .padding(.leading, 8)
+                    .padding(.leading, 4)
 
                     Spacer()
 
@@ -93,20 +94,21 @@ struct MainTabView: View {
                             }
                         } label: {
                             Image(systemName: homeListMode ? "square.grid.2x2" : "list.bullet")
-                                .font(.system(size: 22, weight: .medium))
+                                .font(.system(size: 24, weight: .medium))
                                 .foregroundColor(theme.controlInactive)
-                                .frame(width: 48, height: 48)
+                                .frame(width: 56, height: 56)
+                                .contentShape(Rectangle())
                                 .contentTransition(.symbolEffect(.replace))
                         }
                         .buttonStyle(PlainButtonStyle())
-                        .padding(.trailing, 8)
+                        .padding(.trailing, 4)
                     }
                 }
                 .frame(width: geo.size.width)
                 .offset(x: offset)
                 .animation(.spring(response: 0.38, dampingFraction: 0.82), value: drawerOpen)
                 .frame(maxHeight: .infinity, alignment: .top)
-                .padding(.top, -15)
+                .padding(.top, 8)
             }
             .ignoresSafeArea(edges: .bottom)
         }
@@ -145,4 +147,5 @@ private struct PlaceholderView: View {
 #Preview {
     MainTabView()
         .environment(\.managedObjectContext, CoreDataStack.shared.viewContext)
+        .environmentObject(SecurityManager())
 }
