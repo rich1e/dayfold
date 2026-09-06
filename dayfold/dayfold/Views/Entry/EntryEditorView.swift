@@ -212,70 +212,16 @@ struct EntryEditorView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            keyboardToolbar
+            ExpandableKeyboardMenu(
+                text: $viewModel.content,
+                selectionLength: selectionLength,
+                showingImagePicker: $showingImagePicker
+            )
         }
         .background(theme.backgroundPrimary)
     }
 
-    // MARK: - 键盘工具栏（随键盘浮动）
-
-    private var keyboardToolbar: some View {
-        VStack(spacing: 0) {
-            // 条件追加：选中字符时显示格式化行
-            if selectionLength > 0 {
-                Divider()
-                FormattingToolbar(text: $viewModel.content, compact: true)
-            }
-
-            // 基线行
-            HStack(spacing: 0) {
-                // 收起键盘
-                toolbarButton(icon: "chevron.down") {
-                    UIApplication.shared.sendAction(
-                        #selector(UIResponder.resignFirstResponder),
-                        to: nil, from: nil, for: nil
-                    )
-                }
-
-                Spacer()
-
-                // AI 占位（disabled）
-                toolbarButton(icon: "sparkles", disabled: true) {}
-
-                // 图片
-                toolbarButton(icon: "photo.on.rectangle") {
-                    showingImagePicker = true
-                }
-
-                // 附件（占位）
-                toolbarButton(icon: "paperclip") {}
-
-                // 切换输入法（系统 keyboard 图标）
-                toolbarButton(icon: "keyboard") {
-                    UIApplication.shared.sendAction(
-                        #selector(UIResponder.becomeFirstResponder),
-                        to: nil, from: nil, for: nil
-                    )
-                }
-            }
-            .padding(.horizontal, 8)
-            .frame(height: 44)
-            .background(theme.backgroundPrimary)
-        }
-    }
-
     // MARK: - Helpers
-
-    private func toolbarButton(icon: String, disabled: Bool = false, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: icon)
-                .font(.system(size: 18, weight: .regular))
-                .foregroundColor(disabled ? Color(theme.textSecondary).opacity(0.4) : Color(theme.textPrimary).opacity(0.85))
-                .frame(width: 44, height: 44)
-        }
-        .buttonStyle(PlainButtonStyle())
-        .disabled(disabled)
-    }
 
     private var dateString: String {
         let fmt = DateFormatter()
