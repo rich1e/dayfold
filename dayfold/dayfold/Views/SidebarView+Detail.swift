@@ -109,7 +109,7 @@ struct DrawerDetailRouter: View {
         case .about:
             DrawerPlaceholderDetail(
                 icon: "info.circle",
-                title: "About Photos",
+                title: "About",
                 subtitle: aboutSubtitle
             )
         }

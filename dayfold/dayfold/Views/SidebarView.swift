@@ -40,7 +40,7 @@ enum SidebarTab: String, CaseIterable, Hashable {
         case .hiddenAlbum:   return "Hidden Album"
         case .stats:         return "数据统计"
         case .trash:         return "回收箱"
-        case .about:         return "About Photos"
+        case .about:         return "About"
         }
     }
 }
