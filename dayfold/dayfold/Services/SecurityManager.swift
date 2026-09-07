@@ -60,8 +60,8 @@ final class SecurityManager: ObservableObject {
     private let kGrace            = "security.lockGraceSeconds"
     private let kLastBackground   = "security.lastBackgroundAt"
 
-    private let biometricContext = LAContext()
-
+    // 不再持有 LAContext 单例：每次需要时创建新实例，避免 evaluatePolicy 之后
+    // 系统自动 invalidate 导致后续 canEvaluatePolicy 永久返回 false 的问题。
     // 失败节流阈值
     private let lockoutShort: TimeInterval = 30
     private let lockoutLong:  TimeInterval = 300
@@ -218,9 +218,15 @@ final class SecurityManager: ObservableObject {
     @discardableResult
     func attemptBiometricUnlock() async -> Bool {
         guard isBiometricEnabled else { return false }
-        guard canEvaluateBiometrics else { return false }
+        // 每次调用都创建新 LAContext，避免 LAContext 单例在多次 evaluatePolicy 后
+        // 被系统 invalidate / 状态污染导致后续 canEvaluatePolicy 返回 false。
+        let ctx = LAContext()
+        var error: NSError?
+        guard ctx.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
+            return false
+        }
         do {
-            let ok = try await biometricContext.evaluatePolicy(
+            let ok = try await ctx.evaluatePolicy(
                 .deviceOwnerAuthenticationWithBiometrics,
                 localizedReason: "解锁 Dayfold"
             )
@@ -233,7 +239,8 @@ final class SecurityManager: ObservableObject {
 
     private var canEvaluateBiometrics: Bool {
         var error: NSError?
-        return biometricContext.canEvaluatePolicy(
+        // 同样使用新 LAContext 探测，避免单例被污染后误报 false。
+        return LAContext().canEvaluatePolicy(
             .deviceOwnerAuthenticationWithBiometrics,
             error: &error
         )
