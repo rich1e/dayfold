@@ -244,14 +244,84 @@ final class PhotoLibraryService: ObservableObject {
 
     // MARK: - 反向地理编码（任意坐标，与 LocationService 设备定位链路解耦）
 
+    /// 反向地理编码缓存：按 "lat,lon"（6 位小数）作为 key，避免对同一坐标重复打 Apple 服务器。
+    /// 内存级缓存，进程重启清空；YAGNI 不做磁盘持久化。
+    /// **仅缓存成功结果**，nil/超时/失败不缓存，避免弱网下一次失败永久污染。
+    private static var placeNameCache: [String: String] = [:]
+    private static let cacheQueue = DispatchQueue(label: "PhotoLibraryService.placeNameCache")
+    /// 单次请求硬超时（CLGeocoder 弱网下可达 10+ 秒，这里 3s 兜底）
+    private static let requestTimeout: TimeInterval = 3
+
     /// 输出格式对齐 LocationService：「city·area」/「city」/「area」，失败返回 nil。
-    /// CLGeocoder 不可并发复用，每次新建实例。
+    /// 行为：
+    /// 1. 内存缓存命中 → 直接返回
+    /// 2. 新建 CLGeocoder（不可并发复用）调 `reverseGeocodeLocation`
+    /// 3. 3s 硬超时：超时分支直接 `return nil`，外层不等 CLGeocoder 内部网络
+    ///    （注：CLGeocoder 不响应 Swift Concurrency cancellation，其内部网络请求会继续，
+    ///     但回调结果被丢弃，整体函数保证 3s 内返回）
+    /// 4. 成功结果才缓存；nil / 超时 / 失败均不缓存
     static func placeName(for coordinate: CLLocationCoordinate2D) async -> String? {
+        let key = cacheKey(for: coordinate)
+
+        // 1. 查缓存
+        if let cached = cacheQueue.sync(execute: { placeNameCache[key] }) {
+            return cached
+        }
+
+        // 2. 调 Apple Geo 服务 + 3s 超时
+        let result = await resolveWithTimeout(coordinate)
+
+        // 3. 仅成功结果写缓存（nil 不缓存）
+        if let result {
+            cacheQueue.sync {
+                placeNameCache[key] = result
+            }
+        }
+        return result
+    }
+
+    private static func cacheKey(for coordinate: CLLocationCoordinate2D) -> String {
+        // 6 位小数精度 ≈ 0.11 米，足以区分拍摄点；超过此精度的请求走同一缓存槽
+        String(format: "%.6f,%.6f", coordinate.latitude, coordinate.longitude)
+    }
+
+    /// 调 `CLGeocoder.reverseGeocodeLocation` 并加 3s 硬超时。
+    /// 用 `withTaskGroup` 跑"主请求"和"超时"两个子任务；**先返回的那个赢**。
+    /// CLGeocoder 不响应 cancellation，超时后其回调被丢弃但内部网络继续；
+    /// 外层 `placeName` 函数保证 3s 内 return，不阻塞调用方 UI。
+    private static func resolveWithTimeout(_ coordinate: CLLocationCoordinate2D) async -> String? {
+        await withTaskGroup(of: String?.self, returning: String?.self) { group in
+            // 子任务 1：调 CLGeocoder（可能跑很久）
+            group.addTask {
+                await resolveDirectly(coordinate)
+            }
+            // 子任务 2：3s 后强制返回 nil（抢占 TaskGroup 完成）
+            group.addTask {
+                try? await Task.sleep(nanoseconds: UInt64(requestTimeout * 1_000_000_000))
+                return nil
+            }
+            // 第一个完成的子任务结果；cancel 剩余任务
+            let first = await group.next() ?? nil
+            group.cancelAll()
+            return first
+        }
+    }
+
+    /// 真正调 CLGeocoder。CLGeocoder 自身不可取消，但函数被外层超时抢占后，
+    /// 此 task 仍可能在后台跑直到 CLGeocoder 内部超时——结果被丢弃，不影响 UI。
+    private static func resolveDirectly(_ coordinate: CLLocationCoordinate2D) async -> String? {
         let geocoder = CLGeocoder()
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
-        let placemarks = try? await geocoder.reverseGeocodeLocation(location)
-        guard let placemark = placemarks?.first else { return nil }
+        do {
+            let placemarks = try await geocoder.reverseGeocodeLocation(location)
+            return format(placemark: placemarks.first)
+        } catch {
+            return nil
+        }
+    }
 
+    private static func format(placemark: CLPlacemark?) -> String? {
+        guard let placemark = placemark else { return nil }
         let city = placemark.locality ?? ""
         let area = placemark.subLocality ?? ""
         if !city.isEmpty && !area.isEmpty {

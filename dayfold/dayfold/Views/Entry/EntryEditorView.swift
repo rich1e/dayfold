@@ -237,8 +237,8 @@ struct EntryEditorView: View {
         if let date = meta.createdAt {
             lines.append("时间：\(formattedDate(date))")
         }
-        if meta.coordinate != nil {
-            lines.append(meta.placeName.map { "位置：\($0)" } ?? "位置：解析中…")
+        if meta.coordinate != nil, let name = meta.placeName, !name.isEmpty {
+            lines.append("位置：\(name)")
         }
         return lines.map { Text($0) }.reduce(Text(""), +)
     }

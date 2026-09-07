@@ -423,10 +423,13 @@ class EntryEditorViewModel: ObservableObject {
             return
         }
 
+        let initialPlaceName: String? = anchor.coordinate.map { Self.formatCoordinate($0) }
         pendingMetadata = PendingPhotoMetadata(
             createdAt: anchor.date,
             coordinate: pendingMetadata?.coordinate ?? anchor.coordinate,
-            placeName: pendingMetadata?.placeName,
+            // 初始就用坐标字符串作为兜底显示，避免弹窗一打开就显示"解析中…"
+            // （3s 内 CLGeocoder 拿到结果后会异步覆盖成中文地名）
+            placeName: pendingMetadata?.placeName ?? initialPlaceName,
             isResolvingPlace: false
         )
         if let coordinate = pendingMetadata?.coordinate {
@@ -454,15 +457,34 @@ class EntryEditorViewModel: ObservableObject {
         let generation = placeResolveGeneration
         pendingMetadata?.isResolvingPlace = true
         Task { [weak self] in
+            // 1. 尝试 3s 内拿到反向地理编码
             let name = await PhotoLibraryService.placeName(for: coordinate)
             guard let self, self.placeResolveGeneration == generation else { return }
-            if self.pendingMetadata != nil {
-                self.pendingMetadata?.placeName = name
+            // 2. 只有拿到结果才覆盖（保留创建时的坐标兜底字符串，避免 3s 后变"解析中…"）
+            if let name, !name.isEmpty {
+                if self.pendingMetadata != nil {
+                    self.pendingMetadata?.placeName = name
+                    self.pendingMetadata?.isResolvingPlace = false
+                } else if self.attachedCreatedAt != nil {
+                    self.placeName = name
+                }
+            } else {
+                // 超时 / 失败：清除 resolving 标志，保留坐标字符串
                 self.pendingMetadata?.isResolvingPlace = false
-            } else if self.attachedCreatedAt != nil {
-                self.placeName = name
             }
         }
+    }
+
+    /// 坐标兜底显示：纬度°N / 经度°E（与 Day One 视频中"xx.xx°北, xx.xx°东"对齐）。
+    /// 用于 CLGeocoder 3s 超时 / 失败 时不让 UI 一直等。
+    private static func formatCoordinate(_ coordinate: CLLocationCoordinate2D) -> String {
+        String(
+            format: "%.4f°%@, %.4f°%@",
+            abs(coordinate.latitude),
+            coordinate.latitude >= 0 ? "N" : "S",
+            abs(coordinate.longitude),
+            coordinate.longitude >= 0 ? "E" : "W"
+        )
     }
 
     var effectiveDate: Date {
