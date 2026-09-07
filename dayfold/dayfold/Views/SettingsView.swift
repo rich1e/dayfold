@@ -64,10 +64,14 @@ struct SettingsView: View {
                 Divider().background(theme.dividerSubtle)
                 graceRow
                 Divider().background(theme.dividerSubtle)
-                biometricRow
-                if securityManager.isBiometricEnabled && securityManager.biometricsAvailable {
-                    Divider().background(theme.dividerSubtle)
-                    promptBiometricRow
+                // 规则 3：密码关闭时，Face ID 与「提示 Face ID」行均不显示。
+                if securityManager.hasPassword {
+                    biometricRow
+                    // 规则 5：仅当 Face ID 主开关开启时才显示「提示 Face ID」行。
+                    if securityManager.isBiometricEnabled {
+                        Divider().background(theme.dividerSubtle)
+                        promptBiometricRow
+                    }
                 }
             }
             .background(theme.backgroundSecondary)
@@ -206,7 +210,9 @@ struct SettingsView: View {
 
     private var biometricRow: some View {
         let biometricLabel = biometricLabelForCurrentDevice()
-        let canToggle = securityManager.biometricsAvailable
+        // 规则 3：密码关闭时 Face ID 不可操作；
+        // 同时设备无生物识别硬件时也不可操作。
+        let canToggle = securityManager.hasPassword && securityManager.biometricsAvailable
         return standardRow(
             disabled: !canToggle,
             leading: {
@@ -234,12 +240,15 @@ struct SettingsView: View {
     }
 
     private var promptBiometricRow: some View {
-        standardRow(
-            disabled: false,
+        // 规则 5：只有 Face ID 主开关打开时，「提示 Face ID」才可操作；
+        // 默认情况下（即 Face ID 关闭时）不可操作。
+        let canToggle = securityManager.isBiometricEnabled
+        return standardRow(
+            disabled: !canToggle,
             leading: {
                 Text("提示 Face ID")
                     .font(.warmBody)
-                    .foregroundColor(theme.textPrimary)
+                    .foregroundColor(canToggle ? theme.textPrimary : theme.textTertiary)
             },
             trailing: {
                 Toggle(
@@ -251,6 +260,7 @@ struct SettingsView: View {
                 )
                 .labelsHidden()
                 .tint(theme.accentPrimary)
+                .disabled(!canToggle)
             }
         )
     }

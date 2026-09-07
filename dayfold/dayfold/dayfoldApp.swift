@@ -37,10 +37,17 @@ struct dayfoldApp: App {
             }
             .onChange(of: scenePhase) { _, newPhase in
                 switch newPhase {
-                case .background, .inactive:
+                case .background:
+                    // 仅在真正进入后台时记录时间戳。
+                    // 注意：不要监听 `.inactive`，因为系统 Face ID 验证、控制中心、
+                    // 通知中心等覆盖层都会短暂触发 .inactive，若此时记录时间，
+                    // Face ID 验证通过后回到 .active 时会因 grace=0 误判为"超时"而重新锁屏。
                     securityManager.appDidEnterBackground()
                 case .active:
                     securityManager.appWillEnterForeground()
+                case .inactive:
+                    // 故意忽略：见 background 分支注释。
+                    break
                 @unknown default:
                     break
                 }

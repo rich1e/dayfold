@@ -72,8 +72,10 @@ final class SecurityManager: ObservableObject {
 
     init() {
         // 读取持久化字段
-        let biometric = defaults.object(forKey: kBiometric) as? Bool ?? true
-        let promptBio = defaults.object(forKey: kPromptBiometric) as? Bool ?? true
+        // 规则 1 + 3：密码默认关闭，密码关闭时 Face ID / 提示 Face ID 默认也是关闭状态。
+        // 因此默认值均为 false（仅当用户曾主动设过才为 true）。
+        let biometric = defaults.object(forKey: kBiometric) as? Bool ?? false
+        let promptBio = defaults.object(forKey: kPromptBiometric) as? Bool ?? false
         let savedGrace = defaults.object(forKey: kGrace) as? Double
         let hasPwd = defaults.string(forKey: kPasswordHash) != nil
             && defaults.string(forKey: kPasswordSalt) != nil
@@ -83,8 +85,11 @@ final class SecurityManager: ObservableObject {
         self.hasPassword = hasPwd
         self.lockGrace = Self.lockMode(from: savedGrace) ?? .immediately
 
-        // 启动时即锁屏（若任一防护开启）
-        self.isLocked = hasPwd || biometric
+        // 启动时是否锁屏：仅由密码决定。
+        // 规则 1：密码默认关闭 → 默认无需解锁。
+        // Face ID 单独开启时（无密码）不强制锁屏，作为辅助解锁方式存在，
+        // 避免出现"无密码却要求解锁"的矛盾状态。
+        self.isLocked = hasPwd
     }
 
     private static func lockMode(from seconds: TimeInterval?) -> LockMode? {
@@ -110,6 +115,9 @@ final class SecurityManager: ObservableObject {
         hasPassword = true
         failedAttempts = 0
         cooldown = nil
+        // 规则 2：密码打开时，Face ID 与「提示 Face ID」默认关闭。
+        // 始终级联关闭两个子开关，保留纯粹"密码解锁"模式，由用户后续在设置中主动开启。
+        setBiometricEnabled(false)
         // 设置密码后立即锁屏
         isLocked = true
     }
@@ -184,10 +192,9 @@ final class SecurityManager: ObservableObject {
             defaults.set(false, forKey: kPromptBiometric)
             promptForBiometric = false
         }
-        // 关闭时立刻解锁
-        if !newValue && !hasPassword {
-            isLocked = false
-        } else if newValue {
+        // 仅当用户同时有密码时才在开关 Face ID 时锁屏；
+        // 否则 Face ID 单独开/关不强制锁屏（避免"无密码却要求解锁"的矛盾状态）。
+        if hasPassword {
             isLocked = true
         }
     }
@@ -204,17 +211,14 @@ final class SecurityManager: ObservableObject {
 
     // MARK: - 公开：解锁入口
 
-    /// 综合解锁入口：LockScreenView 在 onAppear 调用。
-    /// - 若 Face ID 开启 + 提示开启 → 自动尝试生物识别。
-    /// - 若仅密码 → 不调用生物识别（交给 UI 走 PinKeypadView）。
+    /// 主动触发的生物识别入口。LockScreenView 自动尝试 + 用户点击图标 都走这里。
+    /// - 只要 Face ID 主开关开启就执行（不受 `promptForBiometric` 守卫 —— 该字段仅用于
+    ///   锁屏首次自动弹出，不应影响用户主动点击图标）。
+    /// - 设备无生物识别硬件时返回 false，由 UI 决定降级（震动/不响应）。
     @discardableResult
     func attemptBiometricUnlock() async -> Bool {
-        guard isBiometricEnabled && promptForBiometric else { return false }
-        guard canEvaluateBiometrics else {
-            // 设备无生物识别 → 降级为解锁
-            isLocked = false
-            return true
-        }
+        guard isBiometricEnabled else { return false }
+        guard canEvaluateBiometrics else { return false }
         do {
             let ok = try await biometricContext.evaluatePolicy(
                 .deviceOwnerAuthenticationWithBiometrics,
@@ -239,20 +243,37 @@ final class SecurityManager: ObservableObject {
 
     // MARK: - 公开：后台 / 前台
 
+    /// 跟踪 App 是否真的退到过后台（被 scenePhase 标记为 .background 一次以上）。
+    /// 用来区分"用户主动 Home 退出" vs "系统 Face ID 弹窗短暂接管"。
+    /// 避免系统 Face ID 验证覆盖层导致 `appWillEnterForeground` 误判超时重新锁屏。
+    private var didEnterBackgroundThisSession: Bool = false
+
     /// 应用进入后台时记录时间。
     func appDidEnterBackground() {
         defaults.set(Date(), forKey: kLastBackground)
+        didEnterBackgroundThisSession = true
     }
 
     /// 应用回到前台时，根据 lockGrace 决定是否锁屏。
+    /// **仅当本次会话确实进过 .background 时**才做超时判断；
+    /// 其他路径（首次启动、Face ID 弹窗接管后回到前台）一律不动 isLocked。
+    /// 同时**仅在有密码时**做超时判断 —— 规则 1 决定了无密码时不应锁屏。
     func appWillEnterForeground() {
-        guard hasPassword || isBiometricEnabled else { return }
+        guard hasPassword else {
+            didEnterBackgroundThisSession = false
+            return
+        }
+        guard didEnterBackgroundThisSession else {
+            // 没真正进过后台（例如 Face ID 弹窗短暂触发的 .inactive）→ 不锁屏
+            return
+        }
+        // 确实退到过后台，进入超时判断
+        defer { didEnterBackgroundThisSession = false }
         guard let last = defaults.object(forKey: kLastBackground) as? Date else {
-            isLocked = true
+            // 没有时间戳记录 → 保守起见不锁屏（避免误锁），让用户主动锁/退
             return
         }
         let elapsed = Date().timeIntervalSince(last)
-        // 立即锁屏：always lock；其他：超过 grace 才锁
         if elapsed >= lockGrace.seconds {
             isLocked = true
         }

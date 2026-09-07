@@ -16,6 +16,10 @@ struct PinKeypadView: View {
     var onComplete: (String) -> Void
     /// 是否禁用整个键盘（冷却期 / 流程结束）。
     var isDisabled: Bool = false
+    /// 左下角生物识别按钮的点击回调。nil 则该位置保持空白占位。
+    var biometricAction: (() -> Void)? = nil
+    /// 设备生物识别类型对应的图标名（faceid / touchid）。
+    var biometricIconName: String = "faceid"
 
     @State private var pin: String = ""
     @State private var dotsShakeTrigger: Int = 0
@@ -84,7 +88,11 @@ struct PinKeypadView: View {
                 }
             }
             HStack(spacing: 0) {
-                keyPlaceholder()
+                if let biometricAction {
+                    biometricButton(action: biometricAction)
+                } else {
+                    keyPlaceholder()
+                }
                 keyButton(digit: "0", subtitle: nil)
                 keyButton(action: backspace, systemImage: "delete.left", subtitle: nil)
             }
@@ -101,6 +109,39 @@ struct PinKeypadView: View {
             .frame(maxWidth: .infinity)
             .frame(height: 64)
             .contentShape(Rectangle())
+    }
+
+    /// 左下角生物识别按钮（Face ID / Touch ID）。
+    /// 用透明 "0" 占位让图标与数字键基线对齐，按下态沿用 `KeypadButtonStyle`。
+    /// `biometricIconName` 为 asset 名时（如 "FaceIDIcon"）走 `Image(_:)` 资源；否则按 SF Symbol。
+    private func biometricButton(action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            ZStack {
+                Text("0")
+                    .font(.system(size: 32, weight: .regular, design: .serif))
+                    .foregroundColor(.clear)
+                iconImage
+                    .renderingMode(.template)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 28, height: 28)
+                    .foregroundColor(theme.accentPrimary)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 64)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(KeypadButtonStyle(theme: theme))
+        .disabled(isDisabled)
+        .accessibilityLabel("使用生物识别解锁")
+    }
+
+    /// 根据 `biometricIconName` 决定用 Asset 还是 SF Symbol。
+    /// 约定：以 "FaceIDIcon" 作为 asset 资源名（项目 Assets.xcassets/FaceIDIcon.imageset）。
+    private var iconImage: Image {
+        biometricIconName == "FaceIDIcon"
+            ? Image(biometricIconName)
+            : Image(systemName: biometricIconName)
     }
 
     @ViewBuilder
