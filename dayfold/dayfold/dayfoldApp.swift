@@ -12,6 +12,7 @@ struct dayfoldApp: App {
     @StateObject private var coreDataStack = CoreDataStack.shared
     @StateObject private var securityManager = SecurityManager()
     @State private var themeManager = ThemeManager.shared
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
@@ -33,6 +34,16 @@ struct dayfoldApp: App {
             .onAppear {
                 coreDataStack.createPresetTags()
                 coreDataStack.ensureDefaultNotebook()
+            }
+            .onChange(of: scenePhase) { _, newPhase in
+                switch newPhase {
+                case .background, .inactive:
+                    securityManager.appDidEnterBackground()
+                case .active:
+                    securityManager.appWillEnterForeground()
+                @unknown default:
+                    break
+                }
             }
         }
     }
