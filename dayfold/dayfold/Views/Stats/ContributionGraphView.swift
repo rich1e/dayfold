@@ -48,7 +48,8 @@ struct ContributionGraphView: View {
         // 每个 Text 给一个 cellSize 宽的"对齐槽"，但允许文字向左溢出不被截断
         HStack(alignment: .center, spacing: cellSpacing) {
             ForEach(Array(weeks.enumerated()), id: \.offset) { idx, week in
-                Text(monthLabel(for: week))
+                let prevWeek: [Date?]? = idx > 0 ? weeks[idx - 1] : nil
+                Text(monthLabel(for: week, previousWeek: prevWeek))
                     .font(.system(size: 10, weight: .medium, design: .rounded))
                     .foregroundColor(theme.textSecondary)
                     .fixedSize()
@@ -59,15 +60,28 @@ struct ContributionGraphView: View {
         .frame(height: rowHeight, alignment: .leading)
     }
 
-    /// 仅在该列首日落在 1/8/15/22/29 时显示 "M月"
-    private func monthLabel(for week: [Date?]) -> String {
+    /// 仅在该列是某月第一周（且与上一列月不同）时显示 "M月"
+    private func monthLabel(for week: [Date?], previousWeek: [Date?]?) -> String {
         guard let firstDay = week.compactMap({ $0 }).first else { return "" }
-        let day = Calendar.current.component(.day, from: firstDay)
-        let markerDays: Set<Int> = [1, 8, 15, 22, 29]
-        guard markerDays.contains(day) else { return "" }
+        let cal = Calendar.current
+        let day = cal.component(.day, from: firstDay)
+        // 只在月初第 1 周（1-7 号）才可能是月份标签
+        guard day <= 7 else { return "" }
+        // 若上一列存在且同一月，不重复显示
+        if let prevFirst = previousWeek?.compactMap({ $0 }).first,
+           isSameMonth(prevFirst, firstDay, calendar: cal) {
+            return ""
+        }
         let f = DateFormatter()
         f.dateFormat = "M月"
         return f.string(from: firstDay)
+    }
+
+    private func isSameMonth(_ a: Date, _ b: Date, calendar: Calendar) -> Bool {
+        let ca = calendar.component(.year, from: a)
+        let cb = calendar.component(.year, from: b)
+        if ca != cb { return false }
+        return calendar.component(.month, from: a) == calendar.component(.month, from: b)
     }
 
     // MARK: - Weekday labels
