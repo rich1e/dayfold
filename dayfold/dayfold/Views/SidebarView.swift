@@ -95,13 +95,17 @@ struct DrawerView: View {
     @EnvironmentObject var securityManager: SecurityManager
 
     @State private var presentedTab: SidebarTab?
-    @StateObject private var statsVM: StatsViewModel
+    @FetchRequest(
+        sortDescriptors: [SortDescriptor(\.createdAt, order: .reverse)],
+        predicate: NSPredicate(format: "deletedAt == nil"),
+        animation: .default
+    )
+    private var allEntries: FetchedResults<Entry>
 
     init(selectedTab: Binding<SidebarTab>, isOpen: Binding<Bool>, context: NSManagedObjectContext) {
         self._selectedTab = selectedTab
         self._isOpen = isOpen
         self.context = context
-        _statsVM = StateObject(wrappedValue: StatsViewModel(context: context))
     }
 
     var body: some View {
@@ -132,7 +136,6 @@ struct DrawerView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(DrawerPalette.bg.ignoresSafeArea())
-        .onAppear { statsVM.refresh() }
         .onChange(of: isOpen) { open in
             // 抽屉关闭时清空二级页状态，保证下次打开是干净列表
             if !open { presentedTab = nil }
@@ -237,7 +240,7 @@ struct DrawerView: View {
     }
 
     private var statsSubtitle: String? {
-        let n = statsVM.totalEntries
+        let n = allEntries.count
         return n > 0 ? "\(n) 篇" : nil
     }
 
