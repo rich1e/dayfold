@@ -22,18 +22,6 @@ struct StatsView: View {
         }
         .background(theme.backgroundPrimary.ignoresSafeArea())
         .onAppear { viewModel.refresh() }
-        .popover(item: $selectedDay) { sel in
-            VStack(alignment: .leading, spacing: 6) {
-                Text(sel.day.formatted(.dateTime.year().month().day()))
-                    .font(.warmHeadline)
-                    .foregroundColor(theme.textPrimary)
-                Text("\(sel.count) 篇")
-                    .font(.warmCaption)
-                    .foregroundColor(theme.textSecondary)
-            }
-            .padding(12)
-            .presentationCompactAdaptation(.popover)
-        }
     }
 
     // MARK: - Cards
@@ -68,9 +56,7 @@ struct StatsView: View {
             ContributionGraphView(
                 data: viewModel.visibleDailyCounts,
                 range: viewModel.heatmapRange,
-                onTap: { day, count in
-                    selectedDay = DaySelection(day: day, count: count)
-                }
+                selectedDay: $selectedDay
             )
             .frame(height: 110)
 

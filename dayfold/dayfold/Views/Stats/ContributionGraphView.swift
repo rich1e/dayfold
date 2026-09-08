@@ -4,35 +4,36 @@ import SwiftUI
 /// Contribution Graph：周列布局的热力图，5 阶 amber 调色板
 ///
 /// 布局思路（借鉴 HeatmapKit 周列算法，自写）：
-/// - `HStack(alignment: .top, spacing: cellSpacing)`：每列 = 一个周
+/// - 右侧 ScrollView 内：VStack(month labels / grid) 整体同步横滚
 /// - 每个 VStack 由 7 个 ContributionCell 组成（顺序跟随 `Calendar.current.firstWeekday`）
-/// - 顶部 month labels（仅在该列首日落在 1/8/15/22/29 时显示）
-/// - 左侧 weekday labels（周一/周三/周五 三行）
-/// - 水平 ScrollView + `.defaultScrollAnchor(.trailing)` 自动滚到今天
+/// - 顶部 month labels（仅在该列首日落在 1/8/15/22/29 时显示 "M月"）
+/// - 左侧 weekday labels（周一/周三/周五 三行），与 grid 7 行严格对齐
 struct ContributionGraphView: View {
     let data: [Date: Int]
     let range: HeatmapRange
-    let onTap: ((Date, Int) -> Void)?
+    @Binding var selectedDay: DaySelection?
 
     @Environment(\.theme) private var theme
 
     private let cellSpacing: CGFloat = 3
     private let weekdayLabelsWidth: CGFloat = 22
     private let cellSize: CGFloat = 12
+    private let rowHeight: CGFloat = 14
+    private let rowSpacing: CGFloat = 6
 
     var body: some View {
         let computed = computeGrid()
         HStack(alignment: .top, spacing: 6) {
             // 左侧：两列对齐 —— 顶部空占位（与 month labels 行同高），下方 weekday labels（与 grid 7 行同高）
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: rowSpacing) {
                 Color.clear
-                    .frame(width: weekdayLabelsWidth, height: 12)
+                    .frame(width: weekdayLabelsWidth, height: rowHeight)
                 weekdayLabelsColumn()
             }
 
             // 右侧：ScrollView 包含 month labels + grid，整体同步横滚
             ScrollView(.horizontal, showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: rowSpacing) {
                     monthLabelsRow(weeks: computed.weeks)
                     grid(weeks: computed.weeks, today: computed.today)
                 }
@@ -50,12 +51,13 @@ struct ContributionGraphView: View {
                 Text(monthLabel(for: week))
                     .font(.system(size: 9, design: .rounded))
                     .foregroundColor(theme.textTertiary)
-                    .frame(width: cellSize, alignment: .leading)
-                    .fixedSize()
-                    .id(idx) // 显式 id 防止 range 切换时 SwiftUI 复用错乱
+                    .frame(width: cellSize, height: rowHeight, alignment: .leading)
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
+                    .id(idx)
             }
         }
-        .frame(height: 12)
+        .frame(height: rowHeight)
     }
 
     /// 仅在该列首日落在 1/8/15/22/29 时显示 "M月"
@@ -78,6 +80,8 @@ struct ContributionGraphView: View {
                     .font(.system(size: 9, design: .rounded))
                     .foregroundColor(theme.textTertiary)
                     .frame(width: weekdayLabelsWidth, height: cellSize, alignment: .leading)
+                    .lineLimit(1)
+                    .fixedSize()
             }
         }
     }
@@ -89,7 +93,6 @@ struct ContributionGraphView: View {
         var result: [String] = []
         for i in 0..<7 {
             let realIdx = (firstWeekday - 1 + i) % 7
-            // Calendar weekday: 1=Sun, 2=Mon, 3=Tue, 4=Wed, 5=Thu, 6=Fri, 7=Sat
             // 显示 Mon(2) / Wed(4) / Fri(6)
             if realIdx == 2 || realIdx == 4 || realIdx == 6 {
                 result.append("周" + names[realIdx])
@@ -116,7 +119,7 @@ struct ContributionGraphView: View {
                                 size: cellSize,
                                 color: HeatmapPalette.color(for: count, dataMax: dataMax),
                                 isToday: Calendar.current.isDate(day, inSameDayAs: today),
-                                onTap: { onTap?(day, count) }
+                                selectedDay: $selectedDay
                             )
                         } else {
                             Color.clear.frame(width: cellSize, height: cellSize)
