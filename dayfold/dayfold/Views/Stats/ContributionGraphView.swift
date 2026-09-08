@@ -95,23 +95,17 @@ struct ContributionGraphView: View {
     private func weekdayLabelsColumn() -> some View {
         VStack(alignment: .leading, spacing: cellSpacing) {
             ForEach(weekdayLabels()) { item in
-                if item.text.isEmpty {
-                    // 占位行：Color.clear 严格占 cellSize 高度，保证与右侧 7 行 cell 严格对齐
-                    Color.clear
-                        .frame(width: weekdayLabelsWidth, height: cellSize)
-                } else {
-                    Text(item.text)
-                        .font(.system(size: 9, design: .rounded))
-                        .foregroundColor(item.isWeekend ? theme.accentDestructive : theme.textTertiary)
-                        .frame(width: weekdayLabelsWidth, height: cellSize, alignment: .leading)
-                        .lineLimit(1)
-                        .fixedSize()
-                }
+                Text(item.text)
+                    .font(.system(size: 9, design: .rounded))
+                    .foregroundColor(item.isWeekend ? theme.accentDestructive : theme.textTertiary)
+                    .frame(width: weekdayLabelsWidth, height: cellSize, alignment: .leading)
+                    .lineLimit(1)
+                    .fixedSize()
             }
         }
     }
 
-    /// 按 `Calendar.current.firstWeekday` 排序列顺序；周一/周三/周五正常显示，周六/周日红色显示
+    /// 按 `Calendar.current.firstWeekday` 排序列顺序；7 行全部显示（周六/日红色，其它灰色）
     private func weekdayLabels() -> [WeekdayLabel] {
         let firstWeekday = Calendar.current.firstWeekday
         // names 按 Calendar weekday 编号索引：1=Sun → index 0, 2=Mon → index 1, ..., 7=Sat → index 6
@@ -121,12 +115,7 @@ struct ContributionGraphView: View {
             // realWeekday: 1..7 对应 Calendar.weekday
             let realWeekday = ((firstWeekday - 1 + i) % 7) + 1
             let isWeekend = (realWeekday == 1 || realWeekday == 7)
-            var text = ""
-            // 显示 Mon(weekday=2) / Wed(weekday=4) / Fri(weekday=6)，加上周末
-            if realWeekday == 2 || realWeekday == 4 || realWeekday == 6
-                || realWeekday == 1 || realWeekday == 7 {
-                text = "周" + names[realWeekday - 1]
-            }
+            let text = "周" + names[realWeekday - 1]
             result.append(WeekdayLabel(id: i, text: text, isWeekend: isWeekend))
         }
         return result
