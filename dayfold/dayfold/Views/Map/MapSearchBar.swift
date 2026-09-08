@@ -32,7 +32,7 @@ struct MapSearchBar: View {
             }
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.vertical, 14)
         .background(
             Capsule()
                 .fill(theme.backgroundSecondary)

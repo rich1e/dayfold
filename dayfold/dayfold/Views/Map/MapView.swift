@@ -25,9 +25,7 @@ struct MapView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            theme.backgroundPrimary.ignoresSafeArea()
-
-            // 地图本体
+            // 地图本体（铺满整屏，包含顶部 safe area）
             MapKitView(
                 entries: viewModel.visibleEntries,
                 onSelect: { entries in
@@ -39,21 +37,7 @@ struct MapView: View {
                     withAnimation { selectedEntries = [] }
                 }
             )
-            .ignoresSafeArea(edges: .bottom)
-
-            // 顶部条：扩展高度并包裹左侧 gearshape 抽屉按钮（按钮由 MainTabView 渲染在上层）
-            VStack(spacing: 0) {
-                theme.backgroundPrimary
-                    .frame(height: 96)
-                    .ignoresSafeArea(edges: .top)
-                    .overlay(alignment: .bottom) {
-                        Rectangle()
-                            .fill(theme.dividerPrimary)
-                            .frame(height: 0.5)
-                    }
-                    .shadow(color: Color.black.opacity(0.22), radius: 8, x: 0, y: 3)
-                Spacer()
-            }
+            .ignoresSafeArea()
 
             // 空态
             if viewModel.entries.isEmpty {
