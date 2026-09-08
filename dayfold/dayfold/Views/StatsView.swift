@@ -5,7 +5,6 @@ import CoreData
 struct StatsView: View {
     @Environment(\.theme) private var theme
     @StateObject private var viewModel: StatsViewModel
-    @State private var selectedDay: DaySelection?
 
     init(context: NSManagedObjectContext) {
         _viewModel = StateObject(wrappedValue: StatsViewModel(context: context))
@@ -55,8 +54,7 @@ struct StatsView: View {
 
             ContributionGraphView(
                 data: viewModel.visibleDailyCounts,
-                range: viewModel.heatmapRange,
-                selectedDay: $selectedDay
+                range: viewModel.heatmapRange
             )
             .frame(height: 110)
 

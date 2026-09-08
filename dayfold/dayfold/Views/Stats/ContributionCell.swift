@@ -1,18 +1,18 @@
 // Views/Stats/ContributionCell.swift
 import SwiftUI
 
-/// 单格：圆角矩形 + onTap + accessibilityLabel
-/// popover 由 binding 驱动（`selectedDay` 在 StatsView 持有），保证 popover 出现在被点击的 cell 上
+/// 单格：圆角矩形 + tap 触发自身 popover
+/// popover 内部状态由 cell 持有，避免跨视图 binding 导致的渲染循环
 struct ContributionCell: View {
     let day: Date
     let count: Int
     let size: CGFloat
     let color: Color
     let isToday: Bool
-    @Binding var selectedDay: DaySelection?
+
+    @State private var isPopoverPresented: Bool = false
 
     var body: some View {
-        let selection = DaySelection(day: day, count: count)
         RoundedRectangle(cornerRadius: 3)
             .fill(color)
             .frame(width: size, height: size)
@@ -24,19 +24,14 @@ struct ContributionCell: View {
             }
             .contentShape(Rectangle())
             .onTapGesture {
-                selectedDay = selection
+                isPopoverPresented = true
             }
             .popover(
-                item: Binding(
-                    get: { selectedDay?.id == selection.id ? selection : nil },
-                    set: { newValue in
-                        if newValue == nil { selectedDay = nil }
-                    }
-                ),
+                isPresented: $isPopoverPresented,
                 attachmentAnchor: .point(.bottom),
                 arrowEdge: .top
-            ) { sel in
-                DayPopoverContent(day: sel.day, count: sel.count)
+            ) {
+                DayPopoverContent(day: day, count: count)
                     .presentationCompactAdaptation(.popover)
             }
             .accessibilityElement()
@@ -65,10 +60,10 @@ private struct DayPopoverContent: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(formattedDay)
-                .font(.warmCaption)
+                .font(.system(size: 12, weight: .medium, design: .rounded))
                 .foregroundColor(theme.textSecondary)
             Text("\(count) 篇")
-                .font(.warmHeadline)
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
                 .foregroundColor(theme.textPrimary)
         }
         .padding(.horizontal, 12)

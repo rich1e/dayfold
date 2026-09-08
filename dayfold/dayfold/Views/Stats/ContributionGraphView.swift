@@ -11,7 +11,6 @@ import SwiftUI
 struct ContributionGraphView: View {
     let data: [Date: Int]
     let range: HeatmapRange
-    @Binding var selectedDay: DaySelection?
 
     @Environment(\.theme) private var theme
 
@@ -46,18 +45,18 @@ struct ContributionGraphView: View {
     // MARK: - Month labels
 
     private func monthLabelsRow(weeks: [[Date?]]) -> some View {
+        // 每个 Text 给一个 cellSize 宽的"对齐槽"，但允许文字向左溢出不被截断
         HStack(alignment: .center, spacing: cellSpacing) {
             ForEach(Array(weeks.enumerated()), id: \.offset) { idx, week in
                 Text(monthLabel(for: week))
-                    .font(.system(size: 9, design: .rounded))
-                    .foregroundColor(theme.textTertiary)
-                    .frame(width: cellSize, height: rowHeight, alignment: .leading)
-                    .lineLimit(1)
-                    .fixedSize(horizontal: true, vertical: false)
+                    .font(.system(size: 10, weight: .medium, design: .rounded))
+                    .foregroundColor(theme.textSecondary)
+                    .fixedSize()
+                    .frame(width: cellSize, alignment: .leading)
                     .id(idx)
             }
         }
-        .frame(height: rowHeight)
+        .frame(height: rowHeight, alignment: .leading)
     }
 
     /// 仅在该列首日落在 1/8/15/22/29 时显示 "M月"
@@ -118,8 +117,7 @@ struct ContributionGraphView: View {
                                 count: count,
                                 size: cellSize,
                                 color: HeatmapPalette.color(for: count, dataMax: dataMax),
-                                isToday: Calendar.current.isDate(day, inSameDayAs: today),
-                                selectedDay: $selectedDay
+                                isToday: Calendar.current.isDate(day, inSameDayAs: today)
                             )
                         } else {
                             Color.clear.frame(width: cellSize, height: cellSize)
