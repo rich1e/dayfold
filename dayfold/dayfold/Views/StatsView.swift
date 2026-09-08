@@ -5,6 +5,7 @@ import CoreData
 struct StatsView: View {
     @Environment(\.theme) private var theme
     @StateObject private var viewModel: StatsViewModel
+    @State private var selectedDay: DaySelection?
 
     init(context: NSManagedObjectContext) {
         _viewModel = StateObject(wrappedValue: StatsViewModel(context: context))
@@ -13,58 +14,72 @@ struct StatsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                headerCard
-                streakCard
+                overviewCard
+                contributionCard
                 ratioCard
-                tagDistributionCard
             }
             .padding()
         }
         .background(theme.backgroundPrimary.ignoresSafeArea())
         .onAppear { viewModel.refresh() }
+        .popover(item: $selectedDay) { sel in
+            VStack(alignment: .leading, spacing: 6) {
+                Text(sel.day.formatted(.dateTime.year().month().day()))
+                    .font(.warmHeadline)
+                    .foregroundColor(theme.textPrimary)
+                Text("\(sel.count) 篇")
+                    .font(.warmCaption)
+                    .foregroundColor(theme.textSecondary)
+            }
+            .padding(12)
+            .presentationCompactAdaptation(.popover)
+        }
     }
 
     // MARK: - Cards
 
-    private var headerCard: some View {
+    private var overviewCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("总览")
                 .font(.warmCaption)
                 .foregroundColor(theme.textSecondary)
 
             HStack(spacing: 0) {
-                statColumn(value: viewModel.totalEntries, label: "全部")
+                statColumn(value: viewModel.totalEntries, label: "全部日记")
                 Divider().background(theme.dividerPrimary).frame(height: 40)
-                statColumn(value: viewModel.monthEntries, label: "本月")
-                Divider().background(theme.dividerPrimary).frame(height: 40)
-                statColumn(value: viewModel.yearEntries, label: "今年")
+                statColumn(value: viewModel.notebookCount, label: "笔记本")
             }
         }
         .warmCard()
     }
 
-    private var streakCard: some View {
-        HStack(spacing: 16) {
-            Image(systemName: "flame.fill")
-                .font(.system(size: 36))
-                .foregroundColor(theme.accentPrimary)
-                .frame(width: 56, height: 56)
-
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text("\(viewModel.currentStreak)")
-                        .font(.warmTitle)
-                        .foregroundColor(theme.textPrimary)
-                    Text("天")
-                        .font(.warmHeadline)
-                        .foregroundColor(theme.textSecondary)
-                }
-                Text("连续记录")
+    private var contributionCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("活跃度")
+                    .font(.warmCaption)
+                    .foregroundColor(theme.textSecondary)
+                Spacer()
+                Text(viewModel.streakLabel)
                     .font(.warmCaption)
                     .foregroundColor(theme.textSecondary)
             }
 
-            Spacer()
+            ContributionGraphView(
+                data: viewModel.visibleDailyCounts,
+                range: viewModel.heatmapRange,
+                onTap: { day, count in
+                    selectedDay = DaySelection(day: day, count: count)
+                }
+            )
+            .frame(height: 110)
+
+            Picker("范围", selection: $viewModel.heatmapRange) {
+                ForEach(HeatmapRange.allCases) { range in
+                    Text(range.label).tag(range)
+                }
+            }
+            .pickerStyle(.segmented)
         }
         .warmCard()
     }
@@ -79,29 +94,8 @@ struct StatsView: View {
                 ratioColumn(value: viewModel.mediaRatio, label: "带图片", icon: "photo")
                 Divider().background(theme.dividerPrimary).frame(height: 40)
                 ratioColumn(value: viewModel.locationRatio, label: "带位置", icon: "mappin")
-            }
-        }
-        .warmCard()
-    }
-
-    private var tagDistributionCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("标签分布")
-                .font(.warmCaption)
-                .foregroundColor(theme.textSecondary)
-
-            if viewModel.tagDistribution.isEmpty {
-                Text("暂无标签")
-                    .font(.warmFootnote)
-                    .foregroundColor(theme.textSecondary)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.vertical, 8)
-            } else {
-                VStack(spacing: 8) {
-                    ForEach(viewModel.tagDistribution) { stat in
-                        tagRow(stat: stat)
-                    }
-                }
+                Divider().background(theme.dividerPrimary).frame(height: 40)
+                ratioColumn(value: viewModel.tagRatio, label: "带标签", icon: "tag.fill")
             }
         }
         .warmCard()
@@ -134,39 +128,5 @@ struct StatsView: View {
                 .foregroundColor(theme.textSecondary)
         }
         .frame(maxWidth: .infinity)
-    }
-
-    private func tagRow(stat: StatsViewModel.TagStat) -> some View {
-        let maxCount = viewModel.tagDistribution.first?.count ?? 1
-        let fraction = maxCount == 0 ? 0 : Double(stat.count) / Double(maxCount)
-        return HStack(spacing: 12) {
-            HStack(spacing: 8) {
-                Image(systemName: stat.tag.wrappedIcon)
-                    .font(.system(size: 12))
-                    .foregroundColor(stat.tag.displayColor)
-                Text(stat.tag.wrappedName)
-                    .font(.warmCaption)
-                    .foregroundColor(theme.textPrimary)
-                    .lineLimit(1)
-            }
-            .frame(minWidth: 80, alignment: .leading)
-
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(theme.backgroundPressed)
-                        .frame(height: 6)
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(stat.tag.displayColor)
-                        .frame(width: geo.size.width * fraction, height: 6)
-                }
-            }
-            .frame(height: 6)
-
-            Text("\(stat.count)")
-                .font(.warmCaption)
-                .foregroundColor(theme.textSecondary)
-                .frame(minWidth: 24, alignment: .trailing)
-        }
     }
 }
