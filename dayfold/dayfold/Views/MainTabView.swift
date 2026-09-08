@@ -36,13 +36,25 @@ struct MainTabView: View {
                 ZStack {
                     theme.backgroundPrimary.ignoresSafeArea()
 
-                    if selectedTab == .list {
-                        HomeView(
-                            context: viewContext,
-                            isListMode: $homeListMode,
-                            onNewEntry: { showingNewEntry = true }
-                        )
-                        .transition(.paperDrop)
+                    Group {
+                        switch selectedTab {
+                        case .list:
+                            HomeView(
+                                context: viewContext,
+                                isListMode: $homeListMode,
+                                onNewEntry: { showingNewEntry = true }
+                            )
+                            .transition(.paperDrop)
+                        case .stats:
+                            StatsView(context: viewContext)
+                                .transition(.paperDrop)
+                        default:
+                            PlaceholderView(
+                                icon: "square.dashed",
+                                title: "敬请期待",
+                                subtitle: "该功能开发中"
+                            )
+                        }
                     }
                 }
                 .animation(.easeOut(duration: 0.38), value: selectedTab)
