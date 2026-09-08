@@ -95,12 +95,18 @@ struct ContributionGraphView: View {
     private func weekdayLabelsColumn() -> some View {
         VStack(alignment: .leading, spacing: cellSpacing) {
             ForEach(weekdayLabels()) { item in
-                Text(item.text)
-                    .font(.system(size: 9, design: .rounded))
-                    .foregroundColor(item.isWeekend ? theme.accentDestructive : theme.textTertiary)
-                    .frame(width: weekdayLabelsWidth, height: cellSize, alignment: .leading)
-                    .lineLimit(1)
-                    .fixedSize()
+                if item.text.isEmpty {
+                    // 占位行：Color.clear 严格占 cellSize 高度，保证与右侧 7 行 cell 严格对齐
+                    Color.clear
+                        .frame(width: weekdayLabelsWidth, height: cellSize)
+                } else {
+                    Text(item.text)
+                        .font(.system(size: 9, design: .rounded))
+                        .foregroundColor(item.isWeekend ? theme.accentDestructive : theme.textTertiary)
+                        .frame(width: weekdayLabelsWidth, height: cellSize, alignment: .leading)
+                        .lineLimit(1)
+                        .fixedSize()
+                }
             }
         }
     }
