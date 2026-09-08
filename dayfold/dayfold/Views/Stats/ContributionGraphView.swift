@@ -86,12 +86,18 @@ struct ContributionGraphView: View {
 
     // MARK: - Weekday labels
 
+    private struct WeekdayLabel: Identifiable {
+        let id: Int              // 0..6 行索引
+        let text: String         // 空字符串表示占位
+        let isWeekend: Bool
+    }
+
     private func weekdayLabelsColumn() -> some View {
         VStack(alignment: .leading, spacing: cellSpacing) {
-            ForEach(Array(weekdayLabels().enumerated()), id: \.offset) { _, label in
-                Text(label)
+            ForEach(weekdayLabels()) { item in
+                Text(item.text)
                     .font(.system(size: 9, design: .rounded))
-                    .foregroundColor(theme.textTertiary)
+                    .foregroundColor(item.isWeekend ? theme.accentDestructive : theme.textTertiary)
                     .frame(width: weekdayLabelsWidth, height: cellSize, alignment: .leading)
                     .lineLimit(1)
                     .fixedSize()
@@ -99,21 +105,23 @@ struct ContributionGraphView: View {
         }
     }
 
-    /// 按 `Calendar.current.firstWeekday` 排序列顺序；只显示 周一/周三/周五 三个标签，其余空字符串占位
-    private func weekdayLabels() -> [String] {
+    /// 按 `Calendar.current.firstWeekday` 排序列顺序；周一/周三/周五正常显示，周六/周日红色显示
+    private func weekdayLabels() -> [WeekdayLabel] {
         let firstWeekday = Calendar.current.firstWeekday
         // names 按 Calendar weekday 编号索引：1=Sun → index 0, 2=Mon → index 1, ..., 7=Sat → index 6
         let names = ["日", "一", "二", "三", "四", "五", "六"]
-        var result: [String] = []
+        var result: [WeekdayLabel] = []
         for i in 0..<7 {
             // realWeekday: 1..7 对应 Calendar.weekday
             let realWeekday = ((firstWeekday - 1 + i) % 7) + 1
-            // 显示 Mon(weekday=2) / Wed(weekday=4) / Fri(weekday=6)
-            if realWeekday == 2 || realWeekday == 4 || realWeekday == 6 {
-                result.append("周" + names[realWeekday - 1])
-            } else {
-                result.append("")
+            let isWeekend = (realWeekday == 1 || realWeekday == 7)
+            var text = ""
+            // 显示 Mon(weekday=2) / Wed(weekday=4) / Fri(weekday=6)，加上周末
+            if realWeekday == 2 || realWeekday == 4 || realWeekday == 6
+                || realWeekday == 1 || realWeekday == 7 {
+                text = "周" + names[realWeekday - 1]
             }
+            result.append(WeekdayLabel(id: i, text: text, isWeekend: isWeekend))
         }
         return result
     }
