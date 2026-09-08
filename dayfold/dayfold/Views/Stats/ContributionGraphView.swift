@@ -13,6 +13,7 @@ struct ContributionGraphView: View {
     let range: HeatmapRange
 
     @Environment(\.theme) private var theme
+    @Environment(\.colorScheme) private var colorScheme
 
     private let cellSpacing: CGFloat = 3
     private let weekdayLabelsWidth: CGFloat = 22
@@ -135,7 +136,7 @@ struct ContributionGraphView: View {
                                 day: day,
                                 count: count,
                                 size: cellSize,
-                                color: HeatmapPalette.color(for: count, dataMax: dataMax),
+                                color: HeatmapPalette.color(for: count, dataMax: dataMax, colorScheme: colorScheme),
                                 isToday: Calendar.current.isDate(day, inSameDayAs: today)
                             )
                         } else {
