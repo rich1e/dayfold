@@ -227,3 +227,50 @@ enum RichTextMarkdownParser {
         return (markdown, filenames)
     }
 }
+
+/// 内容段：把正文 markdown 拆分为文本与图片两类，供图文混排 UI 复用
+public enum ContentSegment {
+    case text(String)
+    case image(String)
+}
+
+extension RichTextMarkdownParser {
+    /// 去掉 Markdown 图片语法 `![](filename)` / `![alt](filename)`，保留其余 markdown 装饰
+    /// （调用方按需继续清洗加粗/标题等）。供卡片预览等"只想要纯文本"场景复用。
+    public static func stripMarkdownImages(_ markdown: String) -> String {
+        guard !markdown.isEmpty else { return markdown }
+        let ns = markdown as NSString
+        let stripped = imageRegex.stringByReplacingMatches(
+            in: markdown, options: [], range: NSRange(location: 0, length: ns.length), withTemplate: ""
+        )
+        return stripped.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// 把内容切成 text / image 段；不含"无 `![]` 但有 mediaAssets → 文末追加"的兜底逻辑，
+    /// 该兜底是详情页独有语义，调用方按需自行追加。
+    public static func contentSegments(from markdown: String) -> [ContentSegment] {
+        guard !markdown.isEmpty else { return [] }
+        let ns = markdown as NSString
+        let matches = imageRegex.matches(in: markdown, options: [], range: NSRange(location: 0, length: ns.length))
+
+        var segments: [ContentSegment] = []
+        var lastLocation = 0
+
+        for match in matches {
+            let textRange = NSRange(location: lastLocation, length: match.range.location - lastLocation)
+            if textRange.length > 0 {
+                segments.append(.text(ns.substring(with: textRange)))
+            }
+            let filename = ns.substring(with: match.range(at: 2))
+            segments.append(.image(filename))
+            lastLocation = match.range.location + match.range.length
+        }
+
+        if lastLocation < ns.length {
+            let tail = ns.substring(with: NSRange(location: lastLocation, length: ns.length - lastLocation))
+            segments.append(.text(tail))
+        }
+
+        return segments
+    }
+}

@@ -119,7 +119,16 @@ struct EntryDetailView: View {
     // MARK: - 图文混排展示
 
     private var entryContentFlow: some View {
-        let segments = parseContentSegments(entry.wrappedContent)
+        var segments = RichTextMarkdownParser.contentSegments(from: entry.wrappedContent)
+
+        // 兜底：正文没有任何 ![] 标记但存在关联图片资产，文末渲染图片（详情页独有语义）
+        let hasImageSegment = segments.contains { if case .image = $0 { return true } else { return false } }
+        if !hasImageSegment && !loadedImages.isEmpty {
+            for asset in entry.mediaAssetsArray {
+                segments.append(.image(asset.wrappedFilename))
+            }
+        }
+
         return VStack(alignment: .leading, spacing: 12) {
             ForEach(segments.indices, id: \.self) { idx in
                 switch segments[idx] {
@@ -144,46 +153,6 @@ struct EntryDetailView: View {
                 }
             }
         }
-    }
-
-    private enum ContentSegment {
-        case text(String)
-        case image(String)
-    }
-
-    private func parseContentSegments(_ content: String) -> [ContentSegment] {
-        guard !content.isEmpty else { return [] }
-        let regex = try! NSRegularExpression(pattern: #"!\[(.*?)\]\((.*?)\)"#, options: [])
-        let nsString = content as NSString
-        let matches = regex.matches(in: content, options: [], range: NSRange(location: 0, length: nsString.length))
-
-        var segments: [ContentSegment] = []
-        var lastLocation = 0
-
-        for match in matches {
-            let textRange = NSRange(location: lastLocation, length: match.range.location - lastLocation)
-            if textRange.length > 0 {
-                let text = nsString.substring(with: textRange)
-                segments.append(.text(text))
-            }
-            let filename = nsString.substring(with: match.range(at: 2))
-            segments.append(.image(filename))
-            lastLocation = match.range.location + match.range.length
-        }
-
-        if lastLocation < nsString.length {
-            let tail = nsString.substring(with: NSRange(location: lastLocation, length: nsString.length - lastLocation))
-            segments.append(.text(tail))
-        }
-
-        // 如果正文没有任何 ![] 标记，但存在关联的图片资产，兜底在文末渲染图片
-        if matches.isEmpty && !loadedImages.isEmpty {
-            for asset in entry.mediaAssetsArray {
-                segments.append(.image(asset.wrappedFilename))
-            }
-        }
-
-        return segments
     }
 
     private func toggleFavorite() {

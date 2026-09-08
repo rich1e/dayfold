@@ -171,7 +171,8 @@ struct EntryCardView: View {
             .replacingOccurrences(of: #"^[-*]\s"#, with: "• ", options: .regularExpression)
             .replacingOccurrences(of: #"^\d+\.\s"#, with: "", options: .regularExpression)
             .replacingOccurrences(of: #"> "#, with: "", options: .regularExpression)
-        return stripped.trimmingCharacters(in: .whitespacesAndNewlines)
+        let noImages = RichTextMarkdownParser.stripMarkdownImages(stripped)
+        return noImages.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private var imageWidth: CGFloat {
