@@ -22,19 +22,23 @@ struct ContributionGraphView: View {
 
     var body: some View {
         let computed = computeGrid()
-        VStack(alignment: .leading, spacing: 6) {
-            // 顶部 month labels 行（每列宽 = cellSize + cellSpacing）
-            monthLabelsRow(weeks: computed.weeks)
-                .padding(.leading, weekdayLabelsWidth)
-
-            HStack(alignment: .top, spacing: 6) {
+        HStack(alignment: .top, spacing: 6) {
+            // 左侧：两列对齐 —— 顶部空占位（与 month labels 行同高），下方 weekday labels（与 grid 7 行同高）
+            VStack(alignment: .leading, spacing: 6) {
+                Color.clear
+                    .frame(width: weekdayLabelsWidth, height: 12)
                 weekdayLabelsColumn()
-                ScrollView(.horizontal, showsIndicators: false) {
-                    grid(weeks: computed.weeks, today: computed.today)
-                        .padding(.horizontal, 2)
-                }
-                .defaultScrollAnchor(.trailing)
             }
+
+            // 右侧：ScrollView 包含 month labels + grid，整体同步横滚
+            ScrollView(.horizontal, showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 6) {
+                    monthLabelsRow(weeks: computed.weeks)
+                    grid(weeks: computed.weeks, today: computed.today)
+                }
+                .padding(.horizontal, 2)
+            }
+            .defaultScrollAnchor(.trailing)
         }
     }
 
@@ -42,12 +46,13 @@ struct ContributionGraphView: View {
 
     private func monthLabelsRow(weeks: [[Date?]]) -> some View {
         HStack(alignment: .center, spacing: cellSpacing) {
-            ForEach(Array(weeks.enumerated()), id: \.offset) { _, week in
+            ForEach(Array(weeks.enumerated()), id: \.offset) { idx, week in
                 Text(monthLabel(for: week))
                     .font(.system(size: 9, design: .rounded))
                     .foregroundColor(theme.textTertiary)
                     .frame(width: cellSize, alignment: .leading)
                     .fixedSize()
+                    .id(idx) // 显式 id 防止 range 切换时 SwiftUI 复用错乱
             }
         }
         .frame(height: 12)
