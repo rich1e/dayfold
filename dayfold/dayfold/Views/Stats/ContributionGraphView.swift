@@ -102,13 +102,15 @@ struct ContributionGraphView: View {
     /// 按 `Calendar.current.firstWeekday` 排序列顺序；只显示 周一/周三/周五 三个标签，其余空字符串占位
     private func weekdayLabels() -> [String] {
         let firstWeekday = Calendar.current.firstWeekday
+        // names 按 Calendar weekday 编号索引：1=Sun → index 0, 2=Mon → index 1, ..., 7=Sat → index 6
         let names = ["日", "一", "二", "三", "四", "五", "六"]
         var result: [String] = []
         for i in 0..<7 {
-            let realIdx = (firstWeekday - 1 + i) % 7
-            // 显示 Mon(2) / Wed(4) / Fri(6)
-            if realIdx == 2 || realIdx == 4 || realIdx == 6 {
-                result.append("周" + names[realIdx])
+            // realWeekday: 1..7 对应 Calendar.weekday
+            let realWeekday = ((firstWeekday - 1 + i) % 7) + 1
+            // 显示 Mon(weekday=2) / Wed(weekday=4) / Fri(weekday=6)
+            if realWeekday == 2 || realWeekday == 4 || realWeekday == 6 {
+                result.append("周" + names[realWeekday - 1])
             } else {
                 result.append("")
             }
