@@ -84,18 +84,13 @@ struct SettingsView: View {
     private var sectionHeader: some View {
         VStack(spacing: 12) {
             Image(systemName: "lock.fill")
-                .font(.system(size: 40, weight: .light))
+                .font(.system(size: 32, weight: .light))
                 .foregroundColor(theme.textPrimary)
 
             (
-                Text("使用密码或生物识别技术")
+                Text("使用密码保护你的日记，")
                     .foregroundColor(theme.textSecondary)
-                + Text("保护您的日记")
-                    .foregroundColor(theme.accentPrimary)
-                + Text("，防止不必要的窥探。")
-                    .foregroundColor(theme.textSecondary)
-                + Text(" ")
-                + Text("了解更多")
+                + Text("让只有你，才能打开属于你的记忆。")
                     .foregroundColor(theme.accentPrimary)
             )
             .font(.warmCaption)
