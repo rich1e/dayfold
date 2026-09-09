@@ -43,9 +43,18 @@ struct EntryBottomSheet: View {
         .frame(maxWidth: .infinity)
         .frame(height: currentHeight)
         .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(theme.backgroundSecondary)
-                .shadow(color: theme.backgroundPressed.opacity(0.4), radius: 12, x: 0, y: -4)
+            // 背景高度比内容高 34pt，延伸到屏底覆盖 home indicator（消除底部间隙）；
+            // SwiftUI 不裁剪，背景可超出 frame 范围绘制，但父空间仍只占 currentHeight
+            UnevenRoundedRectangle(
+                topLeadingRadius: 20,
+                bottomLeadingRadius: 0,
+                bottomTrailingRadius: 0,
+                topTrailingRadius: 20
+            )
+            .fill(theme.backgroundSecondary)
+            .frame(height: currentHeight + 34)
+            .offset(y: 34)
+            .shadow(color: theme.backgroundPressed.opacity(0.4), radius: 12, x: 0, y: -4)
         )
         .gesture(
             DragGesture()
@@ -119,6 +128,48 @@ struct EntryBottomSheet: View {
     }
 
     private func sheetEntryCard(entry: Entry) -> some View {
+        SheetEntryCardRow(
+            entry: entry,
+            photoWallScrollTarget: $photoWallScrollTarget,
+            viewMode: $viewMode
+        )
+        .padding(12)
+        .background(theme.backgroundTertiary)
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(theme.dividerPrimary, lineWidth: 1)
+        )
+    }
+
+    private func snapSheet(translation: CGFloat) {
+        let anchors: [CGFloat] = [SheetHeight.collapsed, SheetHeight.medium, SheetHeight.expanded]
+        let target = sheetHeight - translation
+        let nearest = anchors.min(by: { abs($0 - target) < abs($1 - target) }) ?? SheetHeight.collapsed
+        sheetHeight = nearest
+    }
+
+    private func formatSelectedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "M月d日"
+        return formatter.string(from: date)
+    }
+}
+
+// MARK: - 单条 entry 卡片（缩略图 + 清洗 markdown）
+private struct SheetEntryCardRow: View {
+    @Environment(\.theme) private var theme
+    let entry: Entry
+    @Binding var photoWallScrollTarget: UUID?
+    @Binding var viewMode: TimelineViewMode
+
+    @State private var thumbnails: [UIImage] = []
+
+    private var thumbnailSourceID: String {
+        entry.mediaAssetsArray.map { $0.wrappedFilename }.joined(separator: ",")
+    }
+
+    var body: some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 if !entry.wrappedTitle.isEmpty {
@@ -127,10 +178,30 @@ struct EntryBottomSheet: View {
                         .foregroundColor(theme.textPrimary)
                         .lineLimit(1)
                 }
-                Text(entry.wrappedContent)
-                    .font(.warmBody)
-                    .foregroundColor(theme.textSecondary)
-                    .lineLimit(2)
+
+                // 缩略图预览（最多 3 张，44×44 圆角）
+                if !thumbnails.isEmpty {
+                    HStack(spacing: 6) {
+                        ForEach(Array(thumbnails.prefix(3).enumerated()), id: \.offset) { _, image in
+                            Image(uiImage: image)
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 44, height: 44)
+                                .clipped()
+                                .cornerRadius(6)
+                        }
+                    }
+                }
+
+                // 文案预览（剥离 markdown 图片语法，避免残留 `![](filename)`）
+                let cleanContent = RichTextMarkdownParser.stripMarkdownImages(entry.wrappedContent)
+                if !cleanContent.isEmpty {
+                    Text(cleanContent)
+                        .font(.warmBody)
+                        .foregroundColor(theme.textSecondary)
+                        .lineLimit(2)
+                }
+
                 if let createdAt = entry.createdAt {
                     Text(createdAt, format: .dateTime.hour().minute())
                         .font(.warmCaption)
@@ -148,21 +219,18 @@ struct EntryBottomSheet: View {
                 }
             }
         }
-        .padding(12)
-        .background(theme.backgroundPrimary)
-        .cornerRadius(12)
+        .task(id: thumbnailSourceID) {
+            await loadThumbnails()
+        }
     }
 
-    private func snapSheet(translation: CGFloat) {
-        let anchors: [CGFloat] = [SheetHeight.collapsed, SheetHeight.medium, SheetHeight.expanded]
-        let target = sheetHeight - translation
-        let nearest = anchors.min(by: { abs($0 - target) < abs($1 - target) }) ?? SheetHeight.collapsed
-        sheetHeight = nearest
-    }
-
-    private func formatSelectedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "M月d日"
-        return formatter.string(from: date)
+    private func loadThumbnails() async {
+        var images: [UIImage] = []
+        for asset in entry.mediaAssetsArray.prefix(3) {
+            if let image = await MediaService.shared.loadImage(filename: asset.wrappedFilename) {
+                images.append(image)
+            }
+        }
+        thumbnails = images
     }
 }

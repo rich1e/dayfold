@@ -33,6 +33,7 @@ struct CalendarView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
+            // 日历面板占满整屏（包含 sheet 下方的空白区域），保证 sheet 底部漏出的是日历背景色
             VStack(spacing: 0) {
                 // 月份导航
                 monthHeader
@@ -56,7 +57,8 @@ struct CalendarView: View {
 
                 Spacer()
             }
-            .background(theme.backgroundPrimary)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(theme.backgroundPrimary.ignoresSafeArea(edges: .bottom))
 
             // 底部抽屉覆盖层
             EntryBottomSheet(
