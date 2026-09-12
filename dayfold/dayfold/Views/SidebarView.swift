@@ -190,10 +190,6 @@ struct DrawerView: View {
                             subtitle: privacySubtitle
                         ),
                         DrawerSettingsRowModel(
-                            tab: .hiddenAlbum,
-                            subtitle: "Off"
-                        ),
-                        DrawerSettingsRowModel(
                             tab: .stats,
                             subtitle: statsSubtitle
                         ),
