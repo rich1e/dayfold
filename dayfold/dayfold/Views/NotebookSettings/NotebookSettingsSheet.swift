@@ -77,22 +77,12 @@ struct NotebookSettingsSheet: View {
     // MARK: - 头部
 
     private var header: some View {
-        HStack {
-            Text("ALBUM SETTING")
-                .font(.system(size: 22, weight: .bold))
-                .foregroundColor(theme.textPrimary)
-                .tracking(2)
-            Spacer()
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 22))
-                    .foregroundColor(theme.textSecondary)
-                    .frame(width: 44, height: 44)
-            }
-        }
-        .padding(.top, 4)
+        Text("ALBUM SETTING")
+            .font(.system(size: 22, weight: .bold))
+            .foregroundColor(theme.textPrimary)
+            .tracking(2)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, 4)
     }
 
     // MARK: - SKIN
