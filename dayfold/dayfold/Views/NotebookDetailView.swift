@@ -26,6 +26,7 @@ struct NotebookDetailView: View {
     @StateObject private var timelineVM: TimelineViewModel
     @FetchRequest private var entries: FetchedResults<Entry>
     @State private var sheetMode: SheetMode?
+    @State private var isUnlocked: Bool = false
 
     init(notebook: Notebook, onNewEntry: @escaping () -> Void, isPresented: Binding<Bool>) {
         self.notebook = notebook
@@ -47,6 +48,22 @@ struct NotebookDetailView: View {
     }
 
     var body: some View {
+        Group {
+            if notebook.isPasswordEnabled && !isUnlocked {
+                NotebookPasswordGate(mode: .verify, notebook: notebook) {
+                    isUnlocked = true
+                }
+            } else {
+                detailContent
+            }
+        }
+        .onChange(of: notebook.isPasswordEnabled) { newValue in
+            // 用户在 Settings sheet 里关闭了密码 → 立刻解锁
+            if !newValue { isUnlocked = true }
+        }
+    }
+
+    private var detailContent: some View {
         ZStack {
             theme.backgroundTertiary.ignoresSafeArea()
 

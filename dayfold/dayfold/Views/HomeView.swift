@@ -13,6 +13,10 @@ struct HomeView: View {
     @State private var currentIndex: Int = 0
     @State private var confirmDelete = false
     @State private var showDetail = false
+    @State private var editingNotebook: Notebook?
+    /// 当前本子的镜像 + @ObservedObject 订阅，确保 Core Data 字段变化（name / coverStyle / hasPassword）
+    /// 触发 HomeView 重绘。`currentNotebook` 计算属性本身不触发 SwiftUI 订阅。
+    @State private var observedNotebook: Notebook?
     @Namespace private var coverNamespace
 
     @FetchRequest(
@@ -67,20 +71,34 @@ struct HomeView: View {
                 ))
             }
         }
+        .sheet(item: $editingNotebook) { nb in
+            NotebookSettingsSheet(notebook: nb)
+                .environment(\.managedObjectContext, context)
+        }
+        // 切换 notebook → 同步到 observedNotebook 触发订阅
+        .onChange(of: currentIndex) { _ in
+            observedNotebook = currentNotebook
+        }
+        .onAppear {
+            observedNotebook = currentNotebook
+        }
     }
 
     // MARK: - 封面翻页模式
 
     private var coverModeView: some View {
         VStack(spacing: 0) {
-            // 标题区
+            // 标题区 — NotebookTitleHeader 内部持有 @ObservedObject,
+            // Notebook 字段(name/coverStyle 等)变更触发该 view 重绘,无需等 currentIndex 切换。
             VStack(spacing: 6) {
-                Text(currentNotebook?.wrappedName ?? "DAYFOLD")
-                    .font(.system(size: 26, weight: .black))
-                    .foregroundColor(theme.textPrimary)
-                    .tracking(3)
-                    .animation(.easeOut(duration: 0.2), value: currentIndex)
-
+                if let nb = observedNotebook ?? currentNotebook {
+                    NotebookTitleHeader(notebook: nb)
+                } else {
+                    Text("DAYFOLD")
+                        .font(.system(size: 26, weight: .black))
+                        .foregroundColor(theme.textPrimary)
+                        .tracking(3)
+                }
                 Text("\(latestDate) / \(entryCount) entries")
                     .font(.system(size: 13, weight: .regular))
                     .foregroundColor(theme.textTertiary)
@@ -96,17 +114,19 @@ struct HomeView: View {
             } else {
                 TabView(selection: $currentIndex) {
                     ForEach(Array(notebooks.enumerated()), id: \.element.objectID) { idx, nb in
-                        NotebookCoverView(notebook: nb)
-                            .frame(width: 240, height: 340)
-                            .tag(idx)
-                            .notebookPageTurn(idx: idx, currentIndex: $currentIndex)   // 新增
-                            .padding(.horizontal, 40)
-                            .onTapGesture {
-                                currentIndex = idx
-                                withAnimation(.spring(response: 0.42, dampingFraction: 0.85)) {
-                                    showDetail = true
-                                }
+                        NotebookCoverView(
+                            notebook: nb,
+                            editingNotebook: $editingNotebook
+                        ) {
+                            currentIndex = idx
+                            withAnimation(.spring(response: 0.42, dampingFraction: 0.85)) {
+                                showDetail = true
                             }
+                        }
+                        .frame(width: 240, height: 340)
+                        .tag(idx)
+                        .notebookPageTurn(idx: idx, currentIndex: $currentIndex)   // 新增
+                        .padding(.horizontal, 40)
                     }
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
@@ -231,11 +251,33 @@ struct HomeView: View {
     }
 }
 
+// MARK: - 笔记本标题区(实时响应 name 变更)
+
+/// 仅持有一个 `@ObservedObject var notebook: Notebook`,让 Notebook 字段(name/coverStyle)
+/// 变更触发本 view 重绘。
+///
+/// 为什么不直接在 HomeView.body 读 `currentNotebook?.wrappedName`?
+/// `currentNotebook` 是计算属性,SwiftUI 不会订阅;且 `Notebook` 是 NSManagedObject,
+/// 必须显式 `@ObservedObject` 才能让 KVO 变更转 SwiftUI 重绘。
+private struct NotebookTitleHeader: View {
+    @Environment(\.theme) private var theme
+    @ObservedObject var notebook: Notebook
+
+    var body: some View {
+        Text(notebook.wrappedName)
+            .font(.system(size: 26, weight: .black))
+            .foregroundColor(theme.textPrimary)
+            .tracking(3)
+    }
+}
+
 // MARK: - 笔记本封面视图
 
 struct NotebookCoverView: View {
     @Environment(\.theme) private var theme
     @ObservedObject var notebook: Notebook
+    @Binding var editingNotebook: Notebook?
+    var onOpenDetail: () -> Void = {}
 
     var body: some View {
         GeometryReader { geo in
@@ -247,7 +289,7 @@ struct NotebookCoverView: View {
                 RoundedRectangle(cornerRadius: 16)
                     .fill(theme.surfacePaper)
                     .overlay(
-                        CoverPatternView(style: notebook.coverStyle)
+                        coverForeground
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                     )
                     .overlay(
@@ -293,21 +335,44 @@ struct NotebookCoverView: View {
                     .frame(width: 22)
                     .offset(x: spineW - 4)
 
-                // ℹ️ 徽章
-                ZStack {
-                    Circle()
-                        .fill(theme.surfacePaper)
-                        .frame(width: 30, height: 30)
-                        .shadow(color: .black.opacity(0.25), radius: 3, x: 0, y: 2)
-                    Text("i")
-                        .font(.system(size: 14, weight: .bold, design: .serif))
-                        .italic()
-                        .foregroundColor(theme.surfacePaperInk)
+                // ℹ️ 徽章 — Button 独立可点
+                Button {
+                    editingNotebook = notebook
+                } label: {
+                    ZStack {
+                        Circle()
+                            .fill(theme.surfacePaper)
+                            .frame(width: 30, height: 30)
+                            .shadow(color: .black.opacity(0.25), radius: 3, x: 0, y: 2)
+                        Text("i")
+                            .font(.system(size: 14, weight: .bold, design: .serif))
+                            .italic()
+                            .foregroundColor(theme.surfacePaperInk)
+                    }
+                    .contentShape(Circle())
                 }
+                .buttonStyle(.plain)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                 .padding(.top, 14)
                 .padding(.trailing, 14)
             }
+            .contentShape(RoundedRectangle(cornerRadius: 16))
+            .onTapGesture {
+                // Button 会优先消费 i 徽章的点击；这里的 onTapGesture 只响应 cover 主体
+                onOpenDetail()
+            }
+        }
+    }
+
+    /// 封面前景图层：Custom Skin 优先；否则显示 SKIN 图案。
+    @ViewBuilder
+    private var coverForeground: some View {
+        if let img = notebook.customSkinImage {
+            Image(uiImage: img)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+        } else {
+            CoverPatternView(style: notebook.coverStyle)
         }
     }
 }

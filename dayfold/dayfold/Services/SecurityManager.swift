@@ -108,8 +108,8 @@ final class SecurityManager: ObservableObject {
     /// 设置或修改密码。传入必须为 4 位数字。
     func setPassword(_ pin: String) {
         precondition(pin.count == 4, "PIN 必须是 4 位")
-        let salt = Self.randomSalt()
-        let hash = Self.derive(pin: pin, salt: salt)
+        let salt = CryptoHelpers.randomSalt()
+        let hash = CryptoHelpers.derive(pin: pin, salt: salt)
         defaults.set(salt, forKey: kPasswordSalt)
         defaults.set(hash, forKey: kPasswordHash)
         hasPassword = true
@@ -147,8 +147,8 @@ final class SecurityManager: ObservableObject {
             let savedHash = defaults.string(forKey: kPasswordHash)
         else { return false }
 
-        let candidate = Self.derive(pin: pin, salt: savedSalt)
-        let ok = constantTimeEqual(candidate, savedHash)
+        let candidate = CryptoHelpers.derive(pin: pin, salt: savedSalt)
+        let ok = CryptoHelpers.constantTimeEqual(candidate, savedHash)
 
         if ok {
             failedAttempts = 0
@@ -329,44 +329,5 @@ final class SecurityManager: ObservableObject {
         isLocked = false
     }
 
-    // MARK: - 私有：密码学
-
-    private static func randomSalt() -> String {
-        var bytes = [UInt8](repeating: 0, count: 16)
-        _ = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
-        return bytes.map { String(format: "%02x", $0) }.joined()
-    }
-
-    /// PBKDF2-HMAC-SHA256, 100k iterations. iOS 平台使用 `CCKeyDerivationPBKDF`
-    /// 是最标准的做法；这里用 CommonCrypto 桥接。
-    private static func derive(pin: String, salt: String) -> String {
-        let pinBytes = Array(pin.utf8)
-        let saltBytes = Array(salt.utf8)
-        var derived = [UInt8](repeating: 0, count: 32)
-
-        let status = pinBytes.withUnsafeBufferPointer { pinPtr -> Int32 in
-            saltBytes.withUnsafeBufferPointer { saltPtr in
-                CCKeyDerivationPBKDF(
-                    CCPBKDFAlgorithm(kCCPBKDF2),
-                    pinPtr.baseAddress, pinBytes.count,
-                    saltPtr.baseAddress, saltBytes.count,
-                    CCPseudoRandomAlgorithm(kCCPRFHmacAlgSHA256),
-                    100_000,
-                    &derived, derived.count
-                )
-            }
-        }
-        precondition(status == kCCSuccess, "PBKDF2 派生失败")
-        return derived.map { String(format: "%02x", $0) }.joined()
-    }
-
-    /// 长度相同的 hex 字符串做常量时间比较。
-    private func constantTimeEqual(_ a: String, _ b: String) -> Bool {
-        guard a.count == b.count else { return false }
-        var diff: UInt8 = 0
-        for (x, y) in zip(a.utf8, b.utf8) {
-            diff |= x ^ y
-        }
-        return diff == 0
-    }
+    // MARK: - 私有：失败节流
 }
