@@ -107,18 +107,8 @@ struct DrawerDetailRouter: View {
         case .trash:
             TrashView()
         case .about:
-            DrawerPlaceholderDetail(
-                icon: "info.circle",
-                title: "About",
-                subtitle: aboutSubtitle
-            )
+            AboutView()
         }
-    }
-
-    private var aboutSubtitle: String {
-        let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
-        let b = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—"
-        return "Version \(v) · Build \(b)"
     }
 }
 
