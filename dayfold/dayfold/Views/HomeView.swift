@@ -105,6 +105,7 @@ struct HomeView: View {
             }
             .padding(.top, 100)
             .frame(height: 134)
+            .animation(.easeInOut(duration: 0.4), value: currentIndex)
 
             Spacer()
 
@@ -112,24 +113,16 @@ struct HomeView: View {
             if notebooks.isEmpty {
                 emptyState
             } else {
-                TabView(selection: $currentIndex) {
-                    ForEach(Array(notebooks.enumerated()), id: \.element.objectID) { idx, nb in
-                        NotebookCoverView(
-                            notebook: nb,
-                            editingNotebook: $editingNotebook
-                        ) {
-                            currentIndex = idx
-                            withAnimation(.spring(response: 0.42, dampingFraction: 0.85)) {
-                                showDetail = true
-                            }
+                NotebookCarousel(
+                    currentIndex: $currentIndex,
+                    notebooks: Array(notebooks),
+                    onTap: { idx in
+                        currentIndex = idx
+                        withAnimation(.spring(response: 0.42, dampingFraction: 0.85)) {
+                            showDetail = true
                         }
-                        .frame(width: 240, height: 340)
-                        .tag(idx)
-                        .notebookPageTurn(idx: idx, currentIndex: $currentIndex)   // 新增
-                        .padding(.horizontal, 40)
                     }
-                }
-                .tabViewStyle(.page(indexDisplayMode: .never))
+                )
                 .frame(height: 380)
             }
 
