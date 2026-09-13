@@ -42,6 +42,7 @@ struct MainTabView: View {
                             HomeView(
                                 context: viewContext,
                                 isListMode: $homeListMode,
+                                isDrawerOpen: drawerOpen,
                                 onNewEntry: { showingNewEntry = true }
                             )
                             .transition(.paperDrop)

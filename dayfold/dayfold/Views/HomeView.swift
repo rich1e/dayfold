@@ -8,6 +8,7 @@ struct HomeView: View {
     @Environment(\.theme) private var theme
     let context: NSManagedObjectContext
     @Binding var isListMode: Bool
+    var isDrawerOpen: Bool = false
     var onNewEntry: () -> Void
 
     @State private var currentIndex: Int = 0
@@ -162,6 +163,11 @@ struct HomeView: View {
                 .transition(.scale(scale: 0.8).combined(with: .opacity))
             }
         }
+        // 抽屉打开时整体隐藏:内容区因 .offset 右移 85%,其左侧 15% 浮在抽屉右边缘上方,
+        // 此时 HomeView 的笔记本封面/指示器/底部按钮会从抽屉右侧露出,造成视觉拥挤
+        .opacity(isDrawerOpen ? 0 : 1)
+        .animation(.easeOut(duration: 0.38), value: isDrawerOpen)
+        .allowsHitTesting(!isDrawerOpen)
     }
 
     // MARK: - 列表模式
