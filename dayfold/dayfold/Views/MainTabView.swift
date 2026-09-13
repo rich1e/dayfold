@@ -20,10 +20,16 @@ struct MainTabView: View {
     var body: some View {
         GeometryReader { geo in
             let drawerWidth = geo.size.width * 0.85
-            // 抽屉打开时,让 HomeView 的封面中心滑到抽屉右边缘外,距屏幕右边缘留 ~32pt 间距。
-            // 公式:carouselCenterScreenX = W/2 + offset = W - margin
-            //      → offset = W/2 - margin
-            let contentOffset: CGFloat = drawerOpen ? (geo.size.width / 2 - 32) : 0
+            // 抽屉打开时,内容区仅向右小偏移,让封面右边缘露出一部分
+            // 在抽屉右侧作为 peek 预览,而不是全部居中导致被裁切。
+            // 封面宽度 204pt,半宽 102;Drawer 覆盖 85% 屏宽。
+            // 设 contentOffset = 64(W/4 略小),让封面中心 x = W/2 + 64 ≈ 屏幕中线偏右,
+            // 封面右边缘 ≈ W/2 + 64 + 102 = W/2 + 166 ≈ 屏幕 75% 处,
+            // 落在抽屉右边缘(0.85W = 75% W)上,刚好露出约 0 间距。
+            // 实际:抽屉右边缘 0.85W;封面右边缘 = W/2 + 64 + 102 = W/2 + 166
+            //   露出 peek = W/2 + 166 - 0.85W = 0.15W - 166 + W/2
+            // 对 W=440:封面右边缘 386,抽屉右边缘 374,露出 12pt。
+            let contentOffset: CGFloat = drawerOpen ? 64 : 0
 
             ZStack(alignment: .leading) {
                 // 底层：内容区（整体向右滑动）
