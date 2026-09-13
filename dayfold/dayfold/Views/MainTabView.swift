@@ -20,19 +20,19 @@ struct MainTabView: View {
     var body: some View {
         GeometryReader { geo in
             let drawerWidth = geo.size.width * 0.85
-            // 抽屉打开时,内容区仅向右小偏移,让封面右边缘露出一部分
-            // 在抽屉右侧作为 peek 预览,而不是全部居中导致被裁切。
-            // 封面宽度 204pt,半宽 102;Drawer 覆盖 85% 屏宽。
-            // 设 contentOffset = 64(W/4 略小),让封面中心 x = W/2 + 64 ≈ 屏幕中线偏右,
-            // 封面右边缘 ≈ W/2 + 64 + 102 = W/2 + 166 ≈ 屏幕 75% 处,
-            // 落在抽屉右边缘(0.85W = 75% W)上,刚好露出约 0 间距。
-            // 实际:抽屉右边缘 0.85W;封面右边缘 = W/2 + 64 + 102 = W/2 + 166
-            //   露出 peek = W/2 + 166 - 0.85W = 0.15W - 166 + W/2
-            // 对 W=440:封面右边缘 386,抽屉右边缘 374,露出 12pt。
-            let contentOffset: CGFloat = drawerOpen ? 64 : 0
+            let offset: CGFloat = drawerOpen ? drawerWidth : 0
 
             ZStack(alignment: .leading) {
-                // 底层：内容区（整体向右滑动）
+                // 底层：抽屉面板（固定左侧，不做动画）
+                DrawerView(
+                    selectedTab: $selectedTab,
+                    isOpen: $drawerOpen,
+                    context: viewContext
+                )
+                .frame(width: drawerWidth)
+                .ignoresSafeArea()
+
+                // 上层：内容区（整体向右滑动）
                 ZStack {
                     theme.backgroundPrimary.ignoresSafeArea()
 
@@ -70,8 +70,8 @@ struct MainTabView: View {
                             }
                     }
                 }
-                // 内容区整体向右偏移(抽屉打开时让 HomeView 中心落在屏幕右侧,留 32pt 间距)
-                .offset(x: contentOffset)
+                // 内容区整体向右偏移（与抽屉宽度完全一致，无缝隙）
+                .offset(x: offset)
                 .animation(.spring(response: 0.38, dampingFraction: 0.82), value: drawerOpen)
                 .shadow(
                     color: drawerOpen ? theme.shadowOverlay : Color.clear,
@@ -80,18 +80,6 @@ struct MainTabView: View {
                     y: 0
                 )
                 .ignoresSafeArea(edges: .bottom)
-
-                // 顶层：抽屉面板（绘制在内容之上,挡住内容区的左半部分）
-                if drawerOpen {
-                    DrawerView(
-                        selectedTab: $selectedTab,
-                        isOpen: $drawerOpen,
-                        context: viewContext
-                    )
-                    .frame(width: drawerWidth)
-                    .ignoresSafeArea()
-                    .transition(.move(edge: .leading))
-                }
 
                 // 顶部按钮层：独立于 ignoresSafeArea 内容区之上，在安全区内布局
                 HStack {
@@ -129,7 +117,7 @@ struct MainTabView: View {
                     }
                 }
                 .frame(width: geo.size.width)
-                .offset(x: contentOffset)
+                .offset(x: offset)
                 .animation(.spring(response: 0.38, dampingFraction: 0.82), value: drawerOpen)
                 .frame(maxHeight: .infinity, alignment: .top)
                 .padding(.top, 8)
