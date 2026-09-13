@@ -24,8 +24,8 @@ struct NotebookCarousel: View {
 
     // MARK: 视觉常量
 
-    private let cardWidth: CGFloat = 240
-    private let cardHeight: CGFloat = 340
+    private let cardWidth: CGFloat = 180
+    private let cardHeight: CGFloat = 255
     /// 相邻卡片水平滑出量 — 用卡片宽度的 55% 拉开距离,确保中心卡片与 peek 卡片之间留出明显间隙
     private let peekOffsetRatio: CGFloat = 0.55
     /// 最大 Y 轴旋转角（参考视频实测 15-20°）
