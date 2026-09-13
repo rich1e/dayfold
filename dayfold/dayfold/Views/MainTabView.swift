@@ -26,16 +26,7 @@ struct MainTabView: View {
             let contentOffset: CGFloat = drawerOpen ? (geo.size.width / 2 - 32) : 0
 
             ZStack(alignment: .leading) {
-                // 底层：抽屉面板（固定左侧，不做动画）
-                DrawerView(
-                    selectedTab: $selectedTab,
-                    isOpen: $drawerOpen,
-                    context: viewContext
-                )
-                .frame(width: drawerWidth)
-                .ignoresSafeArea()
-
-                // 上层：内容区（整体向右滑动）
+                // 底层：内容区（整体向右滑动）
                 ZStack {
                     theme.backgroundPrimary.ignoresSafeArea()
 
@@ -73,8 +64,7 @@ struct MainTabView: View {
                             }
                     }
                 }
-                // 内容区整体向右偏移(抽屉覆盖 85% 屏宽)
-                // 偏移量让 HomeView 的中心滑到抽屉右边缘外,屏幕右侧留出 ~32pt 间距
+                // 内容区整体向右偏移(抽屉打开时让 HomeView 中心落在屏幕右侧,留 32pt 间距)
                 .offset(x: contentOffset)
                 .animation(.spring(response: 0.38, dampingFraction: 0.82), value: drawerOpen)
                 .shadow(
@@ -84,6 +74,18 @@ struct MainTabView: View {
                     y: 0
                 )
                 .ignoresSafeArea(edges: .bottom)
+
+                // 顶层：抽屉面板（绘制在内容之上,挡住内容区的左半部分）
+                if drawerOpen {
+                    DrawerView(
+                        selectedTab: $selectedTab,
+                        isOpen: $drawerOpen,
+                        context: viewContext
+                    )
+                    .frame(width: drawerWidth)
+                    .ignoresSafeArea()
+                    .transition(.move(edge: .leading))
+                }
 
                 // 顶部按钮层：独立于 ignoresSafeArea 内容区之上，在安全区内布局
                 HStack {
