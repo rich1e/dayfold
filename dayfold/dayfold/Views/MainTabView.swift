@@ -20,7 +20,10 @@ struct MainTabView: View {
     var body: some View {
         GeometryReader { geo in
             let drawerWidth = geo.size.width * 0.85
-            let offset: CGFloat = drawerOpen ? drawerWidth : 0
+            /// 抽屉右边缘与 HomeView 内容区之间的额外间距,避免封面/指示器/按钮
+            /// 紧贴抽屉边缘造成视觉拥挤
+            let drawerGap: CGFloat = 32
+            let offset: CGFloat = drawerOpen ? drawerWidth + drawerGap : 0
 
             ZStack(alignment: .leading) {
                 // 底层：抽屉面板（固定左侧，不做动画）
@@ -42,7 +45,6 @@ struct MainTabView: View {
                             HomeView(
                                 context: viewContext,
                                 isListMode: $homeListMode,
-                                isDrawerOpen: drawerOpen,
                                 onNewEntry: { showingNewEntry = true }
                             )
                             .transition(.paperDrop)
