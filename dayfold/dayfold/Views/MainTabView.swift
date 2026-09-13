@@ -20,10 +20,10 @@ struct MainTabView: View {
     var body: some View {
         GeometryReader { geo in
             let drawerWidth = geo.size.width * 0.85
-            /// 抽屉右边缘与 HomeView 内容区之间的额外间距,避免封面/指示器/按钮
-            /// 紧贴抽屉边缘造成视觉拥挤
-            let drawerGap: CGFloat = 32
-            let offset: CGFloat = drawerOpen ? drawerWidth + drawerGap : 0
+            // 抽屉打开时,让 HomeView 的封面中心滑到抽屉右边缘外,距屏幕右边缘留 ~32pt 间距。
+            // 公式:carouselCenterScreenX = W/2 + offset = W - margin
+            //      → offset = W/2 - margin
+            let contentOffset: CGFloat = drawerOpen ? (geo.size.width / 2 - 32) : 0
 
             ZStack(alignment: .leading) {
                 // 底层：抽屉面板（固定左侧，不做动画）
@@ -73,8 +73,9 @@ struct MainTabView: View {
                             }
                     }
                 }
-                // 内容区整体向右偏移（与抽屉宽度完全一致，无缝隙）
-                .offset(x: offset)
+                // 内容区整体向右偏移(抽屉覆盖 85% 屏宽)
+                // 偏移量让 HomeView 的中心滑到抽屉右边缘外,屏幕右侧留出 ~32pt 间距
+                .offset(x: contentOffset)
                 .animation(.spring(response: 0.38, dampingFraction: 0.82), value: drawerOpen)
                 .shadow(
                     color: drawerOpen ? theme.shadowOverlay : Color.clear,
@@ -120,7 +121,7 @@ struct MainTabView: View {
                     }
                 }
                 .frame(width: geo.size.width)
-                .offset(x: offset)
+                .offset(x: contentOffset)
                 .animation(.spring(response: 0.38, dampingFraction: 0.82), value: drawerOpen)
                 .frame(maxHeight: .infinity, alignment: .top)
                 .padding(.top, 8)
