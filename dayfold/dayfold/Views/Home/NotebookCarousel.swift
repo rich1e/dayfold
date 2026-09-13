@@ -6,7 +6,9 @@ import SwiftUI
 /// 用 `ZStack` + `DragGesture` 自管手势，实现：
 /// - 拖拽时所有卡片实时跟随手指旋转（continuous, 非离散跳变）
 /// - 松手根据阈值决定回弹或换页（spring 动画）
-/// - 中心卡片缩放 + 旋转 0°；相邻卡片 35° 扇形 fan + 0.85 缩放 + 0.4 不透明度
+/// - 中心卡片 0°/满不透明/满尺寸;相邻卡片 18° Y 轴扇形 + 0.88 缩放 + 整张卡片水平滑出
+///   (peekOffset = cardWidth × 0.55),永远有清晰背景间隙,绝不重叠
+/// - peek 卡片同样不透明 + 加独立阴影,保持视觉层次
 /// - 单一笔记本时 position 永远 = 0，等价无效果
 ///
 /// 替换原 `TabView(.page)` + `NotebookPageTurnModifier`（离散跳变）。
@@ -24,9 +26,12 @@ struct NotebookCarousel: View {
 
     private let cardWidth: CGFloat = 240
     private let cardHeight: CGFloat = 340
-    private let peekOffset: CGFloat = 36      // 相邻卡片水平露出量
-    private let maxRotation: Double = 35      // 最大 Y 轴旋转角
-    private let swipeThreshold: CGFloat = 80  // 翻页阈值（pt）
+    /// 相邻卡片水平滑出量 — 用卡片宽度的 55% 拉开距离,确保中心卡片与 peek 卡片之间留出明显间隙
+    private let peekOffsetRatio: CGFloat = 0.55
+    /// 最大 Y 轴旋转角（参考视频实测 15-20°）
+    private let maxRotation: Double = 18
+    /// 翻页阈值（pt）
+    private let swipeThreshold: CGFloat = 80
     private let springResponse: Double = 0.7
     private let springDamping: Double = 0.85  // 无 overshoot
 
@@ -71,10 +76,14 @@ struct NotebookCarousel: View {
         let position = Double(idx - currentIndex) + Double(dragX / cardWidth)
         let normalized = max(-1.5, min(1.5, position))
         let rotation = normalized * maxRotation
-        let scale = 1.0 - min(abs(normalized) * 0.15, 0.2)
-        let opacity = 1.0 - min(abs(normalized) * 0.6, 0.7)
-        let offsetX = CGFloat(normalized) * peekOffset
-        let zIndex = -abs(Double(idx - currentIndex))  // 中心卡片绘制最上
+        // 仅缩小 peek 卡片,中心卡片保持 1.0;distance > 1 的更远卡片继续缩小
+        let scale = 1.0 - min(abs(normalized) * 0.12, 0.18)
+        // 整张卡片水平滑出(基于卡片宽度),确保中心与 peek 之间永远留有间隙
+        let offsetX = CGFloat(normalized) * cardWidth * peekOffsetRatio
+        // z-index: 离中心越近越大 → 中心卡片最后绘制,自然覆盖 peek
+        let zIndex = -abs(Double(idx - currentIndex))
+        // 仅中心卡片可点击
+        let isCenter = abs(normalized) < 0.5
 
         NotebookCoverView(
             notebook: notebook,
@@ -83,9 +92,15 @@ struct NotebookCarousel: View {
             onTap(idx)
         }
         .frame(width: cardWidth, height: cardHeight)
-        .offset(x: offsetX)
         .scaleEffect(scale)
-        .opacity(opacity)
+        // 阴影放在 offset/rotation 之前,保证 peek 卡片有独立阴影与中心卡片分离
+        .shadow(
+            color: .black.opacity(isCenter ? 0.45 : 0.3),
+            radius: isCenter ? 24 : 14,
+            x: isCenter ? 0 : (normalized < 0 ? 8 : -8),
+            y: 12
+        )
+        .offset(x: offsetX)
         .rotation3DEffect(
             .degrees(rotation),
             axis: (x: 0, y: 1, z: 0),
@@ -93,6 +108,6 @@ struct NotebookCarousel: View {
             perspective: 0.4
         )
         .zIndex(zIndex)
-        .allowsHitTesting(abs(normalized) < 0.5)   // 仅中心卡片可点
+        .allowsHitTesting(isCenter)
     }
 }
